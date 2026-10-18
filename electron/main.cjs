@@ -1,5 +1,5 @@
 /**
- * Electron 主进程 —— 云湖客户端桌面版（GUI）
+ * Electron 主进程 —— 云湖牢大版桌面版（GUI）
  *
  * ⚠️ 架构（重要）：**不搞前后端分离**。
  *   之前我写的是「主进程 spawn 一个 node 服务端 + 窗口连本地 HTTP」——那是套壳启动器，
@@ -150,7 +150,7 @@ function createWindow() {
     height: 860,
     minWidth: 420,
     minHeight: 560,
-    title: '云湖客户端',
+    title: '云湖牢大版',
     backgroundColor: '#17181f',
     autoHideMenuBar: true,
     webPreferences: { nodeIntegration: false, contextIsolation: true },
@@ -175,11 +175,11 @@ function createTray() {
   const icoPath = path.join(rootDir(), 'build', 'icon.png')
   tray = fs.existsSync(icoPath) ? new Tray(icoPath) : new Tray(path.join(__dirname, 'tray.png'))
   const menu = Menu.buildFromTemplate([
-    { label: '打开云湖客户端', click: () => { mainWindow ? mainWindow.show() : createWindow() } },
+    { label: '打开云湖牢大版', click: () => { mainWindow ? mainWindow.show() : createWindow() } },
     { type: 'separator' },
     { label: '退出', click: () => { isQuitting = true; app.quit() } },
   ])
-  tray.setToolTip('云湖客户端')
+  tray.setToolTip('云湖牢大版')
   tray.setContextMenu(menu)
   tray.on('click', () => { mainWindow ? mainWindow.show() : createWindow() })
 }
