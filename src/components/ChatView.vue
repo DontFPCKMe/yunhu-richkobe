@@ -119,6 +119,8 @@ watch(() => cur.value?.id, toBottom)
     <div class="head-main">
       <div class="t">
         <span class="nm">{{ cur?.name || '未选择会话' }}</span>
+        <!-- QQ 式昵称旁绿点：云湖无对方在线接口，映射为「实时连接在线」（ws online） -->
+        <span v-if="cur && ctx.ws?.state?.status === 'online'" class="online-dot" title="实时连接在线"></span>
         <span class="s" v-if="cur">{{ CHAT_TYPE_LABEL[cur.type] }} · {{ cur.id }}</span>
       </div>
     </div>
