@@ -27,7 +27,7 @@ jobs:
         include:
           - os: ubuntu-latest
             name: linux
-            paths: '*.AppImage'
+            paths: release/*.AppImage
           - os: windows-latest
             name: windows
             paths: |
@@ -35,7 +35,7 @@ jobs:
               release/*.zip
           - os: macos-latest
             name: macos
-            paths: '*.dmg'
+            paths: release/*.dmg
     runs-on: ${{ matrix.os }}
     steps:
       - name: 检出代码
