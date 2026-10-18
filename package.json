@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "云湖第三方 Web 客户端 · Vue3 + 真 cordis 插件内核 + Satori 协议 + WebDAV 网关（仅供学习交流）",
+  "description": "云湖牢大版 · Vue3 + 真 cordis 插件内核 + Satori 协议 + WebDAV 网关（仅供学习交流）",
   "scripts": {
     "dev": "vite",
     "preflight": "node scripts/preflight.mjs",
@@ -38,14 +38,15 @@
     "electron-builder": "^26.15.3",
     "js-yaml": "^5.4.2",
     "tsx": "^4.23.15",
-    "typescript": "^7.0.2",
+    "typescript": "^5.9.0",
     "vite": "^6.0.7",
-    "vitepress": "^1.6.4"
+    "vitepress": "^1.6.4",
+    "vue-tsc": "^3.3.13"
   },
   "main": "electron/main.cjs",
   "build": {
-    "appId": "io.fly1919.yunhu",
-    "productName": "云湖客户端",
+    "appId": "com.yhchat.kobe",
+    "productName": "云湖牢大版",
     "directories": {
       "output": "release"
     },
@@ -55,6 +56,8 @@
       "build/icon.png",
       "build/icon.ico",
       "build/icon.icns",
+      "build/tray.png",
+      "build/installer-sidebar.bmp",
       "package.json"
     ],
     "linux": {
@@ -63,23 +66,32 @@
       ],
       "icon": "build/icon.png",
       "category": "Network",
-      "artifactName": "yunhu-client-${version}-x64.AppImage"
+      "artifactName": "yunhulaoda-${version}-linux-${arch}.AppImage"
     },
     "win": {
       "target": [
-        "nsis"
+        "nsis",
+        "zip"
       ],
-      "artifactName": "yunhu-client-${version}-setup-x64.exe",
+      "artifactName": "yunhulaoda-${version}-windows-${arch}.${ext}",
       "icon": "build/icon.ico",
       "oneClick": false,
       "allowToChangeInstallationDirectory": true
     },
-    "executableName": "yunhu-client",
+    "nsis": {
+      "artifactName": "yunhulaoda-${version}-windows-${arch}-setup.${ext}",
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "installerHeaderIcon": "build/icon.ico",
+      "installerSidebar": "build/installer-sidebar.bmp",
+      "uninstallerSidebar": "build/installer-sidebar.bmp"
+    },
+    "executableName": "yunhulaoda",
     "mac": {
       "target": [
         "dmg"
       ],
-      "artifactName": "yunhu-client-${version}-x64.dmg",
+      "artifactName": "yunhulaoda-${version}-macos-${arch}.dmg",
       "category": "public.app-category.social-networking",
       "icon": "build/icon.icns"
     }
