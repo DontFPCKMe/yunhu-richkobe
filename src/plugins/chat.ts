@@ -47,12 +47,13 @@ export const chatConfig: Schema<ChatCfg> = Schema.object({
 export const chatPlugin = {
   Config: chatConfig,
   name: 'chat',
-  inject: ['api', 'auth'],
+  inject: ['api', 'auth', 'storage'],
   provide: ['chat'],
 
   apply(ctx: Context, config: any = {}) {
     const api = ctx.api
     const auth = ctx.auth
+    const storage = (ctx as any).storage
     const pollMs = config.pollMs ?? 4000
     const maxMessages = config.maxMessages ?? 200
 
@@ -293,26 +294,72 @@ export const chatPlugin = {
         // 直接覆盖会让当前会话重新冒出未读气泡 —— 本地先归零。
         if (state.current) {
           const cur = list.find((c: any) => c.id === state.current!.id)
-          if (cur) { cur.unread = 0; cur.at = false }
+          if (cur) {
+            cur.unread = 0; cur.at = false
+            // E4：dismiss 尚未落地时服务端仍记未读，补一次上报把服务端也清掉
+            dismissNow(state.current.id)
+          }
         }
         state.conversations = list
+        saveSnapshot(list)
       } catch (e: any) {
         if (!silent) ctx.emit('ui/toast', { text: '会话列表加载失败：' + e.message, 'type': 'error' })
       } finally { state.loadingConvs = false }
     }
 
-    /** 当前会话收到新消息时防抖向服务器报已读，否则下一轮轮询会把气泡带回来 */
-    let dismissTimer: any = null
-    let dismissId: string | null = null
-    function scheduleDismiss(id: string) {
-      dismissId = id
-      if (dismissTimer) clearTimeout(dismissTimer)
-      dismissTimer = setTimeout(() => {
-        dismissTimer = null
-        if (dismissId && state.current?.id === dismissId) api.dismiss(dismissId).catch(() => {})
-        dismissId = null
-      }, 2500)
+    /**
+     * 已读上报（dismiss）带失败重试：失败进队列，10s 冲一次直到成功。
+     * 之前 .catch(()=>{}) 静默吞失败，服务端未读残留 → 切走/重启后红点复现。
+     */
+    const dismissQueue = new Set<string>()
+    let dismissRetryTimer: any = null
+    function dismissNow(id: string) {
+      api.dismiss(id).then(() => dismissQueue.delete(id)).catch(() => {
+        dismissQueue.add(id)
+        if (!dismissRetryTimer) dismissRetryTimer = setInterval(flushDismiss, 10000)
+      })
     }
+    function flushDismiss() {
+      if (!dismissQueue.size) { clearInterval(dismissRetryTimer); dismissRetryTimer = null; return }
+      for (const id of [...dismissQueue]) dismissNow(id)
+    }
+
+    /** 当前会话收到新消息时防抖报已读；每个会话独立计时槽（单槽会在切会话时丢已读） */
+    const dismissTimers = new Map<string, any>()
+    function scheduleDismiss(id: string) {
+      const old = dismissTimers.get(id)
+      if (old) clearTimeout(old)
+      dismissTimers.set(id, setTimeout(() => {
+        dismissTimers.delete(id)
+        if (state.current?.id === id) dismissNow(id)
+      }, 2500))
+    }
+
+    /* ---- 会话缓存（storage.cache）：重启秒开列表 + 恢复上次会话 ---- */
+    let cacheObj: any = null
+    let lastSnapAt = 0
+    async function ensureCache(): Promise<any> {
+      if (!cacheObj) cacheObj = (await storage?.load('cache').catch(() => ({}))) || {}
+      return cacheObj
+    }
+    async function saveCurrentId(id: string | null) {
+      const c = await ensureCache()
+      c.currentId = id
+      await storage?.save('cache', c).catch(() => {})
+    }
+    /** 会话列表快照（30s 节流，避免轮询频繁写盘） */
+    async function saveSnapshot(list: any[]) {
+      const now = Date.now()
+      if (now - lastSnapAt < 30000) return
+      lastSnapAt = now
+      const c = await ensureCache()
+      c.convs = list.slice(0, 60).map((x: any) => ({
+        id: x.id, name: x.name, avatar: x.avatar, type: x.type,
+        ts: x.ts, unread: x.unread, at: x.at, preview: x.preview,
+      }))
+      await storage?.save('cache', c).catch(() => {})
+    }
+    ctx.on('auth/logout', () => { cacheObj = null; lastSnapAt = 0 })
 
     async function loadMessages(silent = false) {
       const cur = state.current
@@ -322,25 +369,46 @@ export const chatPlugin = {
         const list = (await api.messages(cur.id, cur.type, 30)).map(withElements)
         const mine = auth.state.user?.id
         for (const m of list) if (m.right === undefined) m.right = m.senderId === mine
-        const changed = list.length !== state.messages.length ||
-          list[list.length - 1]?.id !== state.messages[state.messages.length - 1]?.id
-        state.messages = list
-        if (!silent || changed) ctx.emit('chat/scroll-bottom')
+        // E7：增量合并而非整表替换 —— 保留用户上滑加载的历史；
+        // 仅当用户本来贴在底部时才自动滚到底（翻历史时不打断）。
+        const byId = new Map(state.messages.map((m: any) => [m.id, m]))
+        let added = 0
+        for (const m of list) {
+          if (byId.has(m.id)) Object.assign(byId.get(m.id), m)
+          else { state.messages.push(m); added++ }
+        }
+        if (added) {
+          state.messages.sort((a: any, b: any) => a.ts - b.ts)
+          if (state.messages.length > maxMessages) state.messages.splice(0, state.messages.length - maxMessages)
+          if (!silent && atBottom()) ctx.emit('chat/scroll-bottom')
+        } else if (!silent) {
+          ctx.emit('chat/scroll-bottom')
+        }
       } catch (e: any) {
         if (!silent) ctx.emit('ui/toast', { text: '消息加载失败：' + e.message, type: 'error' })
       } finally { state.loadingMsgs = false }
     }
 
+    /** 消息区是否贴在底部（ChatView 每次滚动时更新） */
+    let bottomFlag = true
+    function setAtBottom(v: boolean) { bottomFlag = v }
+    function atBottom() { return bottomFlag }
+
     async function open(chat: any) {
       state.current = chat
+      // E6：先归零再加载，避免总角标在 await 窗口内多计
+      const hit0 = state.conversations.find((c: any) => c.id === chat.id)
+      if (hit0) { hit0.unread = 0; hit0.at = false }
+      bottomFlag = true
       state.messages = []
       state.hasMore = true
       state.searchResults = []
       state.searchWord = ''
       clearReply()
       clearSelection()
+      saveCurrentId(chat.id)
       await loadMessages()
-      api.dismiss(chat.id).catch(() => {})
+      dismissNow(chat.id)
       const hit = state.conversations.find((c: any) => c.id === chat.id)
       if (hit) { hit.unread = 0; hit.at = false }
       ctx.emit('chat/open', chat)
@@ -535,7 +603,7 @@ export const chatPlugin = {
         else {
           state.messages.push(m)
           if (state.messages.length > maxMessages) state.messages.splice(0, state.messages.length - maxMessages)
-          ctx.emit('chat/scroll-bottom')
+          if (atBottom()) ctx.emit('chat/scroll-bottom')
         }
       }
       const conv = state.conversations.find((c: any) => c.id === session.channel.id)
@@ -543,7 +611,11 @@ export const chatPlugin = {
         conv.preview = previewOf(m)
         conv.ts = session.timestamp
         if (!isCurrent && kind === 'created') conv.unread = (conv.unread || 0) + 1
-        if (isCurrent && kind === 'created' && !mine) scheduleDismiss(session.channel.id)
+        if (isCurrent && kind === 'created' && !mine) {
+          // E4：当前会话来消息立即本地归零 + 即时报已读（防抖兜底合并上报）
+          conv.unread = 0; conv.at = false
+          scheduleDismiss(session.channel.id)
+        }
         const idx = state.conversations.indexOf(conv)
         if (idx > 0) { state.conversations.splice(idx, 1); state.conversations.unshift(conv) }
       } else if (kind === 'created') {
@@ -571,7 +643,9 @@ export const chatPlugin = {
       ...chatRenderer,
       /* 会话分组（本地） */
       ...groupApi,
-      close: () => { state.current = null; state.messages = [] },
+      close: () => { state.current = null; state.messages = []; saveCurrentId(null) },
+      /** ChatView 滚动时调用：标记是否贴在底部（决定新消息要不要自动滚） */
+      setAtBottom,
     }
 
     /* ---- 订阅统一事件（Satori 风格） ---- */
@@ -583,19 +657,40 @@ export const chatPlugin = {
     ctx.effect(() => {
       let timer: any = null, tick = 0
       const stop = () => { if (timer) { clearInterval(timer); timer = null } }
-      const unwatch = watch(() => auth.state.status, (s: string) => {
+      const unwatch = watch(() => auth.state.status, async (s: string) => {
         stop()
         if (s !== 'ready') { state.conversations = []; state.current = null; state.messages = []; return }
+        // E1：登录后先用本地快照秒开列表，并恢复上次打开的会话（重启不再丢现场）
+        const c = await ensureCache().catch(() => ({}))
+        if (Array.isArray(c.convs) && c.convs.length && !state.conversations.length) {
+          state.conversations = c.convs
+          if (c.currentId && !state.current) {
+            const hit = c.convs.find((x: any) => x.id === c.currentId)
+            if (hit) { hit.unread = 0; hit.at = false; state.current = hit; loadMessages(true) }
+          }
+        }
         loadConversations(true)
         timer = setInterval(() => {
-          if (document.hidden) return
           tick++
-          if ((ctx as any).ws?.online && tick % 5 !== 0) return
+          // E5：后台不轮询，但回到前台要立刻对账一次（visibilitychange 里触发）
+          if (document.hidden) return
+          // E8：WS 假死看门狗 —— 45s 没收到任何帧就强制重连
+          const ws: any = (ctx as any).ws
+          if (ws?.online && ws.state?.lastAt && Date.now() - ws.state.lastAt > 45000) ws.reconnect?.()
+          if (ws?.online && tick % 5 !== 0) return
           loadConversations(true)
           if (state.current) loadMessages(true)
         }, pollMs)
       }, { immediate: true })
-      return () => { unwatch(); stop() }
+      // E5：回到前台立即对账（不等下一个 tick，最长 20s 的陈旧窗口消失）
+      const onVis = () => {
+        if (document.visibilityState === 'visible' && auth.state.status === 'ready') {
+          loadConversations(true)
+          if (state.current) loadMessages(true)
+        }
+      }
+      document.addEventListener('visibilitychange', onVis)
+      return () => { unwatch(); stop(); document.removeEventListener('visibilitychange', onVis) }
     })
 
     /* 输入区按钮由插件贡献 —— 这批是 chat 插件自带的 */

@@ -85,6 +85,13 @@ function jumpTo(mid: string) {
 
 function toBottom() { nextTick(() => { if (box.value) box.value.scrollTop = box.value.scrollHeight }) }
 
+/** 滚动时上报「是否贴底」：新消息/轮询刷新只在贴底时自动滚，翻历史不被打断 */
+function onScroll() {
+  const el = box.value
+  if (!el) return
+  ctx.chat?.setAtBottom?.(el.scrollHeight - el.scrollTop - el.clientHeight < 40)
+}
+
 /** 时间分隔胶囊文案：今天/昨天/日期 + 时分 */
 function fmtDiv(ts: number) {
   const d = new Date(ts)
@@ -120,12 +127,7 @@ watch(() => cur.value?.id, toBottom)
       <button class="ghost small" @click="ctx.ws.reconnect()">重连</button>
     </div>
 
-    <!-- QQ 式标题栏图标：云湖公开接口没有通话/投屏端点，先占位提示，不假装能用 -->
-    <div class="head-side" v-if="cur">
-      <button class="ghost small icon-btn" title="语音通话" @click="ctx.ui?.toast?.('云湖公开接口暂无通话端点，占位按钮', 'warn')"><Icon name="phone" :size="16" /></button>
-      <button class="ghost small icon-btn" title="视频通话" @click="ctx.ui?.toast?.('云湖公开接口暂无通话端点，占位按钮', 'warn')"><Icon name="video" :size="16" /></button>
-      <button class="ghost small icon-btn" title="屏幕共享" @click="ctx.ui?.toast?.('云湖公开接口暂无投屏端点，占位按钮', 'warn')"><Icon name="screen" :size="16" /></button>
-    </div>
+    <!-- 云湖公开接口没有通话/投屏端点 —— 按「无后端即砍」原则不放占位按钮 -->
 
     <!-- 插件插槽：其他插件可以往这里塞自己的组件 -->
     <component v-for="(sl, i) in ctx.chat?.slotsOf?.('chat-header-extra') || []" :key="'h' + i"
@@ -166,7 +168,7 @@ watch(() => cur.value?.id, toBottom)
     </div>
   </div>
 
-  <div v-else ref="box" class="messages" @click="closeMenu(); closeMore()">
+  <div v-else ref="box" class="messages" @click="closeMenu(); closeMore()" @scroll="onScroll">
     <div v-if="chat.state.hasMore" class="load-more">
       <button class="ghost small" :disabled="chat.state.loadingMore" @click="chat.loadMore()">
         {{ chat.state.loadingMore ? '加载中…' : '加载更多历史' }}
@@ -184,7 +186,7 @@ watch(() => cur.value?.id, toBottom)
   <component v-for="(sl, i) in ctx.chat?.slotsOf?.('chat-before-composer') || []" :key="'bc' + i"
              :is="sl.component" v-bind="sl.props || {}" />
 
-  <Composer v-if="cur" />
+  <Composer v-if="cur" :key="cur.id" />
 
   <component v-for="(sl, i) in ctx.chat?.slotsOf?.('global') || []" :key="'g' + i"
              :is="sl.component" v-bind="sl.props || {}" />
