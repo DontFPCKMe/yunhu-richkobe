@@ -32,6 +32,24 @@ const COVERED_PATHS = ['/stickers', '/theme', '/logs', '/settings-user', '/plugi
 const railPages = computed(() => pages.value.filter((p: any) => MAIN_PATHS.includes(p.path)))
 /** 「更多功能」宫格展示的插件页（≡ 菜单不再一锅端堆插件页） */
 const morePages = computed(() => pages.value.filter((p: any) => !MAIN_PATHS.includes(p.path) && !COVERED_PATHS.includes(p.path)))
+/**
+ * 宫格管理：用户可把插件页「常驻」到 ☰ 菜单（仿 QQ 更多功能的已添加/管理），
+ * 其余收拢在宫格里。持久化到 localStorage。
+ */
+const MORE_PIN_KEY = 'yh.more.pinned'
+const morePinned = ref<string[]>((() => {
+  try { return JSON.parse(localStorage.getItem(MORE_PIN_KEY) || '[]') } catch { return [] }
+})())
+function togglePinPage(path: string) {
+  const i = morePinned.value.indexOf(path)
+  if (i >= 0) morePinned.value.splice(i, 1)
+  else morePinned.value.push(path)
+  localStorage.setItem(MORE_PIN_KEY, JSON.stringify(morePinned.value))
+}
+/** ☰ 菜单里追加的常驻插件页 */
+const pinnedPages = computed(() => morePages.value.filter((p: any) => morePinned.value.includes(p.path)))
+/** 宫格里展示的（未常驻的） */
+const gridPages = computed(() => morePages.value.filter((p: any) => !morePinned.value.includes(p.path)))
 const moreOpen2 = ref(false)
 
 /** 总未读（QQ 式角标，挂在「消息」导航上） */
@@ -142,6 +160,13 @@ async function checkUpdate() {
             <button class="rm-item" @click="pick('more')"><Icon name="grid" :size="15" /> 更多功能</button>
             <div class="rm-sep"></div>
             <button class="rm-item" :disabled="!has('/settings-user')" @click="pick('settings')"><Icon name="settings" :size="15" /> 用户设置</button>
+            <!-- 常驻到 ☰ 的插件页（更多功能里管理） -->
+            <template v-if="pinnedPages.length">
+              <div class="rm-sep"></div>
+              <button v-for="p in pinnedPages" :key="p.path" class="rm-item" @click="go(p.path)">
+                <Icon :name="p.icon" :size="15" /> {{ p.name }}
+              </button>
+            </template>
             <div class="rm-sep"></div>
             <button class="rm-item danger" @click="pick('logout')"><Icon name="logout" :size="15" /> 退出账号</button>
           </div>
@@ -173,10 +198,11 @@ async function checkUpdate() {
 
     <KSlot name="global" />
 
-    <!-- 更多功能宫格（仿 QQ 截图 3） -->
-    <MorePanel v-if="moreOpen2" :pages="morePages"
+    <!-- 更多功能宫格（仿 QQ 截图 3，含常驻管理） -->
+    <MorePanel v-if="moreOpen2" :pages="gridPages" :pinned="pinnedPages"
                @go="(p: string) => { go(p); moreOpen2 = false }"
                @manage="go('/plugins'); moreOpen2 = false"
+               @pin="togglePinPage"
                @close="moreOpen2 = false" />
   </div>
 </template>
