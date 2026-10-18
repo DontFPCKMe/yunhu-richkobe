@@ -130,12 +130,25 @@ export const chatPlugin = {
       groups: JSON.parse(localStorage.getItem(LS_GROUPS) || '[]') as Array<{ id: string; name: string }>,
       assign: JSON.parse(localStorage.getItem(LS_ASSIGN) || '{}') as Record<string, string>,   // convId -> groupId
       collapsed: JSON.parse(localStorage.getItem('yunhu.conv.collapsed') || '[]') as string[],
+      pinned: JSON.parse(localStorage.getItem('yunhu.conv.pinned') || '[]') as string[],
+      hidden: JSON.parse(localStorage.getItem('yunhu.conv.hidden') || '[]') as string[],
       editing: false,
     })
     function saveGroups() {
       localStorage.setItem(LS_GROUPS, JSON.stringify(convGroups.groups))
       localStorage.setItem(LS_ASSIGN, JSON.stringify(convGroups.assign))
       localStorage.setItem('yunhu.conv.collapsed', JSON.stringify(convGroups.collapsed))
+      localStorage.setItem('yunhu.conv.pinned', JSON.stringify(convGroups.pinned))
+      localStorage.setItem('yunhu.conv.hidden', JSON.stringify(convGroups.hidden))
+    }
+    /** 会话排序：置顶优先，其余按时间倒序 */
+    function sortConvs(list: any[]) {
+      return [...list].sort((a: any, b: any) => {
+        const pa = convGroups.pinned.includes(a.id) ? 1 : 0
+        const pb = convGroups.pinned.includes(b.id) ? 1 : 0
+        if (pa !== pb) return pb - pa
+        return (b.ts || 0) - (a.ts || 0)
+      })
     }
     const groupApi = {
       groups: convGroups,
@@ -164,6 +177,26 @@ export const chatPlugin = {
         saveGroups()
       },
       isCollapsed(id: string) { return convGroups.collapsed.includes(id) },
+      /** 置顶（本地排序，云湖无置顶接口） */
+      togglePin(convId: string) {
+        const i = convGroups.pinned.indexOf(convId)
+        if (i >= 0) convGroups.pinned.splice(i, 1)
+        else convGroups.pinned.push(convId)
+        saveGroups()
+        state.conversations = sortConvs(state.conversations)
+      },
+      isPinned(convId: string) { return convGroups.pinned.includes(convId) },
+      /** 删除会话（本地隐藏，不删云端聊天记录；云湖无删会话接口） */
+      hideConv(convId: string) {
+        if (!convGroups.hidden.includes(convId)) convGroups.hidden.push(convId)
+        saveGroups()
+        state.conversations = state.conversations.filter((c: any) => c.id !== convId)
+        if (state.current?.id === convId) { state.current = null; state.messages = [] }
+      },
+      restoreConv(convId: string) {
+        convGroups.hidden = convGroups.hidden.filter((x: string) => x !== convId)
+        saveGroups()
+      },
       /** 侧栏渲染用：分组 + 未分组 */
       sections(list: any[]) {
         const byGroup: Record<string, any[]> = {}
@@ -289,19 +322,21 @@ export const chatPlugin = {
       state.loadingConvs = true
       try {
         const list = await api.conversations()
-        list.sort((a: any, b: any) => b.ts - a.ts)
+        // 本地隐藏（删除会话）过滤 + 置顶排序
+        const shown = list.filter((c: any) => !convGroups.hidden.includes(c.id))
+        const sorted = sortConvs(shown)
         // 正在查看的会话：服务端未读数是陈旧的（只在 dismiss 时清），
         // 直接覆盖会让当前会话重新冒出未读气泡 —— 本地先归零。
         if (state.current) {
-          const cur = list.find((c: any) => c.id === state.current!.id)
+          const cur = sorted.find((c: any) => c.id === state.current!.id)
           if (cur) {
             cur.unread = 0; cur.at = false
             // E4：dismiss 尚未落地时服务端仍记未读，补一次上报把服务端也清掉
             dismissNow(state.current.id)
           }
         }
-        state.conversations = list
-        saveSnapshot(list)
+        state.conversations = sorted
+        saveSnapshot(sorted)
       } catch (e: any) {
         if (!silent) ctx.emit('ui/toast', { text: '会话列表加载失败：' + e.message, 'type': 'error' })
       } finally { state.loadingConvs = false }
@@ -617,9 +652,9 @@ export const chatPlugin = {
           scheduleDismiss(session.channel.id)
         }
         const idx = state.conversations.indexOf(conv)
-        if (idx > 0) { state.conversations.splice(idx, 1); state.conversations.unshift(conv) }
+        if (idx > 0) { state.conversations = sortConvs(state.conversations) }
       } else if (kind === 'created') {
-        loadConversations(true)
+        if (!convGroups.hidden.includes(session.channel.id)) loadConversations(true)
       }
       if (!isCurrent && !mine && kind === 'created') ctx.emit('chat/incoming', m)
     }
@@ -696,13 +731,13 @@ export const chatPlugin = {
       return () => { unwatch(); stop(); document.removeEventListener('visibilitychange', onVis) }
     })
 
-    /* 输入区按钮由插件贡献 —— 这批是 chat 插件自带的 */
+    /* 输入区按钮由插件贡献 —— 这批是 chat 插件自带的（默认序：文本/MD/HTML → 表情 → 图片 → 视频 → 文件） */
     chat.composer('composer', [
       { id: 'type.text', kind: 'type', value: 1, label: '文本', order: 10 },
       { id: 'type.md', kind: 'type', value: 3, label: 'Markdown', order: 11 },
       { id: 'type.html', kind: 'type', value: 8, label: 'HTML', order: 12 },
-      { id: 'att.image', kind: 'image', label: '图片', order: 30 },
-      { id: 'att.file', kind: 'file', label: '文件', order: 31 },
+      { id: 'att.image', kind: 'image', label: '图片', order: 50 },
+      { id: 'att.file', kind: 'file', label: '文件', order: 70 },
     ])
 
     ctx.set('chat', chat)

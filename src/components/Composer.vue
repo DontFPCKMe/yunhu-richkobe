@@ -21,9 +21,40 @@ const videoInput = ref<HTMLInputElement | null>(null)
  * 输入区按钮来自插件注册表 ctx.chat.composerOf('composer')：
  * 「文本/Markdown/HTML」由 chat 插件贡献，「快捷回复」由 quickreply 贡献。
  * 快捷回复单独渲染成一行 chips（qr-row），与模式切换按钮视觉区分。
+ * 两行顺序都可拖拽自由调整，存 localStorage（默认序 = 插件注册 order）。
  */
-const barItems = computed(() => (chat.composerOf?.('composer') || []).filter((it: any) => it.kind !== 'quick'))
-const qrItems = computed(() => (chat.composerOf?.('composer') || []).filter((it: any) => it.kind === 'quick'))
+const BAR_ORDER_KEY = 'yh.bar.order'
+const QR_ORDER_KEY = 'yh.qr.order'
+function loadOrder(key: string): string[] {
+  try { return JSON.parse(localStorage.getItem(key) || '[]') } catch { return [] }
+}
+const barOrder = ref<string[]>(loadOrder(BAR_ORDER_KEY))
+const qrOrder = ref<string[]>(loadOrder(QR_ORDER_KEY))
+function sortByOrder(list: any[], order: string[]) {
+  const idx = new Map(order.map((id, i) => [id, i]))
+  return [...list].sort((a, b) => (idx.get(a.id) ?? 9999) - (idx.get(b.id) ?? 9999))
+}
+const barItems = computed(() => sortByOrder((chat.composerOf?.('composer') || []).filter((it: any) => it.kind !== 'quick'), barOrder.value))
+const qrItems = computed(() => sortByOrder((chat.composerOf?.('composer') || []).filter((it: any) => it.kind === 'quick'), qrOrder.value))
+
+/* ---- 拖拽排序：dragstart 记 id，drop 到目标上即把拖拽项插到目标位置 ---- */
+let dragId: string | null = null
+function onDragStart(id: string) { dragId = id }
+function onDropReorder(targetId: string, which: 'bar' | 'qr') {
+  if (!dragId || dragId === targetId) { dragId = null; return }
+  const items = which === 'bar' ? barItems.value : qrItems.value
+  const ids = items.map((i: any) => i.id)
+  const from = ids.indexOf(dragId)
+  const to = ids.indexOf(targetId)
+  if (from >= 0 && to >= 0) {
+    ids.splice(from, 1)
+    ids.splice(to, 0, dragId)
+    if (which === 'bar') barOrder.value = ids
+    else qrOrder.value = ids
+    localStorage.setItem(which === 'bar' ? BAR_ORDER_KEY : QR_ORDER_KEY, JSON.stringify(ids))
+  }
+  dragId = null
+}
 
 /** QQ 式图标工具条：非模式切换的按钮渲染成图标（title 保留文字语义） */
 const BAR_ICON: Record<string, string> = {
@@ -87,6 +118,9 @@ interface Pending {
   kind: 'image' | 'video' | 'audio' | 'file'
   caption: string        // 图片独立配文（发送时随图后发一条文本）
   error: string          // 上次发送失败原因（保留在暂存区可重试）
+  /* 上传进度（0-1）与实时速度 MB/s，发送中显示进度条 */
+  progress: number
+  speed: number
 }
 const pending = ref<Pending[]>([])
 let pendingSeq = 0
@@ -102,7 +136,7 @@ function classify(f: File): Pending['kind'] {
 function stage(f: File) {
   const k = classify(f)
   const url = (k === 'image' || k === 'video') ? URL.createObjectURL(f) : ''
-  pending.value.push({ id: ++pendingSeq, file: f, url, kind: k, caption: '', error: '' })
+  pending.value.push({ id: ++pendingSeq, file: f, url, kind: k, caption: '', error: '', progress: 0, speed: 0 })
 }
 
 function unstage(p: Pending) {
@@ -168,9 +202,25 @@ function onEdited(f: File) {
 const uploading = ref(false)
 const dragOver = ref(false)
 
+/** 上传进度回调：进度比例 + 实时速度 MB/s（约 0.4s 窗口平滑） */
+function progressOf(p: Pending) {
+  let lastLoaded = 0
+  let lastTs = performance.now()
+  return (loaded: number, total: number) => {
+    const now = performance.now()
+    const dt = (now - lastTs) / 1000
+    if (dt > 0.4) {
+      p.speed = Math.max(0, (loaded - lastLoaded) / dt / 1024 / 1024)
+      lastLoaded = loaded
+      lastTs = now
+    }
+    p.progress = total ? loaded / total : 0
+  }
+}
+
 /**
- * 发送：逐个上传待发送附件（失败保留在暂存区标红可重试），再发文本。
- * 视频/音频直接走 api.uploadFile + 元素树（不经 stickers 的吞异常路径）。
+ * 发送：逐个上传待发送附件（uploadAndUrl 拿完整 URL + 进度/速度），再发文本。
+ * 失败保留在暂存区标红可重试；超大小限制在 api 层直接拒绝并提示。
  */
 async function submit() {
   if (uploading.value || chat.state.sending) return
@@ -182,25 +232,30 @@ async function submit() {
   try {
     for (const p of [...todo]) {
       p.error = ''
+      p.progress = 0
+      p.speed = 0
       try {
+        const onProg = progressOf(p)
         if (p.kind === 'image') {
-          const key: any = await ctx.api.uploadFile(p.file, 'image')
-          await chat.sendMedia([h.image(typeof key === 'string' ? key : key.url || key.key)])
+          const { url } = await ctx.api.uploadAndUrl(p.file, 'image', onProg)
+          await chat.sendMedia([h.image(url)])
           if (p.caption.trim()) await chat.send(p.caption.trim(), 1)
         } else if (p.kind === 'video') {
-          const key: any = await ctx.api.uploadFile(p.file, 'video')
-          await chat.sendMedia([h.video(typeof key === 'string' ? key : key.key, 0)])
+          const { url } = await ctx.api.uploadAndUrl(p.file, 'video', onProg)
+          await chat.sendMedia([h.video(url, 0)])
         } else if (p.kind === 'audio') {
-          const key: any = await ctx.api.uploadFile(p.file, 'audio')
-          await chat.sendMedia([h.audio(typeof key === 'string' ? key : key.key, 0)])
+          const { url } = await ctx.api.uploadAndUrl(p.file, 'audio', onProg)
+          await chat.sendMedia([h.audio(url, 0)])
         } else {
-          const key: any = await ctx.api.uploadFile(p.file, 'file')
-          await chat.sendMedia([h.file(typeof key === 'string' ? key : key.url || key.key, p.file.name, p.file.size)])
+          const { url } = await ctx.api.uploadAndUrl(p.file, 'file', onProg)
+          await chat.sendMedia([h.file(url, p.file.name, p.file.size)])
         }
         unstage(p)
       } catch (err: any) {
         // 失败不丢附件：标红留在暂存区，下次点发送自动重试
         p.error = err?.message || '上传失败'
+        p.progress = 0
+        p.speed = 0
         attachFailed++
       }
     }
@@ -244,9 +299,12 @@ function fmtSize(n: number) {
     <QuoteBar />
     <div class="bar-row">
       <template v-for="it in barItems" :key="it.id">
-        <button v-if="it.kind === 'type'" class="ghost tiny"
-                :class="{ on: kind === it.value }" @click="onBar(it)">{{ it.label }}</button>
-        <button v-else class="ghost tiny icon-btn" :title="it.label" @click="onBar(it)">
+        <button v-if="it.kind === 'type'" class="ghost tiny" draggable="true"
+                :class="{ on: kind === it.value }" @click="onBar(it)"
+                @dragstart="onDragStart(it.id)" @dragover.prevent @drop.stop="onDropReorder(it.id, 'bar')">{{ it.label }}</button>
+        <button v-else class="ghost tiny icon-btn" :title="it.label" draggable="true"
+                @click="onBar(it)"
+                @dragstart="onDragStart(it.id)" @dragover.prevent @drop.stop="onDropReorder(it.id, 'bar')">
           <Icon :name="BAR_ICON[it.kind] || 'page'" :size="16" />
         </button>
       </template>
@@ -263,7 +321,9 @@ function fmtSize(n: number) {
     </div>
 
     <div v-if="qrItems.length || addingQr" class="qr-row">
-      <button v-for="it in qrItems" :key="it.id" class="qr-chip" @click="onBar(it)">
+      <button v-for="it in qrItems" :key="it.id" class="qr-chip" draggable="true"
+              @click="onBar(it)"
+              @dragstart="onDragStart(it.id)" @dragover.prevent @drop.stop="onDropReorder(it.id, 'qr')">
         {{ it.label }}
         <span class="x" title="移除" @click.stop="quickreply?.remove?.(it.value)">×</span>
       </button>
@@ -284,6 +344,11 @@ function fmtSize(n: number) {
           <span class="nm">{{ p.file.name }}</span>
         </div>
         <span class="pend-meta">{{ p.kind === 'file' || p.kind === 'audio' ? fmtSize(p.file.size) : fmtSize(p.file.size) }}</span>
+        <!-- 上传进度条 + 实时速度 MB/s -->
+        <div v-if="uploading && p.progress > 0 && !p.error" class="pend-prog">
+          <div class="bar" :style="{ width: Math.round(p.progress * 100) + '%' }"></div>
+          <span class="spd">{{ p.speed.toFixed(1) }} MB/s</span>
+        </div>
         <span v-if="p.error" class="pend-err" :title="p.error">发送失败 · 点发送重试</span>
         <button class="pend-x" title="移除" @click="unstage(p)">×</button>
         <input v-if="p.kind === 'image'" v-model="p.caption" class="pend-cap" placeholder="给这张图配一句话（可选）" />
@@ -313,6 +378,8 @@ function fmtSize(n: number) {
 .bar-row::-webkit-scrollbar { display: none; }
 .bar-row > * { flex: 0 0 auto; }
 .tiny { padding: 3px 10px; font-size: 12px; border-radius: 7px; }
+/* 图标按钮必须零内边距，否则 grid 居中会被 padding 挤偏（实测偏 4px） */
+.bar-row .icon-btn { padding: 0; }
 .bar-row .on { background: var(--acc); color: #fff; border-color: transparent; }
 .line { display: flex; gap: 9px; align-items: flex-end; }
 .rec-dot { font-size: 12px; color: var(--err); flex: 0 0 auto; }
@@ -352,4 +419,16 @@ function fmtSize(n: number) {
   display: grid; place-items: center;
 }
 .pend-x:hover { background: var(--err); }
+/* 上传进度条（底部）+ 速度标签 */
+.pend-prog {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 14px;
+  background: rgba(0, 0, 0, .55); display: flex; align-items: center;
+}
+.pend-prog .bar {
+  position: absolute; left: 0; top: 0; bottom: 0; background: var(--acc); opacity: .8;
+  transition: width .25s linear;
+}
+.pend-prog .spd {
+  position: relative; width: 100%; text-align: center; font-size: 9.5px; color: #fff; line-height: 14px;
+}
 </style>

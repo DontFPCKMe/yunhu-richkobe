@@ -86,10 +86,23 @@ function jumpTo(mid: string) {
 function toBottom() { nextTick(() => { if (box.value) box.value.scrollTop = box.value.scrollHeight }) }
 
 /** 滚动时上报「是否贴底」：新消息/轮询刷新只在贴底时自动滚，翻历史不被打断 */
+let loadingTop = false
 function onScroll() {
   const el = box.value
   if (!el) return
   ctx.chat?.setAtBottom?.(el.scrollHeight - el.scrollTop - el.clientHeight < 40)
+  // 历史消息自动加载：滚到顶部即拉上一页（QQ 式，不再需要点按钮），并保持阅读位置
+  if (el.scrollTop < 40 && chat.state.hasMore && !chat.state.loadingMore && !loadingTop) {
+    loadingTop = true
+    const prevH = el.scrollHeight
+    const topBefore = el.scrollTop
+    Promise.resolve(chat.loadMore()).finally(() => {
+      nextTick(() => {
+        el.scrollTop = el.scrollHeight - prevH + topBefore
+        loadingTop = false
+      })
+    })
+  }
 }
 
 /** 时间分隔胶囊文案：今天/昨天/日期 + 时分 */
@@ -171,10 +184,8 @@ watch(() => cur.value?.id, toBottom)
   </div>
 
   <div v-else ref="box" class="messages" @click="closeMenu(); closeMore()" @scroll="onScroll">
-    <div v-if="chat.state.hasMore" class="load-more">
-      <button class="ghost small" :disabled="chat.state.loadingMore" @click="chat.loadMore()">
-        {{ chat.state.loadingMore ? '加载中…' : '加载更多历史' }}
-      </button>
+    <div v-if="chat.state.hasMore && chat.state.loadingMore" class="load-more">
+      <span class="sys">加载历史中…</span>
     </div>
     <template v-for="f in flow" :key="f.t === 'div' ? f.id : f.msg.id">
       <div v-if="f.t === 'div'" class="sys time-div"><span>{{ fmtDiv(f.ts) }}</span></div>

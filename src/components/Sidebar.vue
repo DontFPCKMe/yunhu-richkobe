@@ -22,10 +22,8 @@ const list = computed(() => chat.filtered())
 function open(c: any) { chat.open(c) }
 
 /* ---------------- 会话分组（本地，存 localStorage） ---------------- */
-const newGroup = ref('')
 // 注意：filtered 是函数，必须调用 —— 之前少个括号导致侧栏一条会话都不显示
 const sections = computed(() => chat.sections(chat.filtered()))
-function addGroup() { chat.addGroup(newGroup.value); newGroup.value = '' }
 
 /* ---- 右键会话 → 分组菜单（夹回视口，避免菜单出屏） ---- */
 const menu = reactive({ open: false, x: 0, y: 0, conv: null as any })
@@ -56,6 +54,19 @@ function createAndAssign() {
   if (g && menu.conv) chat.assignTo(menu.conv.id, g.id)
   closeMenu()
 }
+/** 置顶/取消置顶（本地排序） */
+function togglePin() {
+  if (menu.conv) chat.togglePin(menu.conv.id)
+  closeMenu()
+}
+/** 删除会话（本地隐藏，不删云端记录；二次确认防误触） */
+function delConv() {
+  const c = menu.conv
+  closeMenu()
+  if (!c) return
+  if (!window.confirm(`从列表删除「${c.name}」？（仅本地隐藏，聊天记录仍在云端）`)) return
+  chat.hideConv(c.id)
+}
 
 /** 点自己的头像 → 打开自己的详细资料 */
 function openMe() {
@@ -85,8 +96,8 @@ async function dlgOk() {
     if (dlg.kind === 'group') {
       const n = dlg.name.trim()
       if (!n) { ctx.ui?.toast?.('群名称不能为空', 'warn'); return }
-      await ctx.social?.createGroup?.(n, dlg.intro.trim())
-      ctx.ui?.toast?.('群聊创建成功', 'success')
+      const ok = await ctx.social?.createGroup?.(n, dlg.intro.trim())
+      if (!ok) return                       // 失败提示已由 social 给出，不再误报成功
       ctx.chat?.loadConversations?.(true)
     } else {
       const id = dlg.fid.trim()
@@ -198,12 +209,6 @@ async function dlgOk() {
       </li>
     </ul>
 
-    <!-- 新建分组 -->
-    <div class="grp-new">
-      <input v-model="newGroup" placeholder="新建分组…" @keyup.enter="addGroup" />
-      <button class="ghost small" @click="addGroup">+</button>
-    </div>
-
     <!-- 插槽：chat-sidebar-bottom -->
     <component v-for="(sl, i) in ctx.chat?.slotsOf?.('chat-sidebar-bottom') || []" :key="'sb' + i"
                :is="sl.component" v-bind="sl.props || {}" />
@@ -211,6 +216,10 @@ async function dlgOk() {
     <!-- 右键分组菜单 -->
     <Teleport to="body">
       <div v-if="menu.open" class="ctx-menu" :style="{ left: menu.x + 'px', top: menu.y + 'px' }" @click.stop>
+        <button class="rm-item" @click="togglePin">
+          <Icon name="star" :size="14" /> {{ chat.isPinned(menu.conv?.id) ? '取消置顶' : '置顶' }}
+        </button>
+        <div class="rm-sep"></div>
         <div class="rm-item dim small" style="cursor:default">移动到分组</div>
         <button class="rm-item" @click="assignTo('')"><Icon name="undo" :size="14" /> 移出分组</button>
         <button v-for="g in chat.groups.groups" :key="g.id" class="rm-item"
@@ -222,6 +231,8 @@ async function dlgOk() {
           <input v-model="menuGroupInput" class="qr-add-input" placeholder="新分组名" @keyup.enter="createAndAssign" />
           <button class="ghost small" @click="createAndAssign">建</button>
         </div>
+        <div class="rm-sep"></div>
+        <button class="rm-item danger" @click="delConv"><Icon name="trash" :size="14" /> 删除会话</button>
       </div>
     </Teleport>
   </div>

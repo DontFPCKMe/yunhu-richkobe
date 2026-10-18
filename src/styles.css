@@ -121,6 +121,9 @@ code.mono, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, m
 .rail {
   grid-area: rail; background: var(--rail); border-right: 1px solid var(--line);
   display: flex; flex-direction: column; align-items: center; padding: 10px 0; gap: 6px;
+  /* 弹出菜单（☰/＋/⋮）必须盖在消息区之上：.messages 带 isolation:isolate 会自成层，
+     三栏不显式建层就会被它盖住（实测菜单项被 DIV.messages 遮挡点不动） */
+  position: relative; z-index: 70;
 }
 .rail-logo {
   width: 32px; height: 32px; border-radius: 9px; display: grid; place-items: center;
@@ -228,7 +231,7 @@ code.mono, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, m
 .chat-side { width: 292px; flex: 0 0 292px; border-right: 1px solid var(--line); background: var(--card); min-height: 0; }
 .chat-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 
-.sidebar { display: flex; flex-direction: column; height: 100%; min-height: 0; }
+.sidebar { display: flex; flex-direction: column; height: 100%; min-height: 0; position: relative; z-index: 60; }
 .me { padding: 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--line); }
 .me img { width: 38px; height: 38px; border-radius: 50%; background: var(--card2); object-fit: cover; flex: 0 0 38px; }
 .me .info { flex: 1; min-width: 0; }
@@ -237,7 +240,7 @@ code.mono, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, m
 /* QQ 式「＋」菜单（创建群聊/加好友） */
 .plus-wrap { position: relative; flex: 0 0 auto; }
 .plus-btn {
-  width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--line);
+  width: 28px; height: 28px; padding: 0; border-radius: 8px; border: 1px solid var(--line);
   background: var(--card2); color: var(--fg); display: grid; place-items: center; cursor: pointer;
 }
 .plus-btn:hover { background: var(--acc); color: #fff; border-color: transparent; }
@@ -318,6 +321,7 @@ code.mono, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, m
 .chat-header {
   display: flex; align-items: center; gap: 10px; padding: 4px 14px;
   border-bottom: 1px solid var(--line); background: var(--card); min-height: 36px;
+  position: relative; z-index: 65;   /* ⋮ 菜单要盖在消息区之上（同 .messages 层叠问题） */
 }
 .chat-header .t { font-weight: 600; font-size: 14px; }
 /* QQ 式昵称旁在线绿点 */
@@ -542,8 +546,11 @@ code.mono, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, m
   font-size: 12.5px; font-weight: 500; cursor: pointer;
 }
 .qr-chip:hover { background: color-mix(in srgb, var(--acc) 24%, transparent); }
-.qr-chip .x { opacity: .5; font-size: 14px; line-height: 1; padding: 0 1px; }
-.qr-chip .x:hover { opacity: 1; color: var(--err); }
+.qr-chip .x {
+  opacity: .6; font-size: 17px; line-height: 1; padding: 0;
+  width: 20px; height: 20px; border-radius: 50%; display: inline-grid; place-items: center;
+}
+.qr-chip .x:hover { opacity: 1; color: #fff; background: var(--err); }
 .qr-chip.qr-add { border-style: dashed; background: transparent; color: var(--fg2); }
 .qr-chip.qr-add:hover { color: var(--acc); border-color: var(--acc); }
 .qr-add-input { width: 120px; padding: 4px 10px; font-size: 12.5px; border-radius: 999px; }
