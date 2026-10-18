@@ -62,6 +62,43 @@ function openMe() {
   const u = auth.state.user
   if (u) ctx.group?.openProfile?.({ id: u.id, name: u.name, avatar: u.avatar })
 }
+
+/* ---------------- QQ 式「＋」菜单：创建群聊 / 加好友（复用 social 后端） ---------------- */
+const plusOpen = ref(false)
+// 点菜单外任意处关闭（与右键分组菜单同一套路）
+const offPlus = () => { plusOpen.value = false }
+watch(() => plusOpen.value, (v) => {
+  if (v) setTimeout(() => document.addEventListener('click', offPlus), 0)
+  else document.removeEventListener('click', offPlus)
+})
+onUnmounted(() => document.removeEventListener('click', offPlus))
+const dlg = reactive({ kind: '' as '' | 'group' | 'friend', name: '', intro: '', fid: '', msg: '', busy: false })
+function plusPick(k: 'group' | 'friend') {
+  plusOpen.value = false
+  dlg.kind = k
+}
+function closeDlg() { dlg.kind = ''; dlg.name = ''; dlg.intro = ''; dlg.fid = ''; dlg.msg = '' }
+async function dlgOk() {
+  if (dlg.busy) return
+  dlg.busy = true
+  try {
+    if (dlg.kind === 'group') {
+      const n = dlg.name.trim()
+      if (!n) { ctx.ui?.toast?.('群名称不能为空', 'warn'); return }
+      await ctx.social?.createGroup?.(n, dlg.intro.trim())
+      ctx.ui?.toast?.('群聊创建成功', 'success')
+      ctx.chat?.loadConversations?.(true)
+    } else {
+      const id = dlg.fid.trim()
+      if (!id) { ctx.ui?.toast?.('请填写对方 ID', 'warn'); return }
+      await ctx.social?.apply?.(id, 1, dlg.msg.trim())
+      ctx.ui?.toast?.('好友申请已发送', 'success')
+    }
+    closeDlg()
+  } catch (e: any) {
+    ctx.ui?.toast?.('操作失败：' + e.message, 'error')
+  } finally { dlg.busy = false }
+}
 </script>
 
 <template>
@@ -73,6 +110,35 @@ function openMe() {
       <div class="info">
         <div class="name">{{ auth.state.user?.name }}</div>
         <div class="sub">ID {{ auth.state.user?.id }}</div>
+      </div>
+      <!-- QQ 式「＋」：创建群聊 / 加好友（闪传文件无后端，不做） -->
+      <div class="plus-wrap">
+        <button class="plus-btn" title="创建群聊 / 加好友" @click.stop="plusOpen = !plusOpen">
+          <Icon name="plus" :size="16" />
+        </button>
+        <div v-if="plusOpen" class="plus-menu" @click.stop>
+          <button class="pm-item" @click="plusPick('group')"><Icon name="contacts" :size="15" /> 创建群聊</button>
+          <button class="pm-item" @click="plusPick('friend')"><Icon name="user" :size="15" /> 加好友</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 创建群聊 / 加好友 对话框 -->
+    <div v-if="dlg.kind" class="dlg-mask" @click.self="closeDlg">
+      <div class="dlg-box">
+        <div class="dlg-title">{{ dlg.kind === 'group' ? '创建群聊' : '加好友' }}</div>
+        <template v-if="dlg.kind === 'group'">
+          <input v-model="dlg.name" class="dlg-input" placeholder="群名称" maxlength="30" />
+          <textarea v-model="dlg.intro" class="dlg-input" placeholder="群简介（可选）" rows="3"></textarea>
+        </template>
+        <template v-else>
+          <input v-model="dlg.fid" class="dlg-input" placeholder="对方 ID" />
+          <textarea v-model="dlg.msg" class="dlg-input" placeholder="验证消息（可选）" rows="2"></textarea>
+        </template>
+        <div class="dlg-foot">
+          <button class="ghost tiny" @click="closeDlg">取消</button>
+          <button class="primary tiny" :disabled="dlg.busy" @click="dlgOk">{{ dlg.busy ? '提交中…' : '确定' }}</button>
+        </div>
       </div>
     </div>
 

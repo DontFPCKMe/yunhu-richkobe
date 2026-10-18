@@ -43,6 +43,7 @@ import { botConsolePlugin } from './plugins/botconsole'
 import { communityPlugin } from './plugins/community'
 import { stickersPlugin } from './plugins/stickers'
 import { commandsPlugin } from './plugins/commands'
+import { lockPlugin } from './plugins/lock'
 
 export interface RegistryItem {
   key: string
@@ -84,6 +85,7 @@ export const registry: RegistryItem[] = [
   { key: 'community', plugin: communityPlugin, desc: '板块（文章分区）· 创建/编辑/管理/绑定群聊', provide: ['community'], deps: ['api', 'ui', 'console'] },
   { key: 'session', plugin: sessionEventPlugin, desc: 'session/event 服务 · ctx.session() 与统一事件层', provide: ['session', 'event'], deps: ['chat', 'bots', 'satori'] },
   { key: 'charbg', plugin: { name: 'charbg', inject: ['api', 'chat', 'ui'], apply: charbgPlugin }, desc: '聊天背景 · /v1/chat-background（会话/全局）', provide: ['charbg'], deps: ['api', 'chat', 'ui', 'console'] },
+  { key: 'lock', plugin: lockPlugin, desc: '锁屏 · 手机端弹窗解锁（PIN 兜底，无摄像头方案）', provide: ['lock'], deps: ['storage', 'auth', 'ui', 'console'] },
 ]
 
 /** 服务实例变化时 +1，组件靠它建立响应式依赖（插件热插拔后 UI 才会跟着刷新） */
@@ -196,7 +198,7 @@ const appService = {
 }
 
 function recordServices() {
-  const names = ['cfg', 'storage', 'logs', 'ui', 'theme', 'console', 'api', 'http', 'auth', 'bots', 'satori', 'chat', 'ws', 'messageActions', 'group', 'quickreply', 'charbg']
+  const names = ['cfg', 'storage', 'logs', 'ui', 'theme', 'console', 'api', 'http', 'auth', 'bots', 'satori', 'chat', 'ws', 'messageActions', 'group', 'quickreply', 'charbg', 'lock']
   for (const n of names) {
     const v = (ctx as any).get?.(n)
     if (v) services.set(n, v)
