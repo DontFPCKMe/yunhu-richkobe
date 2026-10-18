@@ -74,9 +74,7 @@
         "zip"
       ],
       "artifactName": "yunhulaoda-${version}-windows-${arch}.${ext}",
-      "icon": "build/icon.ico",
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true
+      "icon": "build/icon.ico"
     },
     "nsis": {
       "artifactName": "yunhulaoda-${version}-windows-${arch}-setup.${ext}",
@@ -84,7 +82,9 @@
       "uninstallerIcon": "build/icon.ico",
       "installerHeaderIcon": "build/icon.ico",
       "installerSidebar": "build/installer-sidebar.bmp",
-      "uninstallerSidebar": "build/installer-sidebar.bmp"
+      "uninstallerSidebar": "build/installer-sidebar.bmp",
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
     },
     "executableName": "yunhulaoda",
     "mac": {
