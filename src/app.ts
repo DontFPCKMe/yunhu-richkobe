@@ -13,6 +13,7 @@ import { Context } from 'cordis'
 import './core/augment'   // cordis 服务/事件的类型补充（声明合并）
 import type { Plugin } from 'cordis'
 import { configPlugin } from './plugins/config'
+import { storagePlugin } from './plugins/storage'
 import { loggerPlugin } from './plugins/logger'
 import { uiPlugin } from './plugins/ui'
 import { themePlugin } from './plugins/theme'
@@ -61,13 +62,14 @@ export const ctx: Context = new Context()
 
 export const registry: RegistryItem[] = [
   { key: 'config', plugin: configPlugin, desc: '配置文件 · yunhu.config.yml', provide: ['cfg'], core: true },
+  { key: 'storage', plugin: storagePlugin, desc: '用户数据落盘 · 文档/yhchat（登录态/会话缓存/PIN/锁/扫码中继）', provide: ['storage'], core: true },
   { key: 'logger', plugin: loggerPlugin, desc: '日志服务 · 包装 cordis logger · 注册「日志」页面', provide: ['logs'] },
   { key: 'ui', plugin: uiPlugin, desc: '主题 / Toast 提示', provide: ['ui'], core: true },
   { key: 'theme', plugin: themePlugin, desc: '主题 · 配色/壁纸/圆角 · 注册「主题」页面', provide: ['theme'], deps: ['ui'] },
   { key: 'console', plugin: consolePlugin, desc: '控制台服务 · 页面/插槽/动作注册', provide: ['console'], core: true },
   { key: 'api', plugin: apiPlugin, desc: '云湖 v1 接口封装（protobuf）', provide: ['api'], core: true },
   { key: 'http', plugin: { name: 'http', inject: ['auth'], apply: httpPlugin }, desc: 'http 服务 · ctx.http.get/post（对标 Koishi ctx.http）', provide: ['http'], deps: ['api', 'auth'] },
-  { key: 'auth', plugin: authPlugin, desc: '登录态 · 注册「账号」页面', provide: ['auth'], deps: ['api'], core: true },
+  { key: 'auth', plugin: authPlugin, desc: '登录态 · 注册「账号」页面', provide: ['auth'], deps: ['api', 'storage'], core: true },
   { key: 'adapter', plugin: adapterPlugin, desc: '云湖适配器 · Satori 统一消息与事件', provide: ['bots', 'satori'], deps: ['api', 'auth'] },
   { key: 'chat', plugin: chatPlugin, desc: '会话/消息 · 注册「聊天」页面', provide: ['chat'], deps: ['api', 'auth'], core: true },
   { key: 'ws', plugin: wsPlugin, desc: 'WebSocket 实时收发', provide: ['ws'], deps: ['api', 'auth'], core: true },
@@ -194,7 +196,7 @@ const appService = {
 }
 
 function recordServices() {
-  const names = ['cfg', 'logs', 'ui', 'theme', 'console', 'api', 'http', 'auth', 'bots', 'satori', 'chat', 'ws', 'messageActions', 'group', 'quickreply', 'charbg']
+  const names = ['cfg', 'storage', 'logs', 'ui', 'theme', 'console', 'api', 'http', 'auth', 'bots', 'satori', 'chat', 'ws', 'messageActions', 'group', 'quickreply', 'charbg']
   for (const n of names) {
     const v = (ctx as any).get?.(n)
     if (v) services.set(n, v)
