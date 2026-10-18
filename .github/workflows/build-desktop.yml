@@ -27,13 +27,15 @@ jobs:
         include:
           - os: ubuntu-latest
             name: linux
-            pattern: '*.AppImage'
+            paths: '*.AppImage'
           - os: windows-latest
             name: windows
-            pattern: '*.exe *.zip'
+            paths: |
+              release/*.exe
+              release/*.zip
           - os: macos-latest
             name: macos
-            pattern: '*.dmg'
+            paths: '*.dmg'
     runs-on: ${{ matrix.os }}
     steps:
       - name: 检出代码
@@ -58,7 +60,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: yunhulaoda-desktop-${{ matrix.name }}
-          path: release/${{ matrix.pattern }}
+          path: ${{ matrix.paths }}
           retention-days: 30
 
   release:
