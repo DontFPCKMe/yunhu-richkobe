@@ -245,7 +245,7 @@ watch(() => props.elements, fix, { deep: true })
   font-size: 20px; line-height: 1; cursor: pointer;
 }
 .viewer-x:hover { background: rgba(255, 255, 255, .26); }
-.sticker { max-width: 140px; max-height: 140px; display: block; object-fit: contain; }
+.sticker { max-width: 96px; max-height: 96px; display: block; object-fit: contain; }
 .video-wrap { display: inline-flex; flex-direction: column; gap: 3px; }
 .vtime { font-size: 11px; color: var(--fg2); }
 .pre { font-size: 12px; white-space: pre-wrap; margin: 0; }
