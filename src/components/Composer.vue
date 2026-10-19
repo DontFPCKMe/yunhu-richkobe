@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, ref, nextTick, computed, onUnmounted } from 'vue'
+import { inject, ref, nextTick, computed, onUnmounted, watch } from 'vue'
 import QuoteBar from './QuoteBar.vue'
 import ImageEditor from './ImageEditor.vue'
 import { h } from '../satori/element'
@@ -113,7 +113,9 @@ function autoresize() {
   el.style.height = el.scrollHeight + 'px'
 }
 
-/* ---------------- 待发送附件（暂存预览，不直接发送） ---------------- */
+/* ---------------- 待发送附件（暂存预览，不直接发送） ----------------
+ * 暂存区按会话 id 存模块级 Map：切会话/组件重挂载都不丢（之前重挂载即清空，要重新上传）。
+ */
 interface Pending {
   id: number
   file: File
@@ -125,8 +127,14 @@ interface Pending {
   progress: number
   speed: number
 }
+const stagedByConv = new Map<string, Pending[]>()
 const pending = ref<Pending[]>([])
 let pendingSeq = 0
+const convId = computed(() => chat.state.current?.id || '')
+watch(convId, (id, oldId) => {
+  if (oldId) stagedByConv.set(oldId, pending.value)
+  pending.value = stagedByConv.get(id) || []
+}, { immediate: true })
 
 function classify(f: File): Pending['kind'] {
   if (f.type.startsWith('image/')) return 'image'
@@ -140,10 +148,12 @@ function stage(f: File) {
   const k = classify(f)
   const url = (k === 'image' || k === 'video') ? URL.createObjectURL(f) : ''
   pending.value.push({ id: ++pendingSeq, file: f, url, kind: k, caption: '', error: '', progress: 0, speed: 0 })
+  if (convId.value) stagedByConv.set(convId.value, pending.value)
 }
 
 function unstage(p: Pending) {
   pending.value = pending.value.filter((x) => x.id !== p.id)
+  if (convId.value) stagedByConv.set(convId.value, pending.value)
   if (p.url) URL.revokeObjectURL(p.url)
 }
 
@@ -244,11 +254,12 @@ async function submit() {
           await chat.sendMedia([h.image(url)])
           if (p.caption.trim()) await chat.send(p.caption.trim(), 1)
         } else if (p.kind === 'video') {
-          const { url } = await ctx.api.uploadAndUrl(p.file, 'video', onProg)
-          await chat.sendMedia([h.video(url, 0)])
+          // 视频/音频发**裸 key**（与 stickers.sendVideo 同协议）：发完整 URL 云端存不下、播放 404
+          const { key } = await ctx.api.uploadFile(p.file, 'video', onProg)
+          await chat.sendMedia([h.video(key, 0)])
         } else if (p.kind === 'audio') {
-          const { url } = await ctx.api.uploadAndUrl(p.file, 'audio', onProg)
-          await chat.sendMedia([h.audio(url, 0)])
+          const { key } = await ctx.api.uploadFile(p.file, 'audio', onProg)
+          await chat.sendMedia([h.audio(key, 0)])
         } else {
           const { url } = await ctx.api.uploadAndUrl(p.file, 'file', onProg)
           await chat.sendMedia([h.file(url, p.file.name, p.file.size)])

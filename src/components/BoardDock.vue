@@ -262,13 +262,16 @@ function boardHtmlOf(b: any) { return b?.content ? renderRich(b.content) : '' }
             <button class="small" @click="g.reloadMount()">进入</button>
           </div>
           <ul class="disk-list">
-            <li v-for="e in g.state.mountEntries" :key="e.name">
+            <li v-for="e in g.state.mountEntries" :key="e.name" :data-fn="e.name">
               <span class="d-ico"><Icon :name="e.isDir ? 'folder' : 'page'" :size="15" /></span>
-              <span class="d-name" @click="e.isDir ? g.mountEnter(e.name) : null">{{ e.name }}</span>
+              <span class="d-name" @click="e.isDir ? g.mountEnter(e.name) : locateFile(e.name)">{{ e.name }}</span>
               <span class="dim small">{{ e.isDir ? '' : human(e.size) }}</span>
               <span class="grow"></span>
               <span class="dim small">{{ e.mtime }}</span>
-              <a v-if="!e.isDir" class="ghost small" :href="mountFileUrl(e.name)" target="_blank" rel="noreferrer">下载</a>
+              <template v-if="!e.isDir">
+                <a class="ghost small" :href="mountFileUrl(e.name)" target="_blank" rel="noreferrer">打开</a>
+                <button class="ghost small icon-btn" title="在列表中定位" @click="locateFile(e.name)"><Icon name="search" :size="13" /></button>
+              </template>
             </li>
             <li v-if="!g.state.mountEntries.length" class="dim center">
               {{ g.state.mountLoading ? '加载中…' : '这个目录是空的（或需要密码）' }}
@@ -277,7 +280,8 @@ function boardHtmlOf(b: any) { return b?.content ? renderRich(b.content) : '' }
         </div>
 
         <ul v-else class="disk-list">
-          <li v-for="f in g.state.diskList" :key="f.id" @dblclick="f.isFolder && g.openFolder(f)">
+          <li v-for="f in g.state.diskList" :key="f.id" :class="{ hit: g.locateHighlight?.name && f.name === g.locateHighlight.name }"
+              @dblclick="f.isFolder && g.openFolder(f)">
             <span class="d-ico"><Icon :name="f.isFolder ? 'folder' : 'page'" :size="15" /></span>
             <span class="d-name" @click="f.isFolder && g.openFolder(f)">{{ f.name }}</span>
             <span class="dim small">{{ f.isFolder ? '' : (f.fileSize ? (f.fileSize / 1024).toFixed(1) + ' KB' : '') }}</span>
@@ -369,14 +373,13 @@ function boardHtmlOf(b: any) { return b?.content ? renderRich(b.content) : '' }
 <style scoped>
 /* 全屏独立界面：不再挤在输入框上面 */
 .dock {
-  /* QQ 式右侧抽屉：群成员/群文件/看板从右侧滑出，不遮会话列表 */
-  position: fixed; right: 0; top: 0; bottom: 28px;
-  width: min(440px, 92vw);
-  /* 层级：高于三栏(60/65/70)与 rail 菜单，低于对话框(80+) —— 点开即在所有组件最上层 */
-  z-index: 75; background: var(--card); border-left: 1px solid var(--line);
-  box-shadow: -12px 0 40px rgba(0, 0, 0, .35);
+  /* 居中大弹窗（用户偏好）：不透明、层级 75（高于三栏与 rail 菜单，低于对话框 80+） */
+  position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  width: min(860px, 94vw); height: min(640px, 90vh);
+  z-index: 75; background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+  box-shadow: 0 18px 60px rgba(0, 0, 0, .5);
   display: flex; flex-direction: column; overflow: hidden;
-  animation: dock-in .18s ease-out;
+  animation: dock-in .16s ease-out;
 }
 .dock-x {
   width: 26px; height: 26px; padding: 0; border-radius: 7px; font-size: 17px; line-height: 1;
@@ -459,6 +462,7 @@ function boardHtmlOf(b: any) { return b?.content ? renderRich(b.content) : '' }
 .m-item .grow { flex: 1; }
 .disk-list { list-style: none; margin: 0; padding: 0; }
 .disk-list li { display: flex; align-items: center; gap: 10px; padding: 8px 2px; border-bottom: 1px solid var(--line); font-size: 13px; }
+.disk-list li.hit { background: var(--acc-soft, var(--card2)); outline: 1px solid var(--acc); border-radius: 6px; }
 .disk-list .d-ico { font-size: 18px; }
 .disk-list .d-name { cursor: pointer; }
 .disk-list .d-name:hover { color: var(--acc); }

@@ -259,6 +259,15 @@ export const groupAdminPlugin = {
       state.mountError = ''
       loadMount()
     }
+
+    /** 「在文件夹中打开」：打开群文件页签并高亮指定文件（消息右键菜单用） */
+    const locateHighlight = { name: '' }
+    function locateFile(name: string) {
+      state.dockOpen = true
+      state.dockTab = 'disk'
+      locateHighlight.name = name
+      loadDisk()
+    }
     function closeMount() { state.mountView = null; state.mountEntries = []; state.mountPath = [] }
     function mountEnter(name: string) { state.mountPath.push(name); loadMount() }
     function mountUp() { state.mountPath.pop(); loadMount() }
@@ -478,11 +487,11 @@ export const groupAdminPlugin = {
     })
 
     const group = {
-      state, GAG_OPTIONS, isGroup,
+      state, GAG_OPTIONS, isGroup, locateHighlight,
       open, close, toggle,
       loadMembers, loadMoreMembers, loadInfo, loadBoard, loadBots, kick, gag, doSearch, scanAllBoards,
       loadTags, loadMoreTags, searchTags, createTag, removeTag, openTagMember, saveMemberTags, loadTagMap, tagsOf,
-      loadFriends, isFriend, loadDisk, openFolder, backFolder, createFolder,
+      loadFriends, isFriend, loadDisk, openFolder, backFolder, createFolder, locateFile,
       openMount, closeMount, mountEnter, mountUp, reloadMount, loadMount,
       /** 打开用户主页 */
       openProfile(user: any) { state.profileUser = user },

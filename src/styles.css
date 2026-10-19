@@ -560,7 +560,8 @@ code.mono, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, m
 .qr-add-input { width: 120px; padding: 4px 10px; font-size: 12.5px; border-radius: 999px; }
 
 /* 聊天标题栏 QQ 式图标按钮 */
-.icon-btn { width: 30px; height: 30px; padding: 0; display: inline-grid; place-items: center; }
+/* 图标按钮零内边距 + grid 居中；特异性要压过 button.small/button.tiny 的 padding */
+button.icon-btn { width: 30px; height: 30px; padding: 0; display: inline-grid; place-items: center; }
 .ctx-menu .rm-item.on { background: var(--acc-soft); color: var(--acc); }
 
 /* ===================================================================
