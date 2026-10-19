@@ -8,6 +8,7 @@
  * 想加功能？写一个插件（可以注册自己的控制台页面/页面元素/消息菜单），
  * 加进 registry，并在 yunhu.config.yml 的 plugins 下写它的配置即可。
  */
+import { enableMobileDebug } from './core/mobileDebug'
 import { shallowRef, watchEffect } from 'vue'
 import { Context } from 'cordis'
 import './core/augment'   // cordis 服务/事件的类型补充（声明合并）
@@ -44,6 +45,8 @@ import { communityPlugin } from './plugins/community'
 import { stickersPlugin } from './plugins/stickers'
 import { commandsPlugin } from './plugins/commands'
 import { lockPlugin } from './plugins/lock'
+
+enableMobileDebug()  // 安卓内置调试浮层（仅 native 环境生效，最早捕获初始化错误）
 
 export interface RegistryItem {
   key: string
