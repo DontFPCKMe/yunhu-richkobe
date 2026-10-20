@@ -59,7 +59,9 @@
       "build/icon.icns",
       "build/tray.png",
       "build/installer-sidebar.bmp",
-      "package.json"
+      "package.json",
+      "!**/node_modules/**",
+      "!node_modules/**"
     ],
     "linux": {
       "target": [
@@ -96,6 +98,7 @@
       "category": "public.app-category.social-networking",
       "icon": "build/icon.icns"
     },
-    "compression": "maximum"
+    "compression": "maximum",
+    "afterPack": "./scripts/afterPack-slim.cjs"
   }
 }
