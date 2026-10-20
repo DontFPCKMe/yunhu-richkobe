@@ -65,6 +65,7 @@ export const groupAdminPlugin = {
       mountPwd: '',
       mountNeedPwd: false,
       mountError: '',
+      mountHighlight: '',   // 挂载盘视图内「定位」高亮的文件名
       dockTab: 'board' as 'board' | 'members' | 'tags' | 'search' | 'disk' | 'info' | 'all',  // 停靠栏页签
       allBoards: [] as any[],    // 扫描到的所有会话看板
       scanProgress: 0,
@@ -298,6 +299,8 @@ export const groupAdminPlugin = {
         state.diskTotal = await api.diskTotalSize(cur.id, cur.type).catch(() => null)
         // 挂载只在群根目录显示一次
         state.mounts = folderId === 0 && cur.type === 2 ? await api.mountList(cur.id).catch(() => []) : []
+        // 云湖自带网盘是空的但有第三方挂载时，自动进第一个挂载盘（用户「群文件不能浏览」的根因）
+        if (!state.diskList.length && state.mounts.length && !state.mountView) openMount(state.mounts[0])
       } catch (e: any) {
         ui.toast('群文件加载失败：' + e.message, 'error')
       } finally { state.diskLoading = false }

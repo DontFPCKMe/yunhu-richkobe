@@ -53,6 +53,12 @@ function mountFileUrl(name: string) {
   return `${location.origin}/webdav/${gid}/@mount/${mid}/${p}`
 }
 
+/** 定位文件：挂载盘视图内高亮当前列表；否则跳群文件面板高亮 */
+function locateFile(name: string) {
+  if (g.state.mountView) { g.state.mountHighlight = name; return }
+  g.locateFile?.(name)
+}
+
 /** 打开挂载盘（页内浏览，不跳转） */
 function openMount(m: any) {
   g.openMount(m)
@@ -73,7 +79,9 @@ function boardHtmlOf(b: any) { return b?.content ? renderRich(b.content) : '' }
 </script>
 
 <template>
-  <div class="dock" v-if="g.state.dockOpen">
+  <!-- 遮罩：点空白处关闭 dock（与所有弹窗行为一致） -->
+  <div v-if="g.state.dockOpen" class="dock-mask" @click.self="g.closeDock()">
+  <div class="dock">
     <!-- 顶部：页签一行可横向滑动，最后一个按钮固定为「退出」 -->
     <div class="dock-head">
       <b class="dock-title">群</b>
@@ -368,10 +376,13 @@ function boardHtmlOf(b: any) { return b?.content ? renderRich(b.content) : '' }
       </template>
     </div>
   </div>
+  </div>
 </template>
 
 <style scoped>
 /* 全屏独立界面：不再挤在输入框上面 */
+/* 遮罩：dock 打开时铺满，点空白关闭 */
+.dock-mask { position: fixed; inset: 0; z-index: 74; background: rgba(0, 0, 0, .3); }
 .dock {
   /* 居中大弹窗（用户偏好）：不透明、层级 75（高于三栏与 rail 菜单，低于对话框 80+） */
   position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);

@@ -286,6 +286,28 @@ async function submit() {
   }
 }
 
+/* ---- 输入区高度拖拽（顶边把手）：最低一行字高，双击复位 ---- */
+const taMinH = 24   // 一行字的高度（px）
+function startResize(e: MouseEvent) {
+  const startY = e.clientY
+  const el = ta.value
+  const startH = el ? el.getBoundingClientRect().height : 140
+  const move = (ev: MouseEvent) => {
+    const h = Math.max(taMinH, Math.min(startH + (startY - ev.clientY), window.innerHeight * 0.7))
+    if (el) el.style.height = h + 'px'
+  }
+  const up = () => {
+    window.removeEventListener('mousemove', move)
+    window.removeEventListener('mouseup', up)
+  }
+  window.addEventListener('mousemove', move)
+  window.addEventListener('mouseup', up)
+}
+function resetHeight() {
+  const el = ta.value
+  if (el) { el.style.height = ''; autoresize() }
+}
+
 function onKey(e: KeyboardEvent) {
   if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
     // @ 成员下拉打开时，Enter 选中当前高亮项而不是发送
@@ -358,6 +380,9 @@ function fmtSize(n: number) {
 <template>
   <div class="composer" :class="{ 'drag-over': dragOver }"
        @drop="onDrop" @dragover.prevent="dragOver = true" @dragleave="dragOver = false">
+    <!-- 顶边拖拽调输入区高度（最低=一行字高，双击复位） -->
+    <div class="resize-bar" title="拖拽调整输入区高度（双击复位）"
+         @mousedown.prevent="startResize" @dblclick="resetHeight"></div>
     <QuoteBar />
     <div class="bar-row">
       <template v-for="it in barItems" :key="it.id">
@@ -466,6 +491,13 @@ function fmtSize(n: number) {
 .send-row .hint { font-size: 11px; color: var(--fg2); }
 .send-row button { height: 28px; padding: 0 18px; font-size: 13px; border-radius: 6px; }
 .rec-dot { font-size: 12px; color: var(--err); flex: 0 0 auto; }
+
+/* 顶边拖拽把手：一条细热区，hover 变强调色提示可拖 */
+.resize-bar {
+  position: absolute; left: 0; right: 0; top: -4px; height: 8px; cursor: ns-resize;
+  background: transparent; z-index: 2;
+}
+.resize-bar:hover, .resize-bar:active { background: color-mix(in srgb, var(--acc) 35%, transparent); }
 
 /* @成员下拉（浮在输入区上方） */
 .at-pop {
