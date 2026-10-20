@@ -57,14 +57,16 @@ export const stickersPlugin = {
 
     /* ---------------- 表情收藏 ---------------- */
 
-    async function load() {
+    async function load(silent = false) {
       state.loading = true
       try { state.list = await api.expressionList() }
-      catch (e: any) { ui.toast('表情收藏加载失败：' + e.message, 'error') }
+      catch (e: any) { if (!silent) ui.toast('表情收藏加载失败：' + e.message, 'error') }
       finally { state.loading = false }
     }
 
-    function open() { state.panelOpen = true; if (!state.list.length) load() }
+    // 每次打开都后台静默刷新：云端可能在别的端加了收藏
+    // （旧实现 `if (!state.list.length) load()` 只空时拉一次，之后永远 stale）
+    function open() { state.panelOpen = true; load(state.list.length > 0) }
     function close() { state.panelOpen = false }
 
     /** 点一张表情 → 作为表情消息发出 */
