@@ -5,7 +5,7 @@
  *   · dxcompiler.dll 25MB —— DirectX 着色器编译器，Chromium 缺失时自动回退，删
  *   · d3dcompiler_47.dll 5MB —— Win10+ 系统自带，删（Electron 官方说明）
  *   · vk_swiftshader.dll 6MB —— 软件 Vulkan 回退；无 GPU 环境才需要，删（目标机均有 GPU）
- * node_modules 不进 asar 由 package.json build.files 的 "!**/node_modules/**" 负责
+ * node_modules 不进 asar 由 package.json build.files 的排除规则负责
  * （main.cjs 只 require electron 与 node 内置模块，前端依赖已编译进 dist）。
  */
 const fs = require('fs')
