@@ -95,6 +95,7 @@
       "artifactName": "yunhulaoda-${version}-macos-${arch}.dmg",
       "category": "public.app-category.social-networking",
       "icon": "build/icon.icns"
-    }
+    },
+    "compression": "maximum"
   }
 }
