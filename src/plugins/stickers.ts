@@ -72,7 +72,11 @@ export const stickersPlugin = {
     /** 点一张表情 → 作为表情消息发出 */
     async function send(e: any) {
       try {
-        await chat.sendMedia([h.sticker(e.url || e.urlOriginal, e.id, 0)])
+        // ⚠️ sticker_url 必须发**完整 URL**：手机端（Murexide 等）直接拿该字段当图片地址，
+        //    发相对 key（expression/xxx.png）手机拼不出地址 → 「识别不到」。官方网页端发的也是完整 URL。
+        const u = e.urlOriginal || e.url || ''
+        const full = /^https?:\/\//i.test(u) ? u : `https://chat-img.jwznb.com/${String(u).replace(/^\/+/, '')}`
+        await chat.sendMedia([h.sticker(full, e.id, 0)])
         close()
       } catch (err: any) { ui.toast('发送失败：' + err.message, 'error') }
     }

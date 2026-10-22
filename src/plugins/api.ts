@@ -44,7 +44,7 @@ function decodeContent(bytes) {
   return {
     text: s(1), buttons: s(2), image_url: s(3), file_name: s(4), file_url: s(5),
     mentioned_id: pb.list(c, 6).map(b => new TextDecoder().decode(b)),
-    form: s(7), quote_msg_text: s(8), image: s(9),
+    form: s(7), quote_msg_text: s(8), image: s(9), sticker_url: s(9),
     post_id: s(10), post_title: s(11), post_content: s(12), post_content_type: n(13),
     expression_id: s(15), quote_image_url: s(16), file_size: n(18),
     video_url: s(19), audio_url: s(21), audio_time: n(22),
