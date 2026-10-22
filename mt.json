@@ -1,0 +1,3111 @@
+{
+  "sha": "c9b291f24c50fe40b5ca6219189331cddb70c4f1",
+  "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/c9b291f24c50fe40b5ca6219189331cddb70c4f1",
+  "tree": [
+    {
+      "path": ".github",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "e0505ba9426917ac7d635a6099a82541627d3b8e",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/e0505ba9426917ac7d635a6099a82541627d3b8e"
+    },
+    {
+      "path": ".github/workflows",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "22bc0a1d3502f03e4afa69b99018eb974d4ca462",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/22bc0a1d3502f03e4afa69b99018eb974d4ca462"
+    },
+    {
+      "path": ".github/workflows/build-app.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f16b296d1eb84bbdc2ddd92e3b6ed0aff3be8d93",
+      "size": 12466,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/f16b296d1eb84bbdc2ddd92e3b6ed0aff3be8d93"
+    },
+    {
+      "path": ".github/workflows/release.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "35cec0fc4e391bcc5448c66a8416fbec8dca64a5",
+      "size": 5986,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/35cec0fc4e391bcc5448c66a8416fbec8dca64a5"
+    },
+    {
+      "path": ".gitignore",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5620ad7146f62eea1451d13c0f4275ce4707e748",
+      "size": 166,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/5620ad7146f62eea1451d13c0f4275ce4707e748"
+    },
+    {
+      "path": ".gitmodules",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6265ba896f3e809ef5cd91eaf4b5e8b0317e19ef",
+      "size": 100,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/6265ba896f3e809ef5cd91eaf4b5e8b0317e19ef"
+    },
+    {
+      "path": "LICENSE",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f288702d2fa16d3cdf0035b15a9fcbc552cd88e7",
+      "size": 35149,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/f288702d2fa16d3cdf0035b15a9fcbc552cd88e7"
+    },
+    {
+      "path": "README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "46912712cf702a1a970a46c5934492d9f3a44c82",
+      "size": 1436,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/46912712cf702a1a970a46c5934492d9f3a44c82"
+    },
+    {
+      "path": "THIRD_PARTY_NOTICES.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cc23d50501c6e9e7c0bdea13bb2b41f65011f5db",
+      "size": 1119,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/cc23d50501c6e9e7c0bdea13bb2b41f65011f5db"
+    },
+    {
+      "path": "app",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "ec06a057c07a41e52dc3cdc0355cd9259daeecca",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/ec06a057c07a41e52dc3cdc0355cd9259daeecca"
+    },
+    {
+      "path": "app/.gitignore",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "42afabfd2abebf31384ca7797186a27a4b7dbee8",
+      "size": 6,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/42afabfd2abebf31384ca7797186a27a4b7dbee8"
+    },
+    {
+      "path": "app/build.gradle.kts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b449d5711a1f7974daf60d0342a8df8a5ce92004",
+      "size": 4325,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/b449d5711a1f7974daf60d0342a8df8a5ce92004"
+    },
+    {
+      "path": "app/proguard-rules.pro",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5e31b017a87642c5a5539fb0770668338a728770",
+      "size": 804,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/5e31b017a87642c5a5539fb0770668338a728770"
+    },
+    {
+      "path": "app/schemas",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "55d067b388c6283419368cd8e3eadaa35b1f345b",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/55d067b388c6283419368cd8e3eadaa35b1f345b"
+    },
+    {
+      "path": "app/schemas/com.juhao.murexide.data.local.LocalCacheDatabase",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "4a9800787ecd4649bb1784e2698937b02c65f085",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/4a9800787ecd4649bb1784e2698937b02c65f085"
+    },
+    {
+      "path": "app/schemas/com.juhao.murexide.data.local.LocalCacheDatabase/1.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3160272a2595711fbc641bf97a80661085382568",
+      "size": 14716,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/3160272a2595711fbc641bf97a80661085382568"
+    },
+    {
+      "path": "app/schemas/com.juhao.murexide.data.local.LocalCacheDatabase/2.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "db3959754729825195bfedda57e0e03f9f6a09f2",
+      "size": 15954,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/db3959754729825195bfedda57e0e03f9f6a09f2"
+    },
+    {
+      "path": "app/src",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "f3633c40b6d5e607dbec34930f09d2197161cb45",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/f3633c40b6d5e607dbec34930f09d2197161cb45"
+    },
+    {
+      "path": "app/src/androidTest",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "94c7365f91e822dcc0a2bd6b4a8c48e1ee763083",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/94c7365f91e822dcc0a2bd6b4a8c48e1ee763083"
+    },
+    {
+      "path": "app/src/androidTest/java",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "93804261ab3361483d1136efbd8bc61acc1003fb",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/93804261ab3361483d1136efbd8bc61acc1003fb"
+    },
+    {
+      "path": "app/src/androidTest/java/com",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "a8414c5357a1f8e4ff86fe7ea310b8da98714958",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/a8414c5357a1f8e4ff86fe7ea310b8da98714958"
+    },
+    {
+      "path": "app/src/androidTest/java/com/juhao",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "916147a338966c2cea3e5a373cf8af9328a0f78c",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/916147a338966c2cea3e5a373cf8af9328a0f78c"
+    },
+    {
+      "path": "app/src/androidTest/java/com/juhao/murexide",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "0d17e4a46c86c1d506b6a196d82a42d25a420597",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/0d17e4a46c86c1d506b6a196d82a42d25a420597"
+    },
+    {
+      "path": "app/src/androidTest/java/com/juhao/murexide/data",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "d3ee8722c8de0c764dce67b1981f727470ca573e",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/d3ee8722c8de0c764dce67b1981f727470ca573e"
+    },
+    {
+      "path": "app/src/androidTest/java/com/juhao/murexide/data/local",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "de558a20c8ce280fbce956e33669c43ee1c1de04",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/de558a20c8ce280fbce956e33669c43ee1c1de04"
+    },
+    {
+      "path": "app/src/androidTest/java/com/juhao/murexide/data/local/LocalCacheBoundaryTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "747940b69011361a17153b90eb1ed71714ec019b",
+      "size": 8145,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/747940b69011361a17153b90eb1ed71714ec019b"
+    },
+    {
+      "path": "app/src/androidTest/java/com/juhao/murexide/data/local/LocalCacheDaoBoundaryTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c19013dcb57e2dc5e9a40152e3822b83fe675cd7",
+      "size": 11213,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/c19013dcb57e2dc5e9a40152e3822b83fe675cd7"
+    },
+    {
+      "path": "app/src/androidTest/java/com/juhao/murexide/data/local/LocalCacheDatabaseTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "abac0a1d4545f010fd8aaec911aed7de2bd155e9",
+      "size": 4415,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/abac0a1d4545f010fd8aaec911aed7de2bd155e9"
+    },
+    {
+      "path": "app/src/androidTest/java/com/juhao/murexide/datastore",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "ac2c8044da4e7c8c13b063bc95035e36f582c67c",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/ac2c8044da4e7c8c13b063bc95035e36f582c67c"
+    },
+    {
+      "path": "app/src/androidTest/java/com/juhao/murexide/datastore/AccountStorageIntegrationTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "44b2cef5e843f556eb696206de15349e827f5843",
+      "size": 7786,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/44b2cef5e843f556eb696206de15349e827f5843"
+    },
+    {
+      "path": "app/src/androidTest/java/com/juhao/murexide/datastore/SettingsStorageIntegrationTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "da7ddd3c945429e4b8d24b6e7cc369a7c8f78397",
+      "size": 2416,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/da7ddd3c945429e4b8d24b6e7cc369a7c8f78397"
+    },
+    {
+      "path": "app/src/androidTest/java/com/juhao/murexide/ui",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "d65bc3e3c5e6e32d1da38069b890ad7d84e37d78",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/d65bc3e3c5e6e32d1da38069b890ad7d84e37d78"
+    },
+    {
+      "path": "app/src/androidTest/java/com/juhao/murexide/ui/chat",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "0e1c262ac81edd76b74024f227596c2237744d5a",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/0e1c262ac81edd76b74024f227596c2237744d5a"
+    },
+    {
+      "path": "app/src/androidTest/java/com/juhao/murexide/ui/chat/components",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "659a25fff36ad4d83ef2140946d9cef2305cc315",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/659a25fff36ad4d83ef2140946d9cef2305cc315"
+    },
+    {
+      "path": "app/src/androidTest/java/com/juhao/murexide/ui/chat/components/DefaultEmojiTextFieldTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8f493e187a4f0e75f5fa8f2132cd8c50bb7ada23",
+      "size": 8370,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/8f493e187a4f0e75f5fa8f2132cd8c50bb7ada23"
+    },
+    {
+      "path": "app/src/androidTest/java/com/juhao/murexide/ui/components",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "37c3cb78d3e5f2e66a80853fc8058a5d24042b1c",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/37c3cb78d3e5f2e66a80853fc8058a5d24042b1c"
+    },
+    {
+      "path": "app/src/androidTest/java/com/juhao/murexide/ui/components/litehtml",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "facb6cbe88c74503f5dd8389e1eaa7fdb0c79431",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/facb6cbe88c74503f5dd8389e1eaa7fdb0c79431"
+    },
+    {
+      "path": "app/src/androidTest/java/com/juhao/murexide/ui/components/litehtml/LiteHtmlViewDetailsTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0660bbede3c7174b217a5d031b32680940ffba43",
+      "size": 8051,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/0660bbede3c7174b217a5d031b32680940ffba43"
+    },
+    {
+      "path": "app/src/main",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "a79fecce4410e59af81fdeb1667e979db807c547",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/a79fecce4410e59af81fdeb1667e979db807c547"
+    },
+    {
+      "path": "app/src/main/AndroidManifest.xml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1aae322f3fd5c5f2b353d3a7ebe8b1c811bda7cd",
+      "size": 10168,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/1aae322f3fd5c5f2b353d3a7ebe8b1c811bda7cd"
+    },
+    {
+      "path": "app/src/main/assets",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "7cfc47454cacafb570d3f5a80dbb0711d7f09b23",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/7cfc47454cacafb570d3f5a80dbb0711d7f09b23"
+    },
+    {
+      "path": "app/src/main/assets/china_regions.NOTICE",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "70e2939b316994a4f9b028932cc93b865f4feeb2",
+      "size": 324,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/70e2939b316994a4f9b028932cc93b865f4feeb2"
+    },
+    {
+      "path": "app/src/main/assets/china_regions.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ca7bd541d622fd65887b7c3127c3aa659ed1dd63",
+      "size": 218251,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/ca7bd541d622fd65887b7c3127c3aa659ed1dd63"
+    },
+    {
+      "path": "app/src/main/cpp",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "3da61dff6c242fc8a6f050fe82927ea154d4e47d",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/3da61dff6c242fc8a6f050fe82927ea154d4e47d"
+    },
+    {
+      "path": "app/src/main/cpp/CMakeLists.txt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f702989075defd23e271f9e4256381bd9fe775c2",
+      "size": 798,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/f702989075defd23e271f9e4256381bd9fe775c2"
+    },
+    {
+      "path": "app/src/main/cpp/litehtml_jni.cpp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4ba5eb2cb53017c2508d0d9170f11c9940c35714",
+      "size": 36049,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/4ba5eb2cb53017c2508d0d9170f11c9940c35714"
+    },
+    {
+      "path": "app/src/main/ic_launcher-playstore.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8ab1064f8406310efcc2af48eede1e1a7a24bbfa",
+      "size": 4572,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/8ab1064f8406310efcc2af48eede1e1a7a24bbfa"
+    },
+    {
+      "path": "app/src/main/java",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "c9f3caf16d4acc2ed4457e15f21935e0c628639e",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/c9f3caf16d4acc2ed4457e15f21935e0c628639e"
+    },
+    {
+      "path": "app/src/main/java/com",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "f48d683dd84dc0c7d693b2de40748edf61ed3040",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/f48d683dd84dc0c7d693b2de40748edf61ed3040"
+    },
+    {
+      "path": "app/src/main/java/com/juhao",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "439f8b290343f34f192597ed818a48de2cf7d50a",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/439f8b290343f34f192597ed818a48de2cf7d50a"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "349ec4e12061d99b1a8cfbbc65916fec6352332a",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/349ec4e12061d99b1a8cfbbc65916fec6352332a"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/Application.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1004bff56afa1d840340bbff0ba9b8da4beeb09b",
+      "size": 10391,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/1004bff56afa1d840340bbff0ba9b8da4beeb09b"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/MainActivity.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5af61c14650954330da9517535bd07b5046a76cb",
+      "size": 37751,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/5af61c14650954330da9517535bd07b5046a76cb"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ShareReceiverActivity.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c6554f2a56b4401ddcf37ffceab87f4c1cfee9c2",
+      "size": 18020,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/c6554f2a56b4401ddcf37ffceab87f4c1cfee9c2"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/data",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "2aaebe32f5ad0a8e9a081a5a01e35481bc2f4dd1",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/2aaebe32f5ad0a8e9a081a5a01e35481bc2f4dd1"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/data/ActiveConversationRegistry.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9f0a48c54eaf0db34db065234ffb04feec8a5efb",
+      "size": 1687,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/9f0a48c54eaf0db34db065234ffb04feec8a5efb"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/data/BoardModels.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9ee96e3237b3001c34b2d7cebd4e4ca49561c789",
+      "size": 687,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/9ee96e3237b3001c34b2d7cebd4e4ca49561c789"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/data/ChatBackgroundModels.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cd89fa3f072ea3436d3344afece3e7b9afc7f3f2",
+      "size": 681,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/cd89fa3f072ea3436d3344afece3e7b9afc7f3f2"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/data/CommunityModels.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9eabc047875c2cd15a0ac81938113a302e6cbf17",
+      "size": 3780,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/9eabc047875c2cd15a0ac81938113a302e6cbf17"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/data/ConversationDetailModels.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "94584bc11e0ae490ad25b48e0ce7cec3eb7d23f9",
+      "size": 3198,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/94584bc11e0ae490ad25b48e0ce7cec3eb7d23f9"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/data/ConversationImage.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cc9bb233d3f12a526357ee745eea8b20daeb2bc7",
+      "size": 161,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/cc9bb233d3f12a526357ee745eea8b20daeb2bc7"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/data/ConversationModels.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7f9d34a0385879745bee0a9bb61cda8ddf2ff7ac",
+      "size": 7910,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/7f9d34a0385879745bee0a9bb61cda8ddf2ff7ac"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/data/DiscoverModels.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3cef2ce00c8c057bae59c983c716e9689e6b509d",
+      "size": 2371,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/3cef2ce00c8c057bae59c983c716e9689e6b509d"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/data/ExpressionModels.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b088731ac0b023186dd3b69c63493b7649e762d6",
+      "size": 2675,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/b088731ac0b023186dd3b69c63493b7649e762d6"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/data/ForwardModels.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7606f4e9cf710586d371e6cdc72df9aa5be8eb88",
+      "size": 2628,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/7606f4e9cf710586d371e6cdc72df9aa5be8eb88"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/data/FriendModels.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "88621250ec78ef943ce18ee265b7e73685c3230c",
+      "size": 3024,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/88621250ec78ef943ce18ee265b7e73685c3230c"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/data/GroupMemberModels.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fc314a339741a43243bfa0520661669b1cc3f34a",
+      "size": 888,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/fc314a339741a43243bfa0520661669b1cc3f34a"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/data/HomeSearchModels.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0773b3b3af19bedc06ffa265d6cc06e31b9d1e06",
+      "size": 830,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/0773b3b3af19bedc06ffa265d6cc06e31b9d1e06"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/data/InstructionModels.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4eb40a89d30821d705c24cd0b90f09eb724088f4",
+      "size": 1718,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/4eb40a89d30821d705c24cd0b90f09eb724088f4"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/data/LoginModels.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4548ec9cbce519511b73b9e507cbf927d1e6bc31",
+      "size": 1415,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/4548ec9cbce519511b73b9e507cbf927d1e6bc31"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/data/MessageModels.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a13d54d90641e9de98fff2a66e314a278c65725b",
+      "size": 6991,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/a13d54d90641e9de98fff2a66e314a278c65725b"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/data/OutgoingMessage.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e1eaf13a1b4c1e9aa0acb7bf576191329d38e4af",
+      "size": 6020,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/e1eaf13a1b4c1e9aa0acb7bf576191329d38e4af"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/data/ShareModels.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a8a5a4a7761392247568cd798427cb06279dbe26",
+      "size": 824,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/a8a5a4a7761392247568cd798427cb06279dbe26"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/data/StickyModels.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b3d09c5aae9947caea1f7c4e939c7983f6121c8f",
+      "size": 265,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/b3d09c5aae9947caea1f7c4e939c7983f6121c8f"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/data/UserModels.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6a4702a8dbde9c39dff2329b31fdebbe10658a23",
+      "size": 933,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/6a4702a8dbde9c39dff2329b31fdebbe10658a23"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/data/commonModels.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e61959a8413f44446cf2b6047213f38e6c9368e5",
+      "size": 157,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/e61959a8413f44446cf2b6047213f38e6c9368e5"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/data/local",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "187917270ec5b1fc07e2dda63c09113255f6d9e1",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/187917270ec5b1fc07e2dda63c09113255f6d9e1"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/data/local/CacheSyncCoordinator.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "579fcc1cbf98f18ed014cdbcb10122947643dce7",
+      "size": 3919,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/579fcc1cbf98f18ed014cdbcb10122947643dce7"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/data/local/LocalCache.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ec06710e80125944244145aba7cc385629cb6c57",
+      "size": 17178,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/ec06710e80125944244145aba7cc385629cb6c57"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/data/local/LocalCacheDatabase.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c2f69a74c008052c7f33d91782c6c8caa7ed1c99",
+      "size": 15439,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/c2f69a74c008052c7f33d91782c6c8caa7ed1c99"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/datastore",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "4746128880ac4b9da01a4c7f1e269eac6e74a808",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/4746128880ac4b9da01a4c7f1e269eac6e74a808"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/datastore/AccountStorage.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e275a99cfc9279ddd3861fa1dadbb2c06d93afd7",
+      "size": 16817,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/e275a99cfc9279ddd3861fa1dadbb2c06d93afd7"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/datastore/SettingsStorage.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c37fb6e6a84ea1c1ed0bfefbfff2cfc8020d5714",
+      "size": 9964,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/c37fb6e6a84ea1c1ed0bfefbfff2cfc8020d5714"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/network",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "3381e005ff0981a764e9190d2c866a4f1bc9e101",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/3381e005ff0981a764e9190d2c866a4f1bc9e101"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/network/NetworkClient.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cc081ecf4b76aa3698b684efffd894732406ce70",
+      "size": 395,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/cc081ecf4b76aa3698b684efffd894732406ce70"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/network/WebSocketManager.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c9aecd9a995d4ba4afee204c62302a4b786c636e",
+      "size": 21042,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/c9aecd9a995d4ba4afee204c62302a4b786c636e"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/receiver",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "318b1981e39ff96c6388dcbefd8900e4e0b7db76",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/318b1981e39ff96c6388dcbefd8900e4e0b7db76"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/receiver/SecretCodeReceiver.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "737d1b3748c649949ce6d58c6868b769859f68a6",
+      "size": 746,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/737d1b3748c649949ce6d58c6868b769859f68a6"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/repository",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "d0f09c8120953cb0f82c73523fe80e95144bb577",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/d0f09c8120953cb0f82c73523fe80e95144bb577"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/repository/AuthRepository.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "968562b4e0a70d1fa7065dd27397ec94f0a09a34",
+      "size": 17721,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/968562b4e0a70d1fa7065dd27397ec94f0a09a34"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/repository/BoardRepository.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "88cf0e0ab8c4fbc198485ae9879f275d81f2ce46",
+      "size": 2337,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/88cf0e0ab8c4fbc198485ae9879f275d81f2ce46"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/repository/BotRepository.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e82b4797ab0fb342d8635182509d8cb6a2f37d23",
+      "size": 8154,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/e82b4797ab0fb342d8635182509d8cb6a2f37d23"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/repository/ChatBackgroundRepository.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b620ebf2bbb547b49d043f543a1edcf6ab385a8b",
+      "size": 2669,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/b620ebf2bbb547b49d043f543a1edcf6ab385a8b"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/repository/CommunityRepository.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b7f97ed03862994f5e7f9e93c6776be5de96fc63",
+      "size": 22813,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/b7f97ed03862994f5e7f9e93c6776be5de96fc63"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/repository/ConversationDetailRepository.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "567f70a3f3d381163c66f0a75ee94864cf0ae98b",
+      "size": 12057,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/567f70a3f3d381163c66f0a75ee94864cf0ae98b"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/repository/ConversationRepository.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "56ab3a7f12a14a97a9df0d63a18d0859ee2a5f57",
+      "size": 12257,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/56ab3a7f12a14a97a9df0d63a18d0859ee2a5f57"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/repository/CreationRepository.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0e304c451fb2e7923fdcce793ecc2ebaf1a9856e",
+      "size": 3411,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/0e304c451fb2e7923fdcce793ecc2ebaf1a9856e"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/repository/DiscoverRepository.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c2b7cc55e47cbb8d069d79adbae69cec4901d653",
+      "size": 5654,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/c2b7cc55e47cbb8d069d79adbae69cec4901d653"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/repository/ExpressionRepository.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f802bc3df94edd22e3947a3ead77a3ce60a7bdaa",
+      "size": 22131,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/f802bc3df94edd22e3947a3ead77a3ce60a7bdaa"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/repository/FriendRepository.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "71d061bb80a92ee141f6680e54ac647c788dfdc0",
+      "size": 15355,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/71d061bb80a92ee141f6680e54ac647c788dfdc0"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/repository/GroupMemberRepository.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1ac3122bfb1350d4670b6cb2e13960c47ebd127f",
+      "size": 7491,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/1ac3122bfb1350d4670b6cb2e13960c47ebd127f"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/repository/HomeSearchRepository.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "984358d301f181390952da73852923b37563d0c0",
+      "size": 7005,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/984358d301f181390952da73852923b37563d0c0"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/repository/InstructionRepository.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "efadb7a823d53b058d4499fdfb7a5c2cdae74e23",
+      "size": 4826,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/efadb7a823d53b058d4499fdfb7a5c2cdae74e23"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/repository/MessageRepository.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b9f1412b17cc22fa81837e2825ae48b54e93851f",
+      "size": 25008,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/b9f1412b17cc22fa81837e2825ae48b54e93851f"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/repository/ShareRepository.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "90074e02a49f40fa091053f764f3ab56397b9fa6",
+      "size": 2304,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/90074e02a49f40fa091053f764f3ab56397b9fa6"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "1f1c8a11a92f1d82e23d8993da865a92d5d52d81",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/1f1c8a11a92f1d82e23d8993da865a92d5d52d81"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/about",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "1e52d37ccb67c04c2e53baf8b4eaea40ec8ecd58",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/1e52d37ccb67c04c2e53baf8b4eaea40ec8ecd58"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/about/AboutActivity.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9224775d6d011adcab535ba85ff0194f93af6da6",
+      "size": 612,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/9224775d6d011adcab535ba85ff0194f93af6da6"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/about/AboutScreen.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "487efc77330dc0872036a0ecae4adb3cac2f92d8",
+      "size": 5553,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/487efc77330dc0872036a0ecae4adb3cac2f92d8"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/chat",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "160f16f883965de1c974310436a717baaed89cd0",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/160f16f883965de1c974310436a717baaed89cd0"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/chat/ChatActivity.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c36a2f946167fb69e59e2f2168b4c44ac425a719",
+      "size": 7870,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/c36a2f946167fb69e59e2f2168b4c44ac425a719"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/chat/ChatScreen.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "12dcaf37d36b3182251ec6b8e0ee0ee3906bbc55",
+      "size": 103399,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/12dcaf37d36b3182251ec6b8e0ee0ee3906bbc55"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/chat/ChatScreenComponents.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f78091fb21e6418ba9bb15f0f954a95bd5d69d12",
+      "size": 16826,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/f78091fb21e6418ba9bb15f0f954a95bd5d69d12"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/chat/ChatViewModel.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "63a8f3dd64b9737f75b015c2a710f2f441736f0c",
+      "size": 83038,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/63a8f3dd64b9737f75b015c2a710f2f441736f0c"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/chat/ForwardBottomSheet.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3a41420046fbcf8770f2736d749c1cb42c384a86",
+      "size": 12551,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/3a41420046fbcf8770f2736d749c1cb42c384a86"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/chat/ForwardViewModel.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "940210d3117eabe5f3a9beeba56373635c2d9432",
+      "size": 7133,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/940210d3117eabe5f3a9beeba56373635c2d9432"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/chat/components",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "3c838131b47eaafc786fb53ff2b4b93f1732fa89",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/3c838131b47eaafc786fb53ff2b4b93f1732fa89"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/chat/components/AudioPlaybackManager.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8cc7cc2a47bdd51d9861da2b03420f02b5421ab6",
+      "size": 3776,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/8cc7cc2a47bdd51d9861da2b03420f02b5421ab6"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/chat/components/BoardPanel.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6ba4d195b223a164024f02c0420a3d9591a164dd",
+      "size": 6186,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/6ba4d195b223a164024f02c0420a3d9591a164dd"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/chat/components/EditHistoryDialog.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a00d08342a499c9bd4253d09581323281862f4d4",
+      "size": 5432,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/a00d08342a499c9bd4253d09581323281862f4d4"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/chat/components/EmojiData.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c84f797ef02be7adadae202816c0c93583b755bc",
+      "size": 1737,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/c84f797ef02be7adadae202816c0c93583b755bc"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/chat/components/EmojiPanel.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "822cabb62131303beab748e869359ad060b3a7d8",
+      "size": 19998,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/822cabb62131303beab748e869359ad060b3a7d8"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/chat/components/GroupMemberSheet.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "79d1ff8b52d2cefa281e257400d28557bb51be0c",
+      "size": 5053,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/79d1ff8b52d2cefa281e257400d28557bb51be0c"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/chat/components/InstructionFormDialog.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "00dbe12f0c62db1c4e049046b4b2b4041fb1b520",
+      "size": 8652,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/00dbe12f0c62db1c4e049046b4b2b4041fb1b520"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/chat/components/InstructionPanel.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f8ce0605a78b3d3dfd7e2d5c4ef1c2394344f654",
+      "size": 5890,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/f8ce0605a78b3d3dfd7e2d5c4ef1c2394344f654"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/chat/components/MessageBubble.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8618f9edc9bd87b8f356608b9b36410ff847a6da",
+      "size": 61183,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/8618f9edc9bd87b8f356608b9b36410ff847a6da"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/chat/components/MessageInput.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e247a18fcbaccf4fc0776fe96bc79edf94f57b61",
+      "size": 20162,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/e247a18fcbaccf4fc0776fe96bc79edf94f57b61"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/chat/components/MessageText.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b8e2b97725c9dd2083629bccb7a80f5fb8b1e2f5",
+      "size": 3544,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/b8e2b97725c9dd2083629bccb7a80f5fb8b1e2f5"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/chat/components/MessageTextField.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "38760e131e22ed283d4c1e4b2dd76342736e97ab",
+      "size": 12431,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/38760e131e22ed283d4c1e4b2dd76342736e97ab"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/chat/components/PostCard.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fba2fcebcec9736b7224d502a0b16e2284476d0a",
+      "size": 2204,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/fba2fcebcec9736b7224d502a0b16e2284476d0a"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/chat/components/ScreenshotBottomSheet.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "663beb2ee176f6701363e509a67505b7d81380a7",
+      "size": 19719,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/663beb2ee176f6701363e509a67505b7d81380a7"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/chat/components/UploadProgressBar.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "177df51e09b1fc16c4ec3dec9d7fe5beeeb1ba51",
+      "size": 2429,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/177df51e09b1fc16c4ec3dec9d7fe5beeeb1ba51"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/chatsearch",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "4a420624f76fc7fedf2b8402739e63ebbf0cc253",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/4a420624f76fc7fedf2b8402739e63ebbf0cc253"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/chatsearch/ChatSearchActivity.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "71ee67f82ffd4e1d1c0a70ee47172c9d9d90ed3a",
+      "size": 4641,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/71ee67f82ffd4e1d1c0a70ee47172c9d9d90ed3a"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/chatsearch/ChatSearchScreen.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "792c1f2b2c9fb32dba31433cc8474cca1fab5ae7",
+      "size": 7340,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/792c1f2b2c9fb32dba31433cc8474cca1fab5ae7"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/chatsearch/ChatSearchViewModel.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "38639b50d4c735b45159056f5a073e817b9c87da",
+      "size": 4839,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/38639b50d4c735b45159056f5a073e817b9c87da"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/community",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "a7f7b38f1ea81cd205821142a142972bff758377",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/a7f7b38f1ea81cd205821142a142972bff758377"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/community/CommunityScreen.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3f785a0295680c22d4ffb5d6f546e9ec7be85c6b",
+      "size": 17990,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/3f785a0295680c22d4ffb5d6f546e9ec7be85c6b"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/community/CommunityViewModel.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6c0c711f5dadf524301cfd112a577e8c4a3a5e9c",
+      "size": 8569,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/6c0c711f5dadf524301cfd112a577e8c4a3a5e9c"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/community/ba",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "b3bf6f18d9e4efaff1ef838b0d06090ce430639e",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/b3bf6f18d9e4efaff1ef838b0d06090ce430639e"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/community/ba/BaDetailActivity.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "89c58dbf6d1bf926df885ca1accc1229ee10e615",
+      "size": 2283,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/89c58dbf6d1bf926df885ca1accc1229ee10e615"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/community/ba/BaDetailScreen.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d35c33c195cf54977a616977af8ac12e104f3021",
+      "size": 6751,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/d35c33c195cf54977a616977af8ac12e104f3021"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/community/ba/BaDetailViewModel.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0d2fc909c5027bd959d55b717c9e7cd7e0ca9c98",
+      "size": 5833,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/0d2fc909c5027bd959d55b717c9e7cd7e0ca9c98"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/community/ba/CreatePostActivity.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8e4da9a394cca096cb9d4bb93729576ef18ceccf",
+      "size": 3747,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/8e4da9a394cca096cb9d4bb93729576ef18ceccf"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/community/ba/CreatePostScreen.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "07a89f95916a49bde07c6e366a1a7aef6d59dd1d",
+      "size": 4534,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/07a89f95916a49bde07c6e366a1a7aef6d59dd1d"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/community/ba/CreatePostViewModel.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4f2bf199e742fb941f3b219fbb305c3b8fb5492b",
+      "size": 3838,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/4f2bf199e742fb941f3b219fbb305c3b8fb5492b"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/community/detail",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "1a9c91ad82e7e61875b51e44830abfd2d6f1a9f3",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/1a9c91ad82e7e61875b51e44830abfd2d6f1a9f3"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/community/detail/PostDetailActivity.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "11f2fd24946717b626abb758472dcb9b4498c610",
+      "size": 2628,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/11f2fd24946717b626abb758472dcb9b4498c610"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/community/detail/PostDetailScreen.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e9aedb769799b8a6dfc1a8e1a744ecc9a36ac44f",
+      "size": 26255,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/e9aedb769799b8a6dfc1a8e1a744ecc9a36ac44f"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/community/detail/PostDetailViewModel.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b2d13f4611209aff8c520e936c316f8c831565ad",
+      "size": 6860,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/b2d13f4611209aff8c520e936c316f8c831565ad"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/community/myposts",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "49a615cd44a6f2f0c33a180f6430707f878fa8ee",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/49a615cd44a6f2f0c33a180f6430707f878fa8ee"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/community/myposts/MyPostsActivity.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d25244e1fa05086a00d16994ba23f0445bac99e7",
+      "size": 1634,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/d25244e1fa05086a00d16994ba23f0445bac99e7"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/community/myposts/MyPostsScreen.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "692a8c6986f47e859b1a1bcb2530f54db0420691",
+      "size": 4788,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/692a8c6986f47e859b1a1bcb2530f54db0420691"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/community/myposts/MyPostsViewModel.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "51b448a4ba794c70bf2999ca0cac5201b8dd2aa0",
+      "size": 2997,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/51b448a4ba794c70bf2999ca0cac5201b8dd2aa0"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/components",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "ae587c2f36d1209d4cdd270f6cd8bcc7523e1b52",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/ae587c2f36d1209d4cdd270f6cd8bcc7523e1b52"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/components/AccountQuickSwitchMenu.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "34cf74e0c37d2d0fbc89778fadfc5f6c6159fe1a",
+      "size": 13188,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/34cf74e0c37d2d0fbc89778fadfc5f6c6159fe1a"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/components/Avatar.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e597dc7e4531ac967e94ddf62a690fdd4f7eea73",
+      "size": 2044,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/e597dc7e4531ac967e94ddf62a690fdd4f7eea73"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/components/CapsuleTabBar.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "917102e29126b90893c3013fe93ac7ecb4fd0565",
+      "size": 4266,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/917102e29126b90893c3013fe93ac7ecb4fd0565"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/components/CompatibleMarkdownComponents.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "338e2578415f4379b3b8d9ab1009339fefcdc6fc",
+      "size": 4956,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/338e2578415f4379b3b8d9ab1009339fefcdc6fc"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/components/EmptyPlaceholder.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f1700e24b0bd67a7c0bc264afae97c554a982389",
+      "size": 4732,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/f1700e24b0bd67a7c0bc264afae97c554a982389"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/components/FloatingTopBar.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ed74c97e1dbdde7774f7782234223b807490d799",
+      "size": 5668,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/ed74c97e1dbdde7774f7782234223b807490d799"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/components/ImageViewer.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4a7d74450a510aaff5ce80490c441e8cea1b2050",
+      "size": 14678,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/4a7d74450a510aaff5ce80490c441e8cea1b2050"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/components/LiteHtmlContent.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "94620d10c1d4cc0d8669ff05d50dbbbc5c801ac2",
+      "size": 6255,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/94620d10c1d4cc0d8669ff05d50dbbbc5c801ac2"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/components/MarkdownText.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f4d5cf23d460fd9d92d0d10021d88094c106be74",
+      "size": 60583,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/f4d5cf23d460fd9d92d0d10021d88094c106be74"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/components/MurexideOpenImageActivity.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bf74b0e08f4c27515803f24fe4af99e87f61f4c7",
+      "size": 11008,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/bf74b0e08f4c27515803f24fe4af99e87f61f4c7"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/components/MurexideVideoFragmentCreate.java",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "46008ca1aa4e4bbc50b54a2983dc11410f554c9c",
+      "size": 478,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/46008ca1aa4e4bbc50b54a2983dc11410f554c9c"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/components/MurexideVideoPlayerFragment.java",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2b1203939469870930ed336cc757ccf15818a7e9",
+      "size": 8459,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/2b1203939469870930ed336cc757ccf15818a7e9"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/components/OpenImageCoilHelpers.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d1343e53ed509e5ba6f41046ef84be7448de336e",
+      "size": 6210,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/d1343e53ed509e5ba6f41046ef84be7448de336e"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/components/SettingsCard.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "46f3f77ae54bf753b35671bc38847d306ee4d8be",
+      "size": 11996,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/46f3f77ae54bf753b35671bc38847d306ee4d8be"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/components/StyledComponents.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "314635a2825b0860f8198d998738c7beb1361fac",
+      "size": 1402,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/314635a2825b0860f8198d998738c7beb1361fac"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/components/UnreadCountBadge.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b58b809291fcb808787bcd5e4a33459d68e74bd7",
+      "size": 681,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/b58b809291fcb808787bcd5e4a33459d68e74bd7"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/components/litehtml",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "da923c539a7b3217d8b3b26db8a65f672df438b5",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/da923c539a7b3217d8b3b26db8a65f672df438b5"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/components/litehtml/HtmlRenderPolicy.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "11b1bdde8b910b404b560b5ad8018cba01a58d8e",
+      "size": 553,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/11b1bdde8b910b404b560b5ad8018cba01a58d8e"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/components/litehtml/LiteHtmlView.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "83c57ba2d137d8485b74d2e486a2920ce67217c1",
+      "size": 29565,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/83c57ba2d137d8485b74d2e486a2920ce67217c1"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/contact",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "aa5dc23d68723f4c82d4853ef2d1b9199fa6962b",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/aa5dc23d68723f4c82d4853ef2d1b9199fa6962b"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/contact/ContactIndex.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1cd63ce04a108c71c29d1a6cb87992344fff9ba5",
+      "size": 3281,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/1cd63ce04a108c71c29d1a6cb87992344fff9ba5"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/contact/ContactListScreen.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f16dc8b78be6d8c2b94780640ead744883ce02bf",
+      "size": 34151,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/f16dc8b78be6d8c2b94780640ead744883ce02bf"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/contact/ContactViewModel.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d7fef45de9732c0045971579cb59a68bada7937a",
+      "size": 7781,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/d7fef45de9732c0045971579cb59a68bada7937a"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/conversation",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "3a6a1334bb128eb7f418e482dd132a6cec1a1422",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/3a6a1334bb128eb7f418e482dd132a6cec1a1422"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/conversation/ConversationListScreen.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "91f915487b78d48ac47184599a481b4ae25cc8e4",
+      "size": 39712,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/91f915487b78d48ac47184599a481b4ae25cc8e4"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/conversation/ConversationViewModel.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c5b7b76d588d9aca82b5b651c9a26bc6aff61252",
+      "size": 19480,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/c5b7b76d588d9aca82b5b651c9a26bc6aff61252"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/conversation/CreationActivity.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "62f033bae1cec9aa09ea7e79a136614a5c93ce17",
+      "size": 13972,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/62f033bae1cec9aa09ea7e79a136614a5c93ce17"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/conversation/CreationViewModel.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "77dd67a39fe672fbcf27dea650fef08d05710275",
+      "size": 3800,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/77dd67a39fe672fbcf27dea650fef08d05710275"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/conversation/SearchViewModel.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "31ce5e864c097e51fe3e7d9231318d883ba41451",
+      "size": 2699,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/31ce5e864c097e51fe3e7d9231318d883ba41451"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/conversationdetail",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "71931a4f09e86923ba551b123c2c8f9b88e89a28",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/71931a4f09e86923ba551b123c2c8f9b88e89a28"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/conversationdetail/BotSettingsActivity.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4d10814acb035aaf5f1bd0173dd17348d13effba",
+      "size": 3893,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/4d10814acb035aaf5f1bd0173dd17348d13effba"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/conversationdetail/BotSettingsScreen.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1de6664602444dbaad75ce49008617919cfad122",
+      "size": 12103,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/1de6664602444dbaad75ce49008617919cfad122"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/conversationdetail/BotSettingsViewModel.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "99380d1c58e18d9e97ab0de7738d0b2561e64a80",
+      "size": 10049,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/99380d1c58e18d9e97ab0de7738d0b2561e64a80"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/conversationdetail/ConversationDetailActivity.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "be9ec4f1d20840cfaabf12dc8dd9ada165e122b0",
+      "size": 10400,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/be9ec4f1d20840cfaabf12dc8dd9ada165e122b0"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/conversationdetail/ConversationDetailScreen.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "73761ce71381b564e630066bcbf5fbe10a3f84a7",
+      "size": 72099,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/73761ce71381b564e630066bcbf5fbe10a3f84a7"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/conversationdetail/ConversationDetailViewModel.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8be68fe55e8d40170e99fb845e08ee41ca5ea0e9",
+      "size": 18521,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/8be68fe55e8d40170e99fb845e08ee41ca5ea0e9"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/conversationdetail/GroupSettingsActivity.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bc54be679dcc5c4e4553a16ad6c675f029e4debb",
+      "size": 3398,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/bc54be679dcc5c4e4553a16ad6c675f029e4debb"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/conversationdetail/GroupSettingsScreen.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3f0159741f843ce0e7f921301c6f8cd389985351",
+      "size": 7148,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/3f0159741f843ce0e7f921301c6f8cd389985351"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/conversationdetail/GroupSettingsViewModel.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "87775ad92ab5b14e0c570373e7f5bb5503719a04",
+      "size": 5961,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/87775ad92ab5b14e0c570373e7f5bb5503719a04"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/conversationdetail/InviteBotToGroupActivity.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "766a8c51fe20d44fb797ffd92d96bc494b439178",
+      "size": 15428,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/766a8c51fe20d44fb797ffd92d96bc494b439178"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/discover",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "91b7434f7bf92b2c31f6cf788a8edfca955ce0d9",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/91b7434f7bf92b2c31f6cf788a8edfca955ce0d9"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/discover/DiscoverScreen.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8f968cb4bbbd9dda9d907fc3b6b2ddcac9b9d653",
+      "size": 21692,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/8f968cb4bbbd9dda9d907fc3b6b2ddcac9b9d653"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/discover/DiscoverViewModel.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "80fab3f8fef499732110bcf2699c58f2f09371f3",
+      "size": 5400,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/80fab3f8fef499732110bcf2699c58f2f09371f3"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/icons",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "6c5038303a6d26855ab63937fd17114766d43054",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/6c5038303a6d26855ab63937fd17114766d43054"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/icons/AnimatedNavigationSymbol.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "22e18a203a294081e6ab85db6e2eea135d771135",
+      "size": 3931,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/22e18a203a294081e6ab85db6e2eea135d771135"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/icons/AppIcons.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e0369c03bdb0987abf070ad48c4b7a1ecbffe06a",
+      "size": 8969,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/e0369c03bdb0987abf070ad48c4b7a1ecbffe06a"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/login",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "8b213df4aa909de6c8ba2f1a84444ddfd9380975",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/8b213df4aa909de6c8ba2f1a84444ddfd9380975"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/login/LoginActivity.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "24c458ff65642e81334f6ca25bd83aaf5b73c1d6",
+      "size": 5930,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/24c458ff65642e81334f6ca25bd83aaf5b73c1d6"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/login/LoginScreen.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3ea24a7862e36042a0b31a4c65a5f8f605793c07",
+      "size": 13551,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/3ea24a7862e36042a0b31a4c65a5f8f605793c07"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/login/LoginViewModel.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4e3318347a6d65e4ac0e19cda4853576f78ab9ba",
+      "size": 4967,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/4e3318347a6d65e4ac0e19cda4853576f78ab9ba"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/login/LoginViewModelFactory.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "769ab5a16c4ab5ced645f33215ae27c8e8e22e9d",
+      "size": 531,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/769ab5a16c4ab5ced645f33215ae27c8e8e22e9d"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/mine",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "d050895dad305576ad421471696f3409f03abf15",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/d050895dad305576ad421471696f3409f03abf15"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/mine/ChinaRegionData.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "42f5c0c800d1e5275d08efefa3e9eef6f6ae6f20",
+      "size": 5731,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/42f5c0c800d1e5275d08efefa3e9eef6f6ae6f20"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/mine/EditProfileActivity.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "449fe36e20ded9d49779c324634fb28f3f077160",
+      "size": 1339,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/449fe36e20ded9d49779c324634fb28f3f077160"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/mine/EditProfileScreen.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8f2dfede7b84b40b3ac4d9452c3cb7d0f43a0edd",
+      "size": 21748,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/8f2dfede7b84b40b3ac4d9452c3cb7d0f43a0edd"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/mine/MineScreen.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5b07601186f8d8c1e129979d262640384c9a3036",
+      "size": 18249,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/5b07601186f8d8c1e129979d262640384c9a3036"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/mine/MineViewModel.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "70bd7d5fab587a17f7c347efc0644776b84ed77e",
+      "size": 10078,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/70bd7d5fab587a17f7c347efc0644776b84ed77e"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/mine/RegionWheelPicker.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "20442782f827b63a0159987994cbf4ca6f3c3801",
+      "size": 12861,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/20442782f827b63a0159987994cbf4ca6f3c3801"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/settings",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "89ad4e4bf3c35fa5b687ef78be844d4d18065778",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/89ad4e4bf3c35fa5b687ef78be844d4d18065778"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/settings/AccountSettingsPage.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5f21c88a2f86142fb6d33ead49474f88cd67c1ca",
+      "size": 5349,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/5f21c88a2f86142fb6d33ead49474f88cd67c1ca"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/settings/ActionSettingsPage.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9e33e9ea4f9df3029c6f2198769e5ed7601f7c69",
+      "size": 7711,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/9e33e9ea4f9df3029c6f2198769e5ed7601f7c69"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/settings/AppearancePage.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7b4c561bcbc589d612574c00fb2af7fe6ba378b6",
+      "size": 27416,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/7b4c561bcbc589d612574c00fb2af7fe6ba378b6"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/settings/BubbleSettingsPage.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d80d4e0f2f7495b5d39a6f75649d15ae9cdf78b6",
+      "size": 11827,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/d80d4e0f2f7495b5d39a6f75649d15ae9cdf78b6"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/settings/ScreenshotSettingsPage.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ab6caf54deae3557d973a95196fbf76ff409ca8e",
+      "size": 2818,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/ab6caf54deae3557d973a95196fbf76ff409ca8e"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/settings/SettingsActivity.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cbf7fee287b267e625b8e2b70954103161dc3bd6",
+      "size": 3488,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/cbf7fee287b267e625b8e2b70954103161dc3bd6"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/settings/SettingsScreen.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9fc247a672928d508962e694b5a683b6a54a8a1f",
+      "size": 4833,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/9fc247a672928d508962e694b5a683b6a54a8a1f"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/settings/UpdatePage.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b8b7097ef738570f785c867fd126cdb59c137e9f",
+      "size": 6495,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/b8b7097ef738570f785c867fd126cdb59c137e9f"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/settings/switchAccount",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "0d1b0ebe73f3fc8052503dc7276bd8f558a6d025",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/0d1b0ebe73f3fc8052503dc7276bd8f558a6d025"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/settings/switchAccount/SwitchAccountActivity.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1c3c98069b8fe1f0bf087aec37c6ca95dbf20f6d",
+      "size": 726,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/1c3c98069b8fe1f0bf087aec37c6ca95dbf20f6d"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/settings/switchAccount/SwitchAccountScreen.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "66eac28ca5baa85049334c11463619af0372f925",
+      "size": 10264,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/66eac28ca5baa85049334c11463619af0372f925"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/sticker",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "a3c7f83013c0887473f2e2ab00594aed8d0c1761",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/a3c7f83013c0887473f2e2ab00594aed8d0c1761"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/sticker/StickerDetailActivity.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "be07c56084b17929d8e77f3c69ef6a3d9d1a9754",
+      "size": 2382,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/be07c56084b17929d8e77f3c69ef6a3d9d1a9754"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/sticker/StickerDetailScreen.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "55ff2001ccf943402e204e64f9c9164bcd272739",
+      "size": 30129,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/55ff2001ccf943402e204e64f9c9164bcd272739"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/sticker/StickerDetailViewModel.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a7249b41e1843c23b03b682b6a85a00568014fd9",
+      "size": 9028,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/a7249b41e1843c23b03b682b6a85a00568014fd9"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/sticker/StickerPackManagerActivity.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6a918323be29276cf4fa775ef01b0656da3a4836",
+      "size": 1694,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/6a918323be29276cf4fa775ef01b0656da3a4836"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/sticker/StickerPackManagerScreen.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e53a5057251b896ce32c4bd5b25aebb55c7e1ab4",
+      "size": 13941,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/e53a5057251b896ce32c4bd5b25aebb55c7e1ab4"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/sticker/StickerPackManagerViewModel.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0b7cff0eb251b5579975b87615d83a54f4a33652",
+      "size": 3823,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/0b7cff0eb251b5579975b87615d83a54f4a33652"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/theme",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "90a1e0d6d53390bb367337a88e7f72f65072dc09",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/90a1e0d6d53390bb367337a88e7f72f65072dc09"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/theme/Color.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2e8a75d524f89d7b5005cdc7e936faa4c652159a",
+      "size": 19223,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/2e8a75d524f89d7b5005cdc7e936faa4c652159a"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/theme/LiquidGlass.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d744bb48a7f4232464b822dbee72c7ff3a2c4e07",
+      "size": 6107,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/d744bb48a7f4232464b822dbee72c7ff3a2c4e07"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/theme/Theme.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3bd3cfcb808ca1377f90f1d70efb508f9e871f08",
+      "size": 13265,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/3bd3cfcb808ca1377f90f1d70efb508f9e871f08"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/theme/UiState.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2a0e7614a52dd80b219a28b0343fbe600f30768d",
+      "size": 627,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/2a0e7614a52dd80b219a28b0343fbe600f30768d"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/theme/liquidglass",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "003efeb2a7987f1ea05b6118d2a824846e3c39c0",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/003efeb2a7987f1ea05b6118d2a824846e3c39c0"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/theme/liquidglass/DampedDragAnimation.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "68a4bc76af1890d6d8b4679c483b3d83e800c995",
+      "size": 6261,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/68a4bc76af1890d6d8b4679c483b3d83e800c995"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/theme/liquidglass/DragGestureInspector.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9e521d6b61c328761edbdd4fd3db724a9bb2546c",
+      "size": 2690,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/9e521d6b61c328761edbdd4fd3db724a9bb2546c"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/theme/liquidglass/InteractiveHighlight.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3d50832a4e67bb8e15e2f682402ed505e9801861",
+      "size": 4516,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/3d50832a4e67bb8e15e2f682402ed505e9801861"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/theme/liquidglass/LiquidGlassMagnifier.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e64da37944fb77a066fcfc09e67d45f2c99afb4e",
+      "size": 10162,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/e64da37944fb77a066fcfc09e67d45f2c99afb4e"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/theme/liquidglass/LiquidGlassSelectionContainer.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "62bf877cb8c7c156326c44d90ac666c37dd5fc22",
+      "size": 8719,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/62bf877cb8c7c156326c44d90ac666c37dd5fc22"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/theme/liquidglass/LiquidGlassSlider.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f655f52052b781c8b9b42c70500755c555fa146f",
+      "size": 13395,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/f655f52052b781c8b9b42c70500755c555fa146f"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/theme/liquidglass/LiquidGlassToggle.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4e165982d72e365bb0b1d4a8e29f95c596ee00ff",
+      "size": 10381,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/4e165982d72e365bb0b1d4a8e29f95c596ee00ff"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/ui/theme/liquidglass/LiquidNavigation.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d6b4597110db09fe21b1bee3404fae06758a5109",
+      "size": 15131,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/d6b4597110db09fe21b1bee3404fae06758a5109"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/utils",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "94d207911aac9a173095d06927c700cf7bb22285",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/94d207911aac9a173095d06927c700cf7bb22285"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/utils/DeviceIdProvider.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2fe2f86a7fd4066fe2161eedd7fac04f7ec4936f",
+      "size": 687,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/2fe2f86a7fd4066fe2161eedd7fac04f7ec4936f"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/utils/DownloadStorage.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "213ac4f673203bc1ab0677738e7b4d34c9543560",
+      "size": 9345,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/213ac4f673203bc1ab0677738e7b4d34c9543560"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/utils/FileDownloader.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "07d877b3d4530acc43bf68b06bb718498b940acc",
+      "size": 13682,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/07d877b3d4530acc43bf68b06bb718498b940acc"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/utils/GetVersionInfo.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ffb7333210739bab5d36ed360bc5b13e1b1d0146",
+      "size": 1793,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/ffb7333210739bab5d36ed360bc5b13e1b1d0146"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/utils/ImageUrlUtils.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4b5d8eb577286a5becaddc95aa18e5de08a0cb30",
+      "size": 1725,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/4b5d8eb577286a5becaddc95aa18e5de08a0cb30"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/utils/MentionUtils.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f1e9b9454dac2362a81fc97b1236550d955ee6c6",
+      "size": 12868,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/f1e9b9454dac2362a81fc97b1236550d955ee6c6"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/utils/NotificationHelper.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0fadccd5aca50f51c4bb60e2ccbf2dd5bc713c55",
+      "size": 6040,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/0fadccd5aca50f51c4bb60e2ccbf2dd5bc713c55"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/utils/QiniuUploadUtil.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "62cd2e587c1bc152cc9b9657a5bf7fd68563e593",
+      "size": 21419,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/62cd2e587c1bc152cc9b9657a5bf7fd68563e593"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/utils/TextUtils.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ba3cfe91402acc1865785a7687fa13a6d1848bfc",
+      "size": 300,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/ba3cfe91402acc1865785a7687fa13a6d1848bfc"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/utils/TimeUtils.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "106e34eda086a8cd2964e2a008f5bd6908b145bf",
+      "size": 1759,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/106e34eda086a8cd2964e2a008f5bd6908b145bf"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/utils/UpdateChecker.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4ea36be7e86b4c8ce524700bb6a4110750aab339",
+      "size": 5295,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/4ea36be7e86b4c8ce524700bb6a4110750aab339"
+    },
+    {
+      "path": "app/src/main/java/com/juhao/murexide/utils/UrlSchemeHandler.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "65bf11fdcba8687c8e211c4ffcc72fd0b427bbb0",
+      "size": 3524,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/65bf11fdcba8687c8e211c4ffcc72fd0b427bbb0"
+    },
+    {
+      "path": "app/src/main/proto",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "7fffe9e13c7714c6a2103b16f45836c6dbada590",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/7fffe9e13c7714c6a2103b16f45836c6dbada590"
+    },
+    {
+      "path": "app/src/main/proto/bot.proto",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "291e8d48413784138899de3edd59c5bffa65e988",
+      "size": 2237,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/291e8d48413784138899de3edd59c5bffa65e988"
+    },
+    {
+      "path": "app/src/main/proto/chat_ws_go.proto",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f34678e26478d7b94a3190603929d1496d6b0dc3",
+      "size": 4986,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/f34678e26478d7b94a3190603929d1496d6b0dc3"
+    },
+    {
+      "path": "app/src/main/proto/conversation.proto",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "756b8cd0a048387587a49f8e7e95bf6dcab28b82",
+      "size": 1307,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/756b8cd0a048387587a49f8e7e95bf6dcab28b82"
+    },
+    {
+      "path": "app/src/main/proto/friend.proto",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5af8572da436ab9fc2c965684b04dac159e8c1e2",
+      "size": 2010,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/5af8572da436ab9fc2c965684b04dac159e8c1e2"
+    },
+    {
+      "path": "app/src/main/proto/group.proto",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c86143f92f0e4f508de5b43737ca85b3b53455ca",
+      "size": 5723,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/c86143f92f0e4f508de5b43737ca85b3b53455ca"
+    },
+    {
+      "path": "app/src/main/proto/instruction.proto",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8b9ac68c6fa0e94e56c6576731b77a695df7396b",
+      "size": 631,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/8b9ac68c6fa0e94e56c6576731b77a695df7396b"
+    },
+    {
+      "path": "app/src/main/proto/msg.proto",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5e291789fa0345ae1519cc06044e8b9762275f0d",
+      "size": 9515,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/5e291789fa0345ae1519cc06044e8b9762275f0d"
+    },
+    {
+      "path": "app/src/main/proto/user.proto",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "654e6dfde700d8d1ac36251172f7a9567a7d00ee",
+      "size": 3862,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/654e6dfde700d8d1ac36251172f7a9567a7d00ee"
+    },
+    {
+      "path": "app/src/main/res",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "b20666d5f666ff4db8716d85de2c91178f81d807",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/b20666d5f666ff4db8716d85de2c91178f81d807"
+    },
+    {
+      "path": "app/src/main/res/drawable",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "1d3883d879ce79bc6423940a6b631a62c2282c37",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/1d3883d879ce79bc6423940a6b631a62c2282c37"
+    },
+    {
+      "path": "app/src/main/res/drawable/app_icon.webp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cca35b6274533f3b2316f7664e0f2694acb8abf3",
+      "size": 1714,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/cca35b6274533f3b2316f7664e0f2694acb8abf3"
+    },
+    {
+      "path": "app/src/main/res/drawable/ic_launcher_foreground.xml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "968cb558cc6823e0ae539234283ea9f37476e5fb",
+      "size": 514,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/968cb558cc6823e0ae539234283ea9f37476e5fb"
+    },
+    {
+      "path": "app/src/main/res/drawable/ic_media_viewer_download.xml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ebd3c2972a28b7efc3e6c36f00e74adec5bd37c0",
+      "size": 751,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/ebd3c2972a28b7efc3e6c36f00e74adec5bd37c0"
+    },
+    {
+      "path": "app/src/main/res/drawable/launch_background.xml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d2c1953933fc2b9ca91b61b26e443664b276eed9",
+      "size": 308,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/d2c1953933fc2b9ca91b61b26e443664b276eed9"
+    },
+    {
+      "path": "app/src/main/res/drawable/markdown.xml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b4d30e0fc3910a225b668fc00dba306ad97dc167",
+      "size": 574,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/b4d30e0fc3910a225b668fc00dba306ad97dc167"
+    },
+    {
+      "path": "app/src/main/res/mipmap-anydpi-v26",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "0e7f12a8fdfe122649b35a426969c0b41ee1b259",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/0e7f12a8fdfe122649b35a426969c0b41ee1b259"
+    },
+    {
+      "path": "app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "88a002d1fae8417826d5cc84210efaecb49a4d08",
+      "size": 342,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/88a002d1fae8417826d5cc84210efaecb49a4d08"
+    },
+    {
+      "path": "app/src/main/res/mipmap-hdpi",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "5697f511dbe3593ed8666bfb1a3593b488124547",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/5697f511dbe3593ed8666bfb1a3593b488124547"
+    },
+    {
+      "path": "app/src/main/res/mipmap-hdpi/ic_launcher.webp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1b32595921a3d1891f68ae0169063bef1d921c29",
+      "size": 690,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/1b32595921a3d1891f68ae0169063bef1d921c29"
+    },
+    {
+      "path": "app/src/main/res/mipmap-mdpi",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "153115cbc9e23ece2d851688b291c33bc2087831",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/153115cbc9e23ece2d851688b291c33bc2087831"
+    },
+    {
+      "path": "app/src/main/res/mipmap-mdpi/ic_launcher.webp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4080ec556100bd69029a385314568c338e19bcbb",
+      "size": 530,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/4080ec556100bd69029a385314568c338e19bcbb"
+    },
+    {
+      "path": "app/src/main/res/mipmap-xhdpi",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "fcb2ec75980837525821c4aee22a2788f5f897e7",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/fcb2ec75980837525821c4aee22a2788f5f897e7"
+    },
+    {
+      "path": "app/src/main/res/mipmap-xhdpi/ic_launcher.webp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c4661903bcf9ebf00e138729ce15875eeffd0c5e",
+      "size": 874,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/c4661903bcf9ebf00e138729ce15875eeffd0c5e"
+    },
+    {
+      "path": "app/src/main/res/mipmap-xxhdpi",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "7ecabed017d2bf8399b9764e30e7b9106bc3050b",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/7ecabed017d2bf8399b9764e30e7b9106bc3050b"
+    },
+    {
+      "path": "app/src/main/res/mipmap-xxhdpi/ic_launcher.webp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "905014ff83fb240cfabe07e3a77bb2b6d3e0e1fe",
+      "size": 1228,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/905014ff83fb240cfabe07e3a77bb2b6d3e0e1fe"
+    },
+    {
+      "path": "app/src/main/res/mipmap-xxxhdpi",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "c78e00f8b09e394d3a4be75a0510b9199c517957",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/c78e00f8b09e394d3a4be75a0510b9199c517957"
+    },
+    {
+      "path": "app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cca35b6274533f3b2316f7664e0f2694acb8abf3",
+      "size": 1714,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/cca35b6274533f3b2316f7664e0f2694acb8abf3"
+    },
+    {
+      "path": "app/src/main/res/values-night-v31",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "40f38bcfc8283c486144112ea600ba656748bc38",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/40f38bcfc8283c486144112ea600ba656748bc38"
+    },
+    {
+      "path": "app/src/main/res/values-night-v31/colors.xml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c59dd62c37f4d491ec2cba8dfe5733be3905fef7",
+      "size": 220,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/c59dd62c37f4d491ec2cba8dfe5733be3905fef7"
+    },
+    {
+      "path": "app/src/main/res/values-night",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "6e2ed31f210120dfff90e93b3ad3bc4578c77bca",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/6e2ed31f210120dfff90e93b3ad3bc4578c77bca"
+    },
+    {
+      "path": "app/src/main/res/values-night/themes.xml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d9424c05602b0653d5f7e1c941428a561e7e6168",
+      "size": 609,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/d9424c05602b0653d5f7e1c941428a561e7e6168"
+    },
+    {
+      "path": "app/src/main/res/values-v27",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "0deaabb2458ee24afb3d108164536a9d439489cf",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/0deaabb2458ee24afb3d108164536a9d439489cf"
+    },
+    {
+      "path": "app/src/main/res/values-v27/themes.xml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "13912d92c790a8ee5827964a3d77bdead3a098e1",
+      "size": 519,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/13912d92c790a8ee5827964a3d77bdead3a098e1"
+    },
+    {
+      "path": "app/src/main/res/values-v31",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "3b279feb39c74eab06f91e59c1cdf516a92fb48d",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/3b279feb39c74eab06f91e59c1cdf516a92fb48d"
+    },
+    {
+      "path": "app/src/main/res/values-v31/colors.xml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "68dde1cea513fa9fb0473506f5c818a5da84b86f",
+      "size": 229,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/68dde1cea513fa9fb0473506f5c818a5da84b86f"
+    },
+    {
+      "path": "app/src/main/res/values",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "c2d87c4d2ef90a59d65a18e6709a34f000f7c267",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/c2d87c4d2ef90a59d65a18e6709a34f000f7c267"
+    },
+    {
+      "path": "app/src/main/res/values/attrs.xml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7c0da2478716d6491d38e2869e5577406ed63866",
+      "size": 161,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/7c0da2478716d6491d38e2869e5577406ed63866"
+    },
+    {
+      "path": "app/src/main/res/values/colors.xml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "de67edd7aff7e0e6f079f4bc4cfa9606f6f78465",
+      "size": 177,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/de67edd7aff7e0e6f079f4bc4cfa9606f6f78465"
+    },
+    {
+      "path": "app/src/main/res/values/strings.xml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1d2c0ab90e1c82aff52bbbbf6d5c11ab18de06e3",
+      "size": 70,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/1d2c0ab90e1c82aff52bbbbf6d5c11ab18de06e3"
+    },
+    {
+      "path": "app/src/main/res/values/themes.xml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2486766104113285e3e81929d99acbed5b3b0d20",
+      "size": 1420,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/2486766104113285e3e81929d99acbed5b3b0d20"
+    },
+    {
+      "path": "app/src/main/res/xml",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "6aaaf6de273d4ea163e67f8f88ba4d98ebf88d5f",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/6aaaf6de273d4ea163e67f8f88ba4d98ebf88d5f"
+    },
+    {
+      "path": "app/src/main/res/xml/backup_rules.xml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ddaf09794b87f5f5cf2eb9a231e6026b19779f07",
+      "size": 676,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/ddaf09794b87f5f5cf2eb9a231e6026b19779f07"
+    },
+    {
+      "path": "app/src/main/res/xml/data_extraction_rules.xml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a5d3f5f9b5d66c77d4c59dab8cea99911b6863e1",
+      "size": 731,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/a5d3f5f9b5d66c77d4c59dab8cea99911b6863e1"
+    },
+    {
+      "path": "app/src/main/res/xml/file_paths.xml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "74026c75bb0fdc8027cf457427cd791bacf6c699",
+      "size": 202,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/74026c75bb0fdc8027cf457427cd791bacf6c699"
+    },
+    {
+      "path": "app/src/test",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "85e01d1134a0b6aeaf94cd01b70d741f0b9a395b",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/85e01d1134a0b6aeaf94cd01b70d741f0b9a395b"
+    },
+    {
+      "path": "app/src/test/java",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "d98a06a26bc684d7d94378d6a48d2a42e7ad3a2b",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/d98a06a26bc684d7d94378d6a48d2a42e7ad3a2b"
+    },
+    {
+      "path": "app/src/test/java/com",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "a2f19199eb70fdb84c64914327cf31be5d651d66",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/a2f19199eb70fdb84c64914327cf31be5d651d66"
+    },
+    {
+      "path": "app/src/test/java/com/juhao",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "8ae5e2fadd0220dfe16dcf41e364c6d95d6fdd29",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/8ae5e2fadd0220dfe16dcf41e364c6d95d6fdd29"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "4886d56b19bbcf308521cb7928115a89ff82732a",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/4886d56b19bbcf308521cb7928115a89ff82732a"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/data",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "b97e23bdf859c80271edc09a1f3aad1a709deb7e",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/b97e23bdf859c80271edc09a1f3aad1a709deb7e"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/data/ActiveConversationRegistryTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bc0573ed679f8102f73131811e0e70048653d9d7",
+      "size": 2131,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/bc0573ed679f8102f73131811e0e70048653d9d7"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/data/ContactRequestModelsWorker1Test.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "77c46c2cb24329f02a5b42962e1f6af57be77fbb",
+      "size": 4163,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/77c46c2cb24329f02a5b42962e1f6af57be77fbb"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/data/ConversationDetailModelsTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "432a4345180c1d2910c35539cc37ec102a8ec56c",
+      "size": 938,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/432a4345180c1d2910c35539cc37ec102a8ec56c"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/data/ConversationModelsTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "af1560ae24c3b47e217ae10d79c58b2ea2f7b3bd",
+      "size": 12855,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/af1560ae24c3b47e217ae10d79c58b2ea2f7b3bd"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/data/ForwardModelsTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cad238d9baf0e6aa6e7500d47f81be67a1fbee57",
+      "size": 1875,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/cad238d9baf0e6aa6e7500d47f81be67a1fbee57"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/data/LoginModelsTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "acfaa46f0e00a22efc2e8ff22b4ce02d8d78bb5d",
+      "size": 464,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/acfaa46f0e00a22efc2e8ff22b4ce02d8d78bb5d"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/data/MessageMergeWorker1Test.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5556c14fb2285064f992a04d8652eceab86f2bef",
+      "size": 5205,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/5556c14fb2285064f992a04d8652eceab86f2bef"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/data/MessageModelsWorker1Test.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d74507759f393c4f4f9f92a01ac030811f4f6132",
+      "size": 5075,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/d74507759f393c4f4f9f92a01ac030811f4f6132"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/data/OutgoingMessageTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "31981221a8c2b93856b1a4f1bd7b5f5ecff51997",
+      "size": 11405,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/31981221a8c2b93856b1a4f1bd7b5f5ecff51997"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/data/StickerModelsTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "98b11ec359a8aa40c84517c17ea58a0613d69e64",
+      "size": 1324,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/98b11ec359a8aa40c84517c17ea58a0613d69e64"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/data/UncoveredDataModelsWorker1Test.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ef582bbcca2cf6662e1391448a36c5af7c96c3e5",
+      "size": 6514,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/ef582bbcca2cf6662e1391448a36c5af7c96c3e5"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/data/UnreadCountTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7c917411096e61c9467b98df5fbbb51adef04ebb",
+      "size": 969,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/7c917411096e61c9467b98df5fbbb51adef04ebb"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/datastore",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "a93f13242ea168a1827be22713694b123b490ebe",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/a93f13242ea168a1827be22713694b123b490ebe"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/datastore/AccountStorageTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "747771c9e1a2ce747b5e59b8473b475b6784f46f",
+      "size": 1721,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/747771c9e1a2ce747b5e59b8473b475b6784f46f"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/network",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "87cffb409565b33e988d1c5b4f43eac8bf5bafaa",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/87cffb409565b33e988d1c5b4f43eac8bf5bafaa"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/network/WebSocketManagerAndroidLogShimWorker3Test.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "72327c3bd0e076a32a334634e9f0ab70533aa10b",
+      "size": 1600,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/72327c3bd0e076a32a334634e9f0ab70533aa10b"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/network/WebSocketManagerProtobufDispatchWorker3Test.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "11b94ee035cde4ed0e110fe278ce2507108bdec5",
+      "size": 15665,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/11b94ee035cde4ed0e110fe278ce2507108bdec5"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/network/WebSocketManagerTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5cd5b82802d698fc94306bff568829b27f586e7a",
+      "size": 3663,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/5cd5b82802d698fc94306bff568829b27f586e7a"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/repository",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "68c2e7db5bd80e4fc19e6106b146030e98a7a49a",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/68c2e7db5bd80e4fc19e6106b146030e98a7a49a"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/repository/ConversationDetailRepositoryTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "86aaf49a15c3e32536e36ca97e88a0c87b7cd22b",
+      "size": 1910,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/86aaf49a15c3e32536e36ca97e88a0c87b7cd22b"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/repository/ConversationRepositoryContractTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7334da803c61e999fa08807ff96ddaf7f7202bf0",
+      "size": 7482,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/7334da803c61e999fa08807ff96ddaf7f7202bf0"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/repository/ConversationRepositoryTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a009e92fcdfb94567708461ef87177bf08e80853",
+      "size": 582,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/a009e92fcdfb94567708461ef87177bf08e80853"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/repository/CreationRepositoryRequestTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cc7b474f19fa1785e2aafff559056f1de596ae7f",
+      "size": 1140,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/cc7b474f19fa1785e2aafff559056f1de596ae7f"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/repository/FriendRepositoryRequestTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "00a531e4f43aca5c6c37916667456d846ba8fadb",
+      "size": 9275,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/00a531e4f43aca5c6c37916667456d846ba8fadb"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/repository/FriendRepositoryTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f1acd9692a2d00c894e016b2a85196df7f9bd92d",
+      "size": 2986,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/f1acd9692a2d00c894e016b2a85196df7f9bd92d"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/repository/HomeSearchRepositoryTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4e07edd9e28e8336b39f2a9382fae5c92b9663c6",
+      "size": 1328,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/4e07edd9e28e8336b39f2a9382fae5c92b9663c6"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/repository/MessageRepositoryContractTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d510c9589e9176965c9c4e8bbcb3702d1c17167b",
+      "size": 9819,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/d510c9589e9176965c9c4e8bbcb3702d1c17167b"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/repository/MessageRepositoryForwardTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e32f8db8f90d8be91647d07939d9a34e35d58753",
+      "size": 2461,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/e32f8db8f90d8be91647d07939d9a34e35d58753"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/repository/MessageRepositoryMediaTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "251d81c34ed88173355a93fba5b922a1d15e71f3",
+      "size": 2396,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/251d81c34ed88173355a93fba5b922a1d15e71f3"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/repository/MessageRepositoryRecallTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "94362c95eeaa9eaf7992775975e1be2b597a4ff6",
+      "size": 516,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/94362c95eeaa9eaf7992775975e1be2b597a4ff6"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/repository/MessageRepositoryUpdateTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "78019c96b7164d6699af2e224c34def40936fad5",
+      "size": 958,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/78019c96b7164d6699af2e224c34def40936fad5"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/ui",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "0e48b349af04f70b003d35b9faaecfbf32b9ca36",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/0e48b349af04f70b003d35b9faaecfbf32b9ca36"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/ui/chat",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "09f876f7fb2ef55723a51b39e0aae0ad0eb4b604",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/09f876f7fb2ef55723a51b39e0aae0ad0eb4b604"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/ui/chat/ChatComposerStateTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a916786c558e24ced6ea94d1eb5a267b7bd0572c",
+      "size": 1194,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/a916786c558e24ced6ea94d1eb5a267b7bd0572c"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/ui/chat/ChatDisplayItemsBoundaryTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8f070d52b74b526985f2df96bea72c6e2920e96e",
+      "size": 3243,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/8f070d52b74b526985f2df96bea72c6e2920e96e"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/ui/chat/ChatHistoryTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "72c37ae46031a287491c866fda02058a56b25c30",
+      "size": 4300,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/72c37ae46031a287491c866fda02058a56b25c30"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/ui/chat/ChatImageGalleryTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a91f1df29f98a5aa23b074af94a42b46a9d9ace3",
+      "size": 5299,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/a91f1df29f98a5aa23b074af94a42b46a9d9ace3"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/ui/chat/ChatPaginationBoundaryTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "aa098a2c9207620c0ec34827473ded0d6e89dc5e",
+      "size": 2932,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/aa098a2c9207620c0ec34827473ded0d6e89dc5e"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/ui/chat/ChatScrollTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0b25bac0cb070529b8ba0121f6253a89ad7b4843",
+      "size": 1077,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/0b25bac0cb070529b8ba0121f6253a89ad7b4843"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/ui/chat/ForwardUiStateTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1f3f3344d43174466db1ad9dfc8e912caa6f0450",
+      "size": 2618,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/1f3f3344d43174466db1ad9dfc8e912caa6f0450"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/ui/chat/RecallMessageStateTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "80dc4a8d60d1772645367cae87a75fdbb0b89b10",
+      "size": 3032,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/80dc4a8d60d1772645367cae87a75fdbb0b89b10"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/ui/chat/components",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "b3c08fb54c4e2e0d65a2d406a6cabc94a3a1ba54",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/b3c08fb54c4e2e0d65a2d406a6cabc94a3a1ba54"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/ui/chat/components/MessageBubbleImageRenderingTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "32a574088ee43c8598ada74c63bf1c0a93a72f41",
+      "size": 685,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/32a574088ee43c8598ada74c63bf1c0a93a72f41"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/ui/chat/components/MessageBubbleSenderNameTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4f55316204851ce7ee059b20c4b9a19570fa117b",
+      "size": 573,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/4f55316204851ce7ee059b20c4b9a19570fa117b"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/ui/chat/components/MessageBubbleVideoDurationTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ccbb95af25276201e6c8b0f0d82482f32380f020",
+      "size": 636,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/ccbb95af25276201e6c8b0f0d82482f32380f020"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/ui/chat/components/MessageFormatSelectionTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "29821b5566da15c35f16023558b8c83f8401494c",
+      "size": 848,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/29821b5566da15c35f16023558b8c83f8401494c"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/ui/chat/components/ScreenshotStoragePolicyTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "41e1c4b5955248ccbce847c32594e26634b98113",
+      "size": 686,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/41e1c4b5955248ccbce847c32594e26634b98113"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/ui/components",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "56ff4ee193307b78020ad8348ac02848d7a5a304",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/56ff4ee193307b78020ad8348ac02848d7a5a304"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/ui/components/CompatibleMarkdownComponentsTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "52cd87b5c4703610bae7ba6898dce8257eb64179",
+      "size": 440,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/52cd87b5c4703610bae7ba6898dce8257eb64179"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/ui/components/ImageViewerItemFactoryTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6b2bc54451e1ba5a7747b2c2f1fc2319fd29d306",
+      "size": 2150,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/6b2bc54451e1ba5a7747b2c2f1fc2319fd29d306"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/ui/components/ImageViewerLaunchGateTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0a638d19a162c59eba9af0dcbc8fdd75d6e6cb3c",
+      "size": 1071,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/0a638d19a162c59eba9af0dcbc8fdd75d6e6cb3c"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/ui/components/OpenImageVideoFragmentTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a048d4526c70677a702d42f06252ade966323ec8",
+      "size": 574,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/a048d4526c70677a702d42f06252ade966323ec8"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/ui/components/litehtml",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "197da3dcff911358d16a44ff356f263ac144aee4",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/197da3dcff911358d16a44ff356f263ac144aee4"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/ui/components/litehtml/HtmlRenderPolicyTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c4ae8b754c43ba133fabace9d415ef833f1d4626",
+      "size": 1386,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/c4ae8b754c43ba133fabace9d415ef833f1d4626"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/ui/components/litehtml/LiteHtmlCssBoundaryTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d0311710837adbe838c0279664c36ea180459054",
+      "size": 1442,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/d0311710837adbe838c0279664c36ea180459054"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/ui/contact",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "0a8c6d446d7061841789f0bc902b9c042208bb7c",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/0a8c6d446d7061841789f0bc902b9c042208bb7c"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/ui/contact/ContactIndexBoundaryTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4da67a65ce672fa63b354bffd3ea55984254f26a",
+      "size": 2050,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/4da67a65ce672fa63b354bffd3ea55984254f26a"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/ui/contact/ContactIndexTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "80bc8ce649166e51cecb39537a293d3f1d4d0eb5",
+      "size": 1543,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/80bc8ce649166e51cecb39537a293d3f1d4d0eb5"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/ui/conversation",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "6f3d0dd961ec7ce23110202e173b0b4d55798fac",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/6f3d0dd961ec7ce23110202e173b0b4d55798fac"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/ui/conversation/CreationViewModelStateTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "effa38cb4da0ff85a69fdf8662331474e933fd4a",
+      "size": 3119,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/effa38cb4da0ff85a69fdf8662331474e933fd4a"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/ui/conversation/HomeSearchUiStateTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8940a374141275ba2e4284d74f73092d3a2bd393",
+      "size": 1521,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/8940a374141275ba2e4284d74f73092d3a2bd393"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/ui/mine",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "a3ffb159f4b523635ad0db337ff9d12d9a1814a5",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/a3ffb159f4b523635ad0db337ff9d12d9a1814a5"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/ui/mine/ChinaRegionDataTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5edfd4f3473f5121473daa61d48c605e5ebe1bd9",
+      "size": 2850,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/5edfd4f3473f5121473daa61d48c605e5ebe1bd9"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/ui/theme",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "4b465accdcf17b81a7828ab3fda018d75014fac6",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/4b465accdcf17b81a7828ab3fda018d75014fac6"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/ui/theme/ThemeBoundaryTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e45d2d22a7741e69906eb354d28b0599ca66ffd6",
+      "size": 1569,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/e45d2d22a7741e69906eb354d28b0599ca66ffd6"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/ui/theme/ThemeModeTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d7aa929c9c444f30c157f885fa951af9fce2f7d5",
+      "size": 2789,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/d7aa929c9c444f30c157f885fa951af9fce2f7d5"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/ui/theme/liquidglass",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "b5d17950564cd1f9daf66be083895fc2b80fe151",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/b5d17950564cd1f9daf66be083895fc2b80fe151"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/ui/theme/liquidglass/LiquidGlassControlsTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "76ec2c402a0f293c9b96b2b8795c48d397db3ec6",
+      "size": 1173,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/76ec2c402a0f293c9b96b2b8795c48d397db3ec6"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/ui/theme/liquidglass/LiquidGlassSelectionContainerTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "af88eb98f56c846ef6952ed35a7d238d725770ad",
+      "size": 738,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/af88eb98f56c846ef6952ed35a7d238d725770ad"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/utils",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "b3bfd3a34be3e8627dfa75b1ad69fa8163379de7",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/b3bfd3a34be3e8627dfa75b1ad69fa8163379de7"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/utils/DownloadVersionWorker1Test.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4a3fe4fc5cd0b3c489b66bb97deca1c90e030865",
+      "size": 3154,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/4a3fe4fc5cd0b3c489b66bb97deca1c90e030865"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/utils/FileDownloaderTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e02cb5e511444c942a2a10c9fed8188b6d51073c",
+      "size": 848,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/e02cb5e511444c942a2a10c9fed8188b6d51073c"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/utils/ImageUrlUtilsTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dcee0c5235aad01b3f865f2b5a48d2cec2f4d48c",
+      "size": 3753,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/dcee0c5235aad01b3f865f2b5a48d2cec2f4d48c"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/utils/MentionUtilsTest.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8ac71d398e0500ee0b7193bc823f901557f29e25",
+      "size": 5655,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/8ac71d398e0500ee0b7193bc823f901557f29e25"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/utils/MentionUtilsWorker1Test.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "401acb3c0102b4197f7c207c84006c99c9221262",
+      "size": 4706,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/401acb3c0102b4197f7c207c84006c99c9221262"
+    },
+    {
+      "path": "app/src/test/java/com/juhao/murexide/utils/UrlAndMediaWorker1Test.kt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ce7af1ae9da8f13a83dfee39e5e45945b2a75ad1",
+      "size": 4057,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/ce7af1ae9da8f13a83dfee39e5e45945b2a75ad1"
+    },
+    {
+      "path": "build.gradle.kts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "92e8181e7130387928a6c1dbf160ed68b63e0263",
+      "size": 273,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/92e8181e7130387928a6c1dbf160ed68b63e0263"
+    },
+    {
+      "path": "changelogithub.config.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e5b1cd3b27af95dfbab0cb8679836d577ee30b9a",
+      "size": 188,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/e5b1cd3b27af95dfbab0cb8679836d577ee30b9a"
+    },
+    {
+      "path": "gradle.properties",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c4927bdfa11a8cca4a0427a51dd1fa8936164e6b",
+      "size": 1069,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/c4927bdfa11a8cca4a0427a51dd1fa8936164e6b"
+    },
+    {
+      "path": "gradle",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "d91e883b05cf342a4922722e16c28c1022ea515f",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/d91e883b05cf342a4922722e16c28c1022ea515f"
+    },
+    {
+      "path": "gradle/gradle-daemon-jvm.properties",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6c1139ec06ae4e5307f6f0ea75ff8338aa2d4b72",
+      "size": 1138,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/6c1139ec06ae4e5307f6f0ea75ff8338aa2d4b72"
+    },
+    {
+      "path": "gradle/libs.versions.toml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7a585937c95fce7d8fd6f594ce4311f8cc4c854e",
+      "size": 6059,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/7a585937c95fce7d8fd6f594ce4311f8cc4c854e"
+    },
+    {
+      "path": "gradle/wrapper",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "bb8fc8c27bc67201661db536b1548dc8f134d9b1",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/bb8fc8c27bc67201661db536b1548dc8f134d9b1"
+    },
+    {
+      "path": "gradle/wrapper/gradle-wrapper.jar",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8bdaf60c75ab801e22807dde59e12a8735a34077",
+      "size": 45457,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/8bdaf60c75ab801e22807dde59e12a8735a34077"
+    },
+    {
+      "path": "gradle/wrapper/gradle-wrapper.properties",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f7c9899cc080471d01446911ac713cfd62d47f76",
+      "size": 280,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/f7c9899cc080471d01446911ac713cfd62d47f76"
+    },
+    {
+      "path": "gradlew",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ef07e0162b183eb9d19a2c9ba7035c283af9f8dd",
+      "size": 8728,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/ef07e0162b183eb9d19a2c9ba7035c283af9f8dd"
+    },
+    {
+      "path": "gradlew.bat",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "db3a6ac207e507b0bc1635a9f2c18d3b174e682e",
+      "size": 2843,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/db3a6ac207e507b0bc1635a9f2c18d3b174e682e"
+    },
+    {
+      "path": "settings.gradle.kts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b111c17f3cf0a5dc687dd9a4865fab66788d10fd",
+      "size": 619,
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/blobs/b111c17f3cf0a5dc687dd9a4865fab66788d10fd"
+    },
+    {
+      "path": "third_party",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "762d2459c69a9950dc94ffd97103c4d0ce2d29b5",
+      "url": "https://api.github.com/repos/murexide-project/Murexide/git/trees/762d2459c69a9950dc94ffd97103c4d0ce2d29b5"
+    },
+    {
+      "path": "third_party/litehtml",
+      "mode": "160000",
+      "type": "commit",
+      "sha": "b9e89f0b9494ff9a5f008800af35503efabddf59"
+    }
+  ],
+  "truncated": false
+}

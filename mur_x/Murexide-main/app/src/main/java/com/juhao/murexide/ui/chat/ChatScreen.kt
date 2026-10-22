@@ -1,0 +1,2120 @@
+package com.juhao.murexide.ui.chat
+
+import com.juhao.murexide.ui.icons.AppIcons
+import com.juhao.murexide.ui.icons.AutoMirroredIcon
+
+import android.Manifest
+import android.content.ClipData
+import android.net.Uri
+import android.os.Build
+import android.os.CancellationSignal
+import android.view.View
+import android.view.WindowInsets as AndroidWindowInsets
+import android.view.WindowInsetsAnimationControlListener
+import android.view.WindowInsetsAnimationController
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import android.widget.Toast
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.Alignment
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.juhao.murexide.ui.components.Avatar
+import com.juhao.murexide.ui.components.ExpressiveDropdownMenu
+import com.juhao.murexide.ui.components.FloatingTopBar
+import com.juhao.murexide.ui.components.fullImagePreviewItem
+import com.juhao.murexide.ui.components.imageMessagePreviewItem
+import com.juhao.murexide.ui.components.videoMessagePreviewItem
+import com.juhao.murexide.ui.components.MediaViewerPagination
+import com.juhao.murexide.ui.components.showImageViewer
+import com.juhao.murexide.ui.chat.components.MessageBubble
+import com.juhao.murexide.ui.chat.components.BoardPanel
+import com.juhao.murexide.ui.chat.components.MessageInput
+import com.juhao.murexide.ui.chat.components.EmojiPanel
+import com.juhao.murexide.ui.chat.components.EditHistoryDialog
+import com.juhao.murexide.ui.chat.components.InstructionPanel
+import com.juhao.murexide.ui.chat.components.InstructionFormDialog
+import com.juhao.murexide.ui.chat.components.UploadProgressBar
+import com.juhao.murexide.ui.chat.components.ScreenshotBottomSheet
+import com.juhao.murexide.ui.chat.components.GroupMemberSheet
+import com.juhao.murexide.datastore.SettingsStorage
+import com.juhao.murexide.data.MessageItem
+import com.juhao.murexide.data.MessageDisplayItem
+import com.juhao.murexide.data.ForwardTarget
+import com.juhao.murexide.data.resolveStickerMessageUrl
+import com.juhao.murexide.repository.ConversationDetailRepository
+import com.juhao.murexide.ui.conversationdetail.ConversationDetailActivity
+import com.juhao.murexide.ui.sticker.*
+import com.juhao.murexide.ui.components.*
+import com.juhao.murexide.ui.chatsearch.ChatSearchActivity
+import com.juhao.murexide.ui.theme.UiState
+import com.juhao.murexide.utils.NotificationHelper
+import com.juhao.murexide.utils.formatTimestamp
+import com.juhao.murexide.ui.theme.LocalLiquidGlassEnabled
+import com.juhao.murexide.ui.theme.LocalLiquidGlassBlur
+import com.juhao.murexide.ui.theme.liquidGlassHighlightEnabled
+import com.juhao.murexide.ui.theme.ProvideLiquidGlassContentColor
+import com.juhao.murexide.ui.theme.liquidglass.LiquidGlassMagnifierHost
+import com.juhao.murexide.utils.requiresLegacyWritePermission
+import com.kyant.backdrop.Backdrop
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import com.kyant.backdrop.drawBackdrop
+import com.kyant.backdrop.effects.blur
+import com.kyant.backdrop.effects.lens
+import com.kyant.backdrop.effects.vibrancy
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.hazeSource
+import dev.chrisbanes.haze.blur.materials.HazeMaterials
+import dev.chrisbanes.haze.HazeInput
+import dev.chrisbanes.haze.blur.hazeBlur
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withTimeoutOrNull
+import kotlin.coroutines.resume
+import kotlin.time.Duration.Companion.milliseconds
+
+private enum class ChatInputPanel {
+    Emoji,
+    Instruction
+}
+
+private val DefaultInputPanelHeight = 280.dp
+
+private suspend fun View.measureShownImeHeight(): Int? {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return null
+
+    return suspendCancellableCoroutine { continuation ->
+        val cancellationSignal = CancellationSignal()
+        continuation.invokeOnCancellation { cancellationSignal.cancel() }
+
+        val controller = windowInsetsController
+        if (controller == null) {
+            continuation.resume(null)
+            return@suspendCancellableCoroutine
+        }
+
+        controller.controlWindowInsetsAnimation(
+            AndroidWindowInsets.Type.ime(),
+            -1L,
+            null,
+            cancellationSignal,
+            object : WindowInsetsAnimationControlListener {
+                override fun onReady(
+                    animationController: WindowInsetsAnimationController,
+                    types: Int
+                ) {
+                    val height = animationController.shownStateInsets.bottom.takeIf { it > 0 }
+                    animationController.finish(false)
+                    if (continuation.isActive) continuation.resume(height)
+                }
+
+                override fun onFinished(
+                    animationController: WindowInsetsAnimationController
+                ) = Unit
+
+                override fun onCancelled(
+                    animationController: WindowInsetsAnimationController?
+                ) {
+                    if (continuation.isActive) continuation.resume(null)
+                }
+            }
+        )
+    }
+}
+
+@Composable
+private fun ChatComposer(
+    viewModel: ChatViewModel,
+    chatType: Int,
+    isSending: Boolean,
+    isEmojiPanelVisible: Boolean,
+    onEmojiClick: () -> Unit,
+    hasInstructions: Boolean,
+    isInstructionPanelVisible: Boolean,
+    onInstructionClick: () -> Unit,
+    onAddAlbumClick: () -> Unit,
+    onAddFileClick: () -> Unit,
+    focusRequester: FocusRequester,
+    onInputFocused: () -> Unit,
+    limitedMsgType: List<Int> = emptyList()
+) {
+    val composerState by viewModel.composerState.collectAsState()
+    MessageInput(
+        inputText = composerState.text,
+        inputSelectionStart = composerState.selectionStart,
+        inputSelectionEnd = composerState.selectionEnd,
+        isSending = isSending,
+        onTextChange = { text, mentions, selectionStart, selectionEnd ->
+            viewModel.updateInputText(
+                text = text,
+                mentions = mentions,
+                selectionStart = selectionStart,
+                selectionEnd = selectionEnd
+            )
+        },
+        onSendClick = { viewModel.sendMessage() },
+        onSendWithType = { type -> viewModel.sendMessage(type) },
+        onAddAlbumClick = onAddAlbumClick,
+        onAddFileClick = onAddFileClick,
+        isEmojiPanelVisible = isEmojiPanelVisible,
+        onEmojiClick = onEmojiClick,
+        hasInstructions = hasInstructions,
+        isInstructionPanelVisible = isInstructionPanelVisible,
+        onInstructionClick = onInstructionClick,
+        mentions = composerState.mentions,
+        onMentionTriggered = { position ->
+            if (chatType == 2) viewModel.showMentionPicker(position)
+        },
+        focusRequester = focusRequester,
+        onInputFocused = onInputFocused,
+        limitedMsgType = limitedMsgType
+    )
+}
+
+@OptIn(
+    ExperimentalMaterial3Api::class, FlowPreview::class, ExperimentalComposeUiApi::class,
+    ExperimentalLayoutApi::class, ExperimentalMaterial3ExpressiveApi::class
+)
+@Composable
+fun ChatScreen(
+    modifier: Modifier = Modifier,
+    chatType: Int,
+    chatName: String,
+    chatAvatar: String,
+    chatId: String,
+    onBackClick: () -> Unit = {},
+    onOpenConversation: (ForwardTarget) -> Unit = {},
+    bigScreenMode: Boolean = false,
+    backUnreadCount: Int = 0,
+    initialUnreadCount: Int = 0,
+    searchTargetMsgId: String? = null,
+    searchTargetMsgSeq: Long? = null,
+    viewModel: ChatViewModel
+) {
+    val density = LocalDensity.current
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val clipboardManager = LocalClipboard.current
+    val uiState by viewModel.screenState.collectAsState()
+    val lastVisibleMsgId by viewModel.lastVisibleMsgId.collectAsState()
+    val themeColor by UiState.themeColor
+    val chatBackgroundColor = if (themeColor == "WHITE") {
+        MaterialTheme.colorScheme.surfaceContainer
+    } else {
+        MaterialTheme.colorScheme.surface
+    }
+    val forwardViewModel: ForwardViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+        key = "forward_${chatType}_$chatId",
+        factory = object : androidx.lifecycle.ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+                return ForwardViewModel(token = viewModel.token) as T
+            }
+        }
+    )
+    val forwardState by forwardViewModel.uiState.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val forwardSendingState = rememberUpdatedState(forwardState.isSending)
+    val forwardSheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = false,
+        confirmValueChange = { value ->
+            value != SheetValue.Hidden || !forwardSendingState.value
+        }
+    )
+    val expressions by viewModel.stickerPanel.collectAsState()
+    val instructionPanel = uiState.instructionPanel
+    val instructionForm by viewModel.instructionForm.collectAsState()
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val inputFocusRequester = remember { FocusRequester() }
+    val composeView = LocalView.current
+
+    val imeBottomPx = WindowInsets.ime.getBottom(density)
+    val imeTargetBottomPx = WindowInsets.imeAnimationTarget.getBottom(density)
+    var pendingInputPanel by remember { mutableStateOf<ChatInputPanel?>(null) }
+    var isMeasuringIme by remember { mutableStateOf(false) }
+    var isReturningToKeyboard by remember { mutableStateOf(false) }
+    var inputPanelHeightPx by remember { mutableIntStateOf(0) }
+
+    var currentMsgHistoryToShow by remember { mutableStateOf<String?>(null) }
+    currentMsgHistoryToShow?.let {
+        EditHistoryDialog(
+            token = viewModel.token,
+            msgId = it,
+            onDismiss = {
+                currentMsgHistoryToShow = null
+            }
+        )
+    }
+
+    val inputPanelHeight = if (inputPanelHeightPx > 0) {
+        with(density) { inputPanelHeightPx.toDp() }
+    } else {
+        DefaultInputPanelHeight
+    }
+
+    fun showInputPanel(panel: ChatInputPanel) {
+        when (panel) {
+            ChatInputPanel.Emoji -> {
+                if (!expressions.isVisible) viewModel.toggleStickerPanel()
+            }
+
+            ChatInputPanel.Instruction -> {
+                if (!instructionPanel.isVisible) viewModel.toggleInstructionPanel()
+            }
+        }
+    }
+
+    fun returnToKeyboard() {
+        isMeasuringIme = false
+        pendingInputPanel = null
+        isReturningToKeyboard = true
+        viewModel.hideStickerPanel()
+        viewModel.hideInstructionPanel()
+    }
+
+    fun requestInputPanel(panel: ChatInputPanel) {
+        val isCurrentPanel = when (panel) {
+            ChatInputPanel.Emoji -> expressions.isVisible
+            ChatInputPanel.Instruction -> instructionPanel.isVisible
+        }
+
+        if (isCurrentPanel || pendingInputPanel == panel) {
+            returnToKeyboard()
+            return
+        }
+
+        isReturningToKeyboard = false
+        pendingInputPanel = panel
+
+        val keyboardHeightPx = maxOf(imeBottomPx, imeTargetBottomPx)
+        if (keyboardHeightPx > 0) {
+            inputPanelHeightPx = keyboardHeightPx
+            isMeasuringIme = false
+            focusManager.clearFocus(force = true)
+            keyboardController?.hide()
+        } else if (inputPanelHeightPx == 0 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            isMeasuringIme = true
+        } else {
+            isMeasuringIme = false
+            focusManager.clearFocus(force = true)
+            keyboardController?.hide()
+        }
+    }
+
+    LaunchedEffect(isMeasuringIme) {
+        if (!isMeasuringIme) return@LaunchedEffect
+
+        inputFocusRequester.requestFocus()
+        withFrameNanos { }
+        val measuredHeightPx = withTimeoutOrNull(500.milliseconds) {
+            composeView.measureShownImeHeight()
+        }
+        if (!isMeasuringIme || pendingInputPanel == null) return@LaunchedEffect
+
+        if (measuredHeightPx != null) {
+            inputPanelHeightPx = measuredHeightPx
+        }
+        focusManager.clearFocus(force = true)
+        keyboardController?.hide()
+        isMeasuringIme = false
+    }
+
+    LaunchedEffect(imeTargetBottomPx) {
+        if (imeTargetBottomPx > 0) {
+            inputPanelHeightPx = imeTargetBottomPx
+        }
+    }
+
+    LaunchedEffect(
+        pendingInputPanel,
+        isMeasuringIme,
+        imeBottomPx,
+        imeTargetBottomPx,
+        expressions.isVisible,
+        instructionPanel.isVisible
+    ) {
+        val panel = pendingInputPanel ?: return@LaunchedEffect
+        if (isMeasuringIme) return@LaunchedEffect
+        if (imeBottomPx != 0 || imeTargetBottomPx != 0) return@LaunchedEffect
+
+        val isPanelVisible = when (panel) {
+            ChatInputPanel.Emoji -> expressions.isVisible
+            ChatInputPanel.Instruction -> instructionPanel.isVisible
+        }
+        if (isPanelVisible) {
+            pendingInputPanel = null
+        } else {
+            showInputPanel(panel)
+        }
+    }
+
+    LaunchedEffect(isReturningToKeyboard) {
+        if (!isReturningToKeyboard) return@LaunchedEffect
+        withFrameNanos { }
+        if (pendingInputPanel != null) {
+            isReturningToKeyboard = false
+            return@LaunchedEffect
+        }
+        inputFocusRequester.requestFocus()
+        keyboardController?.show()
+        delay(800.milliseconds)
+        if (isReturningToKeyboard) {
+            isReturningToKeyboard = false
+        }
+    }
+
+    LaunchedEffect(isReturningToKeyboard, imeBottomPx, imeTargetBottomPx) {
+        if (
+            isReturningToKeyboard &&
+            imeTargetBottomPx > 0 &&
+            imeBottomPx >= imeTargetBottomPx
+        ) {
+            inputPanelHeightPx = imeTargetBottomPx
+            isReturningToKeyboard = false
+        }
+    }
+
+    var showMenuMsgId by remember { mutableStateOf<String?>(null) }
+    var showMoreMenu by remember { mutableStateOf(false) }
+    var showEditNickNameDialog by remember { mutableStateOf(false) }
+
+    val recallDialog by viewModel.recallDialog.collectAsState()
+
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(showMenuMsgId) {
+        val targetMsgId = showMenuMsgId ?: return@LaunchedEffect
+        snapshotFlow {
+            listState.isScrollInProgress to
+                listState.layoutInfo.visibleItemsInfo.any { it.key == targetMsgId }
+        }.collect { (isScrolling, isVisible) ->
+            if (isScrolling && !isVisible) {
+                showMenuMsgId = null
+                return@collect
+            }
+        }
+    }
+
+    var composerHeightPx by remember { mutableIntStateOf(0) }
+    var listHeightPx by remember { mutableIntStateOf(0) }
+    var showScrollToBottom by remember { mutableStateOf(false) }
+    var liveUnreadCount by remember { mutableIntStateOf(0) }
+    var hasJumpedToUnread by remember { mutableStateOf(false) }
+    var firstMessageId by remember { mutableStateOf<String?>(null) }
+    var highlightedMessageId by remember { mutableStateOf<String?>(null) }
+    var highlightRequest by remember { mutableIntStateOf(0) }
+    var quoteJumpJob by remember { mutableStateOf<Job?>(null) }
+
+    var firstUnreadMsgId by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(
+        lastVisibleMsgId,
+        initialUnreadCount,
+        uiState.messages.size,
+        uiState.messages.firstOrNull()?.msgId
+    ) {
+        if (uiState.messages.isEmpty()) return@LaunchedEffect
+        if (firstUnreadMsgId != null) return@LaunchedEffect
+
+        val resolved = lastVisibleMsgId
+            ?: uiState.messages.getOrNull(initialUnreadCount - 1)?.msgId
+        if (resolved != null) {
+            firstUnreadMsgId = resolved
+        }
+    }
+
+    val downloadingFiles by viewModel.downloadingFiles.collectAsState()
+
+    val settingsStorage = remember { SettingsStorage(context) }
+    val bubbleCornerRadius by settingsStorage.bubbleCornerRadiusFlow.collectAsState(initial = 18f)
+    val bubbleOpacity by settingsStorage.bubbleOpacityFlow.collectAsState(initial = 0.9f)
+    val showMyBubbleAvatarSetting by settingsStorage.showMyBubbleAvatarFlow.collectAsState(initial = true)
+    val showMsgTagsSetting by settingsStorage.showMsgTagsFlow.collectAsState(initial = false)
+
+    val showBackground by settingsStorage.showBackgroundFlow.collectAsState(initial = true)
+    val backgroundOpacity by settingsStorage.backgroundOpacityFlow.collectAsState(initial = 0.5f)
+
+    val hazeState = remember { HazeState() }
+    val liquidGlassEnabled = LocalLiquidGlassEnabled.current
+    val liquidGlassBlur = LocalLiquidGlassBlur.current
+    val showGlassHighlight = liquidGlassHighlightEnabled()
+    val liquidBackdrop = if (liquidGlassEnabled) {
+        rememberLayerBackdrop {
+            drawRect(chatBackgroundColor)
+            drawContent()
+        }
+    } else {
+        null
+    }
+
+    val albumPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickMultipleVisualMedia(maxItems = 9)
+    ) { uris: List<Uri> ->
+        if (uris.isNotEmpty()) {
+            viewModel.uploadAndSendMedia(uris.take(9), context)
+        }
+    }
+
+    val filePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let { viewModel.uploadAndSendFile(it, context) }
+    }
+
+    var pendingDownloadMessage by remember { mutableStateOf<MessageItem?>(null) }
+    val storagePermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        val message = pendingDownloadMessage
+        pendingDownloadMessage = null
+        if (granted && message != null) {
+            viewModel.startDownload(message, context)
+        } else if (message != null) {
+            Toast.makeText(context, "需要存储权限才能下载文件", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    fun openAlbumPicker() {
+        albumPickerLauncher.launch(
+            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo)
+        )
+    }
+
+    fun openFilePicker() {
+        filePickerLauncher.launch("*/*")
+    }
+
+    val selectionMode = uiState.selectionMode
+    val selectedMessages = uiState.selectedMessages
+
+    fun startDownload(message: MessageItem) {
+        if (requiresLegacyWritePermission(context)) {
+            pendingDownloadMessage = message
+            storagePermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        } else {
+            viewModel.startDownload(message, context)
+        }
+    }
+
+    fun openForward(messages: List<MessageItem>) {
+        val validMessages = messages.filter {
+            it.msgId.isNotBlank() &&
+                    !it.isRecalled &&
+                    it.contentType != MessageItem.CONTENT_TYPE_TIP
+        }
+        if (validMessages.size != messages.size) {
+            Toast.makeText(context, "已撤回或提示消息不可转发", Toast.LENGTH_SHORT).show()
+            return
+        }
+        if (validMessages.isEmpty()) return
+        forwardViewModel.open(
+            sourceChatType = chatType,
+            sourceMsgIds = validMessages.map { it.msgId }.distinct()
+        )
+    }
+
+    fun dismissForward() {
+        scope.launch {
+            if (forwardSheetState.isVisible) forwardSheetState.hide()
+            forwardViewModel.close()
+        }
+    }
+
+    LaunchedEffect(forwardState.isOpen) {
+        if (forwardState.isOpen && !forwardSheetState.isVisible) {
+            forwardSheetState.show()
+        } else if (!forwardState.isOpen && forwardSheetState.isVisible) {
+            forwardSheetState.hide()
+        }
+    }
+
+    LaunchedEffect(forwardViewModel) {
+        forwardViewModel.events.collect { event ->
+            when (event) {
+                is ForwardEvent.SourceForwarded -> viewModel.removeForwardedMessage(event.msgId)
+                is ForwardEvent.Completed -> {
+                    viewModel.exitSelectionMode()
+                    if (forwardSheetState.isVisible) forwardSheetState.hide()
+                    forwardViewModel.close()
+                    viewModel.refresh()
+
+                    val target = event.recipients.singleOrNull()
+                    val result = snackbarHostState.showSnackbar(
+                        message = if (target == null) {
+                            "消息已转发到${event.recipients.size}个对话当中"
+                        } else {
+                            "消息已转发到${target.displayName}中"
+                        },
+                        actionLabel = target?.let { "查看" },
+                        duration = if (target == null) SnackbarDuration.Short else SnackbarDuration.Long
+                    )
+                    if (result == SnackbarResult.ActionPerformed && target != null) {
+                        onOpenConversation(target)
+                    }
+                }
+            }
+        }
+    }
+
+    BackHandler(enabled = selectionMode) {
+        viewModel.exitSelectionMode()
+    }
+
+    BackHandler(enabled = !selectionMode && showMenuMsgId != null) {
+        showMenuMsgId = null
+    }
+
+    val displayItems by remember {
+        derivedStateOf {
+            computeDisplayItems(
+                messages = uiState.messages,
+                chatType = chatType,
+                ownerId = uiState.ownerId,
+                adminIds = uiState.adminIds
+            )
+        }
+    }
+
+    LaunchedEffect(showMenuMsgId, displayItems) {
+        val targetMsgId = showMenuMsgId ?: return@LaunchedEffect
+        if (displayItems.none { it.message.msgId == targetMsgId }) {
+            showMenuMsgId = null
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        NotificationHelper.clearNotification(context, chatId)
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.toastMessage.collect { message ->
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.buttonEvent.collect { event ->
+            when (event) {
+                is ButtonEvent.OpenUrl -> {
+                    handleStaticHtmlLink(context, event.url)
+                }
+
+                is ButtonEvent.CopyText -> {
+                    clipboardManager.setClipEntry(
+                        ClipEntry(ClipData.newPlainText("button", event.text))
+                    )
+                    Toast.makeText(context, "已复制", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(
+        listState,
+        uiState.hasMore,
+        uiState.isLoadingMore,
+        uiState.isRefreshing
+    ) {
+        snapshotFlow {
+            val layoutInfo = listState.layoutInfo
+            val visibleItems = layoutInfo.visibleItemsInfo
+
+            val shouldLoadMore = if (visibleItems.isNotEmpty()) {
+                val lastVisibleIndex = visibleItems.last().index
+                val totalItems = layoutInfo.totalItemsCount
+                lastVisibleIndex >= totalItems - 5 &&
+                    uiState.hasMore &&
+                    !uiState.isLoadingMore &&
+                    !uiState.isRefreshing
+            } else {
+                false
+            }
+
+            val atBottom = if (visibleItems.isNotEmpty()) {
+                !listState.canScrollBackward
+            } else {
+                true
+            }
+
+            Pair(shouldLoadMore, atBottom)
+        }
+            .collect { (shouldLoadMore, atBottom) ->
+                if (shouldLoadMore) {
+                    viewModel.loadMore()
+                }
+
+                showScrollToBottom = !atBottom
+                if (atBottom) {
+                    liveUnreadCount = 0
+                }
+            }
+    }
+
+    LaunchedEffect(listState, displayItems) {
+        snapshotFlow {
+            val visibleItems = listState.layoutInfo.visibleItemsInfo
+            if (visibleItems.isEmpty()) null
+            else visibleItems.firstOrNull()?.key as? String
+        }.collect { topMsgId ->
+            topMsgId?.let { viewModel.updateLastVisibleMsgId(it) }
+        }
+    }
+
+    LaunchedEffect(searchTargetMsgId, searchTargetMsgSeq) {
+        val target = searchTargetMsgId ?: return@LaunchedEffect
+        if (target.isBlank()) return@LaunchedEffect
+        delay(500)
+        if (viewModel.loadQuotedMessage(target, searchTargetMsgSeq)) {
+            val targetIndex = withTimeoutOrNull(2_000.milliseconds) {
+                snapshotFlow {
+                    displayItems.indexOfFirst { it.message.msgId == target }
+                }.first { it >= 0 }
+            }
+            if (targetIndex != null) {
+                listState.animateScrollToCenteredItem(targetIndex)
+                highlightedMessageId = target
+                highlightRequest++
+            }
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        var lastMsgId: String? = null
+        var pendingCount = 0
+
+        snapshotFlow { uiState.messages.firstOrNull() }
+            .collect { message: MessageItem? ->
+                val msgId = message?.msgId
+                if (message == null) return@collect
+                if (msgId == lastMsgId) return@collect
+                lastMsgId = msgId
+
+                pendingCount++
+
+                if (firstMessageId == null) {
+                    firstMessageId = msgId
+                    pendingCount = 0
+                    return@collect
+                }
+
+                if (msgId == firstMessageId) {
+                    pendingCount = 0
+                    return@collect
+                }
+
+                val isAtBottom = !listState.canScrollBackward
+
+                firstMessageId = msgId
+
+                if (uiState.hasNewer) return@collect
+
+                if (isAtBottom && !listState.isScrollInProgress) {
+                    listState.animateScrollToItem(0)
+                    liveUnreadCount = 0
+                    pendingCount = 0
+                } else {
+                    if (!message.isMine) {
+                        liveUnreadCount += pendingCount
+                    }
+                    pendingCount = 0
+                }
+            }
+    }
+
+    val scrollToBottom: () -> Unit = {
+        scope.launch {
+            listState.animateScrollToItem(0)
+            liveUnreadCount = 0
+            if (uiState.messages.isNotEmpty()) {
+                firstMessageId = uiState.messages.first().msgId
+            }
+        }
+    }
+
+    var showScreenshotSheet by remember { mutableStateOf(false) }
+
+    if (showScreenshotSheet) {
+        val orderedSelected = uiState.messages
+            .filter { it in selectedMessages }
+            .reversed()
+
+        ScreenshotBottomSheet(
+            messages = orderedSelected,
+            chatName = chatName,
+            chatAvatar = chatAvatar,
+            onDismiss = { showScreenshotSheet = false }
+        )
+    }
+
+    if (forwardState.isOpen) {
+        ForwardBottomSheet(
+            state = forwardState,
+            sheetState = forwardSheetState,
+            onDismiss = ::dismissForward,
+            onQueryChange = forwardViewModel::updateQuery,
+            onRetry = forwardViewModel::retryLoad,
+            onTargetClick = forwardViewModel::toggleTarget,
+            onSend = forwardViewModel::send
+        )
+    }
+
+    LiquidGlassMagnifierHost(
+        modifier = modifier.fillMaxSize(),
+        enabled = liquidGlassEnabled
+    ) {
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            containerColor = chatBackgroundColor,
+            snackbarHost = {
+                SnackbarHost(
+                    hostState = snackbarHostState,
+                    modifier = Modifier.padding(
+                        bottom = with(LocalDensity.current) { composerHeightPx.toDp() }
+                    )
+                )
+            },
+            topBar = {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() }
+                        ) {}
+                ) {
+                    FloatingTopBar(
+                        hazeState = hazeState,
+                        liquidBackdrop = liquidBackdrop,
+                        navigationIcon = if (selectionMode || !bigScreenMode) {
+                            {
+                                Crossfade(targetState = selectionMode) { isSelectionMode ->
+                                    if (isSelectionMode) {
+                                        IconButton(
+                                            onClick = { viewModel.exitSelectionMode() },
+                                            modifier = Modifier.size(46.dp)
+                                        ) {
+                                            Icon(
+                                                AppIcons.Close,
+                                                contentDescription = "退出多选",
+                                                modifier = Modifier.size(24.dp)
+                                            )
+                                        }
+                                    } else {
+                                        Box {
+                                            IconButton(
+                                                modifier = Modifier.size(46.dp),
+                                                onClick = onBackClick
+                                            ) {
+                                                AutoMirroredIcon(
+                                                    imageVector = AppIcons.ArrowBack,
+                                                    contentDescription = "返回",
+                                                    modifier = Modifier.size(24.dp)
+                                                )
+                                            }
+                                            if (backUnreadCount > 0) {
+                                                Badge(
+                                                    modifier = Modifier
+                                                        .align(Alignment.BottomEnd)
+                                                        .padding(6.dp),
+                                                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                                ) {
+                                                    Text(
+                                                        text = if (backUnreadCount > 99) "99+" else backUnreadCount.toString(),
+                                                        style = MaterialTheme.typography.labelSmall
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            null
+                        },
+                        avatar = if (!selectionMode) {
+                            {
+                                Avatar(
+                                    url = chatAvatar,
+                                    alwaysCircle = true,
+                                    size = 40.dp
+                                )
+                            }
+                        } else null,
+                        title = {
+                            Crossfade(targetState = selectionMode) { isSelectionMode ->
+                                if (isSelectionMode) {
+                                    Row(
+                                        modifier = Modifier.height(46.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(2.dp)
+                                    ) {
+                                        Text(
+                                            "已选中",
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                        AnimatedContent(
+                                            targetState = selectedMessages.size,
+                                            transitionSpec = {
+                                                if (targetState < initialState) {
+                                                    slideInVertically(
+                                                        initialOffsetY = { fullHeight -> fullHeight },
+                                                        animationSpec = tween(200)
+                                                    ) togetherWith slideOutVertically(
+                                                        targetOffsetY = { fullHeight -> -fullHeight },
+                                                        animationSpec = tween(200)
+                                                    )
+                                                } else {
+                                                    slideInVertically(
+                                                        initialOffsetY = { fullHeight -> -fullHeight },
+                                                        animationSpec = tween(200)
+                                                    ) togetherWith slideOutVertically(
+                                                        targetOffsetY = { fullHeight -> fullHeight },
+                                                        animationSpec = tween(200)
+                                                    )
+                                                }
+                                            },
+                                            label = "selected_count"
+                                        ) { count ->
+                                            Text(
+                                                text = "$count",
+                                                style = MaterialTheme.typography.titleMedium,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        }
+                                        Text(
+                                            "条",
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                } else {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.height(46.dp)
+                                    ) {
+                                        Column {
+                                            Text(
+                                                text = chatName,
+                                                style = MaterialTheme.typography.bodyLarge,
+                                                fontWeight = FontWeight.Bold,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+                                            if (chatType == 2 && uiState.memberCount != null) {
+                                                Text(
+                                                    text = "${uiState.memberCount} 位成员",
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                    maxLines = 1
+                                                )
+                                            }
+                                            if (chatType == 3 && uiState.usageCount != null) {
+                                                Text(
+                                                    text = "${uiState.usageCount} 人使用",
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                    maxLines = 1
+                                                )
+                                            }
+                                            if (chatType == 1 && uiState.continuousOnlineDay != null) {
+                                                Text(
+                                                    text = "连续在线 ${uiState.continuousOnlineDay} 天",
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                    maxLines = 1
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        onTitleClick = {
+                            if (!selectionMode) {
+                                ConversationDetailActivity.start(
+                                    context = context,
+                                    chatId = viewModel.chatId,
+                                    chatType = chatType,
+                                    chatName = chatName,
+                                    chatAvatar = chatAvatar
+                                )
+                            }
+                        },
+                        extraButton = if (selectionMode) null else {
+                            {
+                                Icon(
+                                    imageVector = if (uiState.boardPanel.isExpanded) {
+                                        AppIcons.KeyboardArrowUp
+                                    } else {
+                                        AppIcons.KeyboardArrowDown
+                                    },
+                                    contentDescription = if (uiState.boardPanel.isExpanded) "收起看板" else "展开看板",
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                        },
+                        onExtraButtonClick = {
+                            viewModel.toggleBoard()
+                        },
+                        actions = {
+                            Row(
+                                modifier = Modifier.animateContentSize()
+                            ) {
+                                if (selectionMode) {
+                                    IconButton(
+                                        onClick = { viewModel.recallSelectedMessages() },
+                                        modifier = Modifier.size(46.dp)
+                                    ) {
+                                        AutoMirroredIcon(
+                                            AppIcons.Undo,
+                                            contentDescription = "撤回",
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                    }
+                                    if (selectedMessages.size == 1) {
+                                        val message = selectedMessages.firstOrNull()
+                                        message?.let {
+                                            if (it.content.isNotBlank()) {
+                                                IconButton(
+                                                    onClick = {
+                                                        scope.launch {
+                                                            clipboardManager.setClipEntry(
+                                                                ClipEntry(
+                                                                    ClipData.newPlainText(
+                                                                        "msg",
+                                                                        it.content
+                                                                    )
+                                                                )
+                                                            )
+                                                        }
+                                                        Toast.makeText(
+                                                            context,
+                                                            "复制成功",
+                                                            Toast.LENGTH_SHORT
+                                                        ).show()
+                                                        viewModel.exitSelectionMode()
+                                                    },
+                                                    modifier = Modifier.size(46.dp)
+                                                ) {
+                                                    Icon(
+                                                        AppIcons.ContentCopy,
+                                                        contentDescription = "复制",
+                                                        modifier = Modifier.size(24.dp)
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                    IconButton(
+                                        onClick = { showScreenshotSheet = true },
+                                        modifier = Modifier.size(46.dp)
+                                    ) {
+                                        Icon(
+                                            AppIcons.Screenshot,
+                                            contentDescription = "截图",
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                    }
+                                } else {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(46.dp)
+                                            .clip(CircleShape)
+                                            .clickable { showMoreMenu = true },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        ExpressiveDropdownMenu(
+                                            expanded = showMoreMenu,
+                                            onDismissRequest = { showMoreMenu = false }
+                                        ) {
+                                            DropdownMenuItem(
+                                                text = { Text("刷新") },
+                                                onClick = {
+                                                    showMoreMenu = false
+                                                    viewModel.refresh()
+                                                },
+                                                leadingIcon = {
+                                                    Icon(
+                                                        AppIcons.Refresh,
+                                                        contentDescription = null
+                                                    )
+                                                }
+                                            )
+                                            DropdownMenuItem(
+                                                text = { Text("搜索聊天记录") },
+                                                leadingIcon = { Icon(AppIcons.Search, null) },
+                                                onClick = {
+                                                    showMoreMenu = false
+                                                    ChatSearchActivity.start(
+                                                        context = context,
+                                                        chatId = chatId,
+                                                        chatType = chatType,
+                                                        chatName = chatName
+                                                    )
+                                                }
+                                            )
+                                            DropdownMenuItem(
+                                                text = { Text("会话详情") },
+                                                onClick = {
+                                                    showMoreMenu = false
+                                                    ConversationDetailActivity.start(
+                                                        context = context,
+                                                        chatId = viewModel.chatId,
+                                                        chatType = chatType,
+                                                        chatName = chatName,
+                                                        chatAvatar = chatAvatar
+                                                    )
+                                                },
+                                                leadingIcon = {
+                                                    Icon(
+                                                        AppIcons.Info,
+                                                        contentDescription = null,
+                                                        modifier = Modifier.size(24.dp)
+                                                    )
+                                                }
+                                            )
+                                        }
+                                        Icon(
+                                            imageVector = AppIcons.MoreVert,
+                                            contentDescription = "更多",
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    )
+
+                    val panelShape = RoundedCornerShape(28.dp)
+                    val panelGlassColor = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.8f)
+                    val panelModifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 6.dp, vertical = 4.dp)
+                        .then(
+                            if (liquidGlassEnabled && liquidBackdrop != null) {
+                                Modifier.drawBackdrop(
+                                    backdrop = liquidBackdrop,
+                                    shape = { panelShape },
+                                    effects = {
+                                        vibrancy()
+                                        blur(1.dp.toPx() * liquidGlassBlur)
+                                        lens(16.dp.toPx(), 32.dp.toPx())
+                                    },
+                                    onDrawSurface = {
+                                        drawRect(
+                                            panelGlassColor
+                                        )
+                                    }
+                                )
+                            } else {
+                                Modifier.shadow(2.dp, panelShape)
+                                    .clip(panelShape)
+                                    .hazeBlur(
+                                        input = HazeInput.Sources(hazeState),
+                                        style = HazeMaterials.thin().then {
+                                            blurRadius(32.dp)
+                                            noiseFactor(0f)
+                                        }
+                                    )
+                            }
+                        )
+
+                    AnimatedVisibility(
+                        visible = !selectionMode && uiState.boardPanel.isExpanded && uiState.boardPanel.boards.isNotEmpty(),
+                        enter = fadeIn() + expandVertically(),
+                        exit = fadeOut() + shrinkVertically()
+                    ) {
+                        Box(modifier = panelModifier) {
+                            ProvideLiquidGlassContentColor(
+                                glassColor = panelGlassColor,
+                                preferredColor = MaterialTheme.colorScheme.onSurface,
+                            ) {
+                                BoardPanel(
+                                    boards = uiState.boardPanel.boards,
+                                    onImageClick = { url ->
+                                        showImageViewer(
+                                            context = context,
+                                            images = listOf(fullImagePreviewItem(url))
+                                        )
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    AnimatedVisibility(
+                        visible = uiState.locatingMessage,
+                        enter = fadeIn() + expandVertically(),
+                        exit = fadeOut() + shrinkVertically()
+                    ) {
+                        Box(modifier = panelModifier) {
+                            ProvideLiquidGlassContentColor(
+                                glassColor = panelGlassColor,
+                                preferredColor = MaterialTheme.colorScheme.onSurface,
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Text(
+                                        text = "正在定位消息…",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    LinearProgressIndicator(
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            bottomBar = {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .onSizeChanged { composerHeightPx = it.height }
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() }
+                        ) {}
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .background(
+                                Brush.verticalGradient(
+                                    colors = listOf(
+                                        Color.Transparent,
+                                        MaterialTheme.colorScheme.surface.copy(alpha = 0.55f),
+                                        MaterialTheme.colorScheme.surface.copy(alpha = 0.85f)
+                                    )
+                                )
+                            )
+                    )
+
+                    AnimatedContent(
+                        modifier = Modifier
+                            .imePadding()
+                            .navigationBarsPadding()
+                            .padding(horizontal = 6.dp, vertical = 8.dp)
+                            .then(
+                                if (liquidGlassEnabled && liquidBackdrop != null) {
+                                    val surfaceColor = MaterialTheme.colorScheme.surfaceContainer
+                                    Modifier.drawBackdrop(
+                                        backdrop = liquidBackdrop,
+                                        shape = { RoundedCornerShape(24.dp) },
+                                        effects = {
+                                            vibrancy()
+                                            blur(1.dp.toPx() * liquidGlassBlur)
+                                            lens(16.dp.toPx(), 32.dp.toPx())
+                                        },
+                                        onDrawSurface = {
+                                            drawRect(
+                                                surfaceColor.copy(alpha = 0.8f)
+                                            )
+                                        }
+                                    )
+                                } else {
+                                    val shape = RoundedCornerShape(24.dp)
+                                    Modifier.shadow(2.dp, shape)
+                                        .clip(shape)
+                                        .hazeBlur(
+                                            input = HazeInput.Sources(hazeState),
+                                            style = HazeMaterials.thin().then {
+                                                blurRadius(32.dp)
+                                                noiseFactor(0f)
+                                            }
+                                        )
+                                }
+                            ),
+                        targetState = selectionMode,
+                        transitionSpec = {
+                            fadeIn(animationSpec = tween(200)) togetherWith
+                                    fadeOut(animationSpec = tween(200))
+                        },
+                        label = "bottom_bar_transition"
+                    ) { isSelectionMode ->
+                        if (isSelectionMode) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                                    .navigationBarsPadding(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                val message = selectedMessages.firstOrNull()
+                                message?.let {
+                                    Button(
+                                        onClick = {
+                                            viewModel.setReplyTo(it)
+                                            viewModel.exitSelectionMode()
+                                        },
+                                        modifier = Modifier.weight(1f),
+                                        enabled = selectedMessages.size == 1 && !it.isRecalled
+                                    ) {
+                                        Icon(AppIcons.FormatQuote, contentDescription = null)
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text("引用")
+                                    }
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                }
+                                TextButton(
+                                    onClick = {
+                                        openForward(
+                                            uiState.messages.asReversed()
+                                                .filter { it in selectedMessages })
+                                    },
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.Center
+                                    ) {
+                                        AutoMirroredIcon(
+                                            AppIcons.Redo,
+                                            contentDescription = null
+                                        )
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text("转发")
+                                    }
+                                }
+                            }
+                        } else {
+                            Column(
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                if (uiState.isGag) {
+                                    val gagUntilTimestamp = uiState.gagUntilTimestamp
+
+                                    val gagUntilTime = if (gagUntilTimestamp != null) {
+                                        if (gagUntilTimestamp == -1L) "永久" else formatTimestamp(gagUntilTimestamp, true)
+                                    } else {
+                                        "未知时间"
+                                    }
+
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.Center
+                                    ) {
+                                        Icon(
+                                            AppIcons.MicOff,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(
+                                            text = "你已被禁言，直到 " + gagUntilTime,
+                                            fontSize = 14.sp
+                                        )
+                                    }
+                                    return@Column
+                                }
+
+                                if (uiState.isUploading) {
+                                    UploadProgressBar(
+                                        progress = uiState.uploadProgress,
+                                        imagePath = uiState.uploadImagePath ?: "",
+                                        onCancel = { viewModel.cancelUpload() }
+                                    )
+                                }
+
+                                AnimatedVisibility(
+                                    visible = uiState.replyTo != null,
+                                    enter = fadeIn() + expandVertically(),
+                                    exit = fadeOut() + shrinkVertically()
+                                ) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .width(3.dp)
+                                                .height(16.dp)
+                                                .background(
+                                                    MaterialTheme.colorScheme.primary,
+                                                    RoundedCornerShape(2.dp)
+                                                )
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(
+                                                text = uiState.replyTo?.senderName ?: "用户",
+                                                style = MaterialTheme.typography.labelSmall,
+                                                fontWeight = FontWeight.Bold,
+                                                color = MaterialTheme.colorScheme.primary
+                                            )
+                                            Spacer(modifier = Modifier.height(2.dp))
+                                            Text(
+                                                text = uiState.replyTo?.getDisplayContent()
+                                                    ?: "消息",
+                                                style = MaterialTheme.typography.labelSmall,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+                                        }
+                                        IconButton(
+                                            onClick = { viewModel.clearReplyTo() },
+                                            modifier = Modifier.size(24.dp)
+                                        ) {
+                                            Icon(
+                                                AppIcons.Close,
+                                                contentDescription = "取消引用",
+                                                modifier = Modifier.size(16.dp)
+                                            )
+                                        }
+                                    }
+                                }
+
+                                AnimatedVisibility(
+                                    visible = uiState.editingMessage != null,
+                                    enter = fadeIn() + expandVertically(),
+                                    exit = fadeOut() + shrinkVertically()
+                                ) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            AppIcons.Edit,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(16.dp),
+                                            tint = MaterialTheme.colorScheme.primary
+                                        )
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Text(
+                                            text = "编辑中……",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(
+                                            text = uiState.editingMessage?.getDisplayContent()
+                                                ?: "",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                            modifier = Modifier.weight(1f)
+                                        )
+                                        IconButton(
+                                            onClick = { viewModel.cancelEdit() },
+                                            modifier = Modifier.size(24.dp)
+                                        ) {
+                                            Icon(
+                                                AppIcons.Close,
+                                                contentDescription = "取消编辑",
+                                                modifier = Modifier.size(16.dp)
+                                            )
+                                        }
+                                    }
+                                }
+
+                                AnimatedVisibility(
+                                    visible = uiState.pendingCommandId != null,
+                                    enter = fadeIn() + expandVertically(),
+                                    exit = fadeOut() + shrinkVertically()
+                                ) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            AppIcons.Code,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(16.dp),
+                                            tint = MaterialTheme.colorScheme.primary
+                                        )
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Text(
+                                            text = "指令: ${uiState.pendingCommandName ?: ""}",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.primary,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                            modifier = Modifier.weight(1f)
+                                        )
+                                        IconButton(
+                                            onClick = { viewModel.clearPendingCommand() },
+                                            modifier = Modifier.size(24.dp)
+                                        ) {
+                                            Icon(
+                                                AppIcons.Close,
+                                                contentDescription = "取消指令",
+                                                modifier = Modifier.size(16.dp)
+                                            )
+                                        }
+                                    }
+                                }
+
+                                ChatComposer(
+                                    viewModel = viewModel,
+                                    chatType = chatType,
+                                    isSending = uiState.isSending,
+                                    onAddAlbumClick = { openAlbumPicker() },
+                                    onAddFileClick = { openFilePicker() },
+                                    isEmojiPanelVisible =
+                                        expressions.isVisible ||
+                                                pendingInputPanel == ChatInputPanel.Emoji,
+                                    onEmojiClick = { requestInputPanel(ChatInputPanel.Emoji) },
+                                    hasInstructions = instructionPanel.instructions.isNotEmpty(),
+                                    isInstructionPanelVisible =
+                                        instructionPanel.isVisible ||
+                                                pendingInputPanel == ChatInputPanel.Instruction,
+                                    onInstructionClick = {
+                                        requestInputPanel(ChatInputPanel.Instruction)
+                                    },
+                                    focusRequester = inputFocusRequester,
+                                    onInputFocused = {
+                                        if (pendingInputPanel != null) return@ChatComposer
+                                        if (showMenuMsgId != null) return@ChatComposer
+                                        if (expressions.isVisible) viewModel.hideStickerPanel()
+                                        if (instructionPanel.isVisible) viewModel.hideInstructionPanel()
+                                        pendingInputPanel = null
+                                        isReturningToKeyboard = false
+                                        isMeasuringIme = false
+                                    },
+                                    limitedMsgType = uiState.limitedMsgType
+                                )
+
+                                BackHandler(
+                                    enabled = pendingInputPanel != null ||
+                                            expressions.isVisible ||
+                                            instructionPanel.isVisible
+                                ) {
+                                    isMeasuringIme = false
+                                    pendingInputPanel = null
+                                    focusManager.clearFocus(force = true)
+                                    keyboardController?.hide()
+                                    viewModel.hideStickerPanel()
+                                    viewModel.hideInstructionPanel()
+                                }
+
+                                AnimatedVisibility(
+                                    visible = expressions.isVisible,
+                                    enter = fadeIn() + expandVertically(),
+                                    exit = fadeOut() + shrinkVertically()
+                                ) {
+                                    EmojiPanel(
+                                        expressions = expressions.expressions,
+                                        isLoading = expressions.isLoading,
+                                        onExpressionClick = { expression ->
+                                            viewModel.sendExpression(expression)
+                                        },
+                                        onStickerItemClick = { stickerItem ->
+                                            viewModel.sendStickerItem(stickerItem)
+                                        },
+                                        onEmojiTextSelected = { emoji ->
+                                            viewModel.appendEmojiToInput(emoji)
+                                        },
+                                        onStickerPackHeaderClick = { pack ->
+                                            StickerDetailActivity.start(
+                                                context = context,
+                                                packId = pack.id,
+                                                token = viewModel.token,
+                                                currentUserId = viewModel.currentUserId
+                                            )
+                                        },
+                                        onDeleteExpression = { id ->
+                                            viewModel.deleteExpression(id)
+                                        },
+                                        onTopExpression = { id ->
+                                            viewModel.topExpression(id)
+                                        },
+                                        stickerPacks = expressions.stickerPacks,
+                                        modifier = Modifier.fillMaxWidth(),
+                                        minHeight = 280.dp,
+                                        maxHeight = with(LocalDensity.current) { inputPanelHeightPx.toDp() },
+                                        onManageStickerPacks = {
+                                            StickerPackManagerActivity.start(
+                                                context = context,
+                                                token = viewModel.token
+                                            )
+                                        }
+                                    )
+                                }
+
+                                AnimatedVisibility(
+                                    visible = instructionPanel.isVisible,
+                                    enter = fadeIn() + expandVertically(),
+                                    exit = fadeOut() + shrinkVertically()
+                                ) {
+                                    InstructionPanel(
+                                        bots = instructionPanel.bots,
+                                        instructions = instructionPanel.instructions,
+                                        isLoading = instructionPanel.isLoading,
+                                        onInstructionClick = { viewModel.onInstructionClick(it) },
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(inputPanelHeight)
+                                    )
+                                }
+
+
+                            }
+                        }
+                    }
+                }
+            }
+        ) { innerPadding ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .then(
+                        if (liquidBackdrop != null) {
+                            Modifier
+                                .layerBackdrop(liquidBackdrop)
+                                .hazeSource(hazeState)
+                        } else {
+                            Modifier.hazeSource(hazeState)
+                        }
+                    )
+            ) {
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .background(chatBackgroundColor)
+                ) {
+                    uiState.backgroundUrl?.takeIf { showBackground && it.isNotEmpty() }
+                        ?.let { bgUrl ->
+                            val bgRequest = remember(bgUrl) {
+                                ImageRequest.Builder(context)
+                                    .data(bgUrl)
+                                    .apply {
+                                        if (bgUrl.contains("jwznb.com")) {
+                                            setHeader("Referer", "https://myapp.jwznb.com")
+                                        }
+                                    }
+                                    .build()
+                            }
+                            AsyncImage(
+                                model = bgRequest,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .alpha(backgroundOpacity),
+                                contentScale = ContentScale.Crop
+                            )
+                        }
+                }
+
+                if (uiState.isLoading && uiState.messages.isEmpty()) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(top = innerPadding.calculateTopPadding() + 24.dp)
+                    ) {
+                        ContainedLoadingIndicator(
+                            modifier = Modifier
+                                .align(Alignment.CenterHorizontally)
+                                .padding(top = 16.dp)
+                        )
+                    }
+                } else if (uiState.error != null && uiState.messages.isEmpty()) {
+                    EmptyPlaceholder(
+                        icon = AppIcons.Warning,
+                        title = "加载失败",
+                        subtitle = uiState.error ?: "未知错误",
+                        modifier = Modifier.padding(top = innerPadding.calculateTopPadding()),
+                        primaryButton = {
+                            Button(onClick = { viewModel.refresh() }) {
+                                Text("重试")
+                            }
+                        }
+                    )
+                } else {
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .onSizeChanged { listHeightPx = it.height },
+                        reverseLayout = true,
+                        contentPadding = PaddingValues(
+                            top = innerPadding.calculateTopPadding(),
+                            bottom = innerPadding.calculateBottomPadding()
+                        ),
+                        verticalArrangement = Arrangement.spacedBy(2.dp)
+                    ) {
+                        itemsIndexed(
+                            items = displayItems,
+                            key = { _, item -> item.message.msgId },
+                            contentType = { _, item -> item.message.contentType }
+                        ) { _, item ->
+                            val message = item.message
+
+                            val showDivider = firstUnreadMsgId != null && initialUnreadCount > 0 &&
+                                firstUnreadMsgId != uiState.messages.firstOrNull()?.msgId
+
+                            if (showDivider && message.msgId == firstUnreadMsgId) {
+                                LaunchedEffect(Unit) {
+                                    hasJumpedToUnread = true
+                                }
+                                UnreadDivider()
+                            }
+
+                            MessageBubble(
+                                modifier = Modifier.animateItem(),
+                                message = message,
+                                roleLabel = item.roleLabel,
+                                onRecall = { viewModel.showRecallDialog(message.msgId) },
+                                onEdit = { viewModel.startEditMessage(message) },
+                                onReply = { viewModel.setReplyTo(message) },
+                                onForward = { openForward(listOf(message)) },
+                                onQuoteClick = { quotedMessage ->
+                                    val quoteMsgId = quotedMessage.quoteMsgId
+                                    if (!quoteMsgId.isNullOrBlank()) {
+                                        showMenuMsgId = null
+                                        quoteJumpJob?.cancel()
+                                        quoteJumpJob = scope.launch {
+                                            if (viewModel.loadQuotedMessage(quoteMsgId)) {
+                                                val targetIndex =
+                                                    withTimeoutOrNull(2_000.milliseconds) {
+                                                        snapshotFlow {
+                                                            displayItems.indexOfFirst {
+                                                                it.message.msgId == quoteMsgId
+                                                            }
+                                                        }.first { it >= 0 }
+                                                    }
+                                                if (targetIndex != null) {
+                                                    listState.animateScrollToCenteredItem(
+                                                        targetIndex
+                                                    )
+                                                    highlightedMessageId = quoteMsgId
+                                                    highlightRequest++
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                isAdmin = uiState.isAdmin,
+                                isLastFromSender = item.isLastFromSender,
+                                isFirstFromSender = item.isFirstFromSender,
+                                drawAvatar = false,
+                                showTags = showMsgTagsSetting,
+                                showMyBubbleAvatarSetting = showMyBubbleAvatarSetting,
+                                bubbleOpacity = bubbleOpacity,
+                                bubbleCornerRadius = bubbleCornerRadius,
+                                isSelectionMode = selectionMode,
+                                isSelected = message in selectedMessages,
+                                onLongPress = { msg -> viewModel.enterSelectionMode(msg) },
+                                onClickInSelectionMode = { msg ->
+                                    viewModel.toggleMessageSelection(
+                                        msg
+                                    )
+                                },
+                                showMenu = showMenuMsgId == message.msgId && !selectionMode,
+                                showMenuMsgId = showMenuMsgId,
+                                showMenuChanged = { msgId ->
+                                    if (!selectionMode) {
+                                        if (msgId != null) {
+                                            focusManager.clearFocus(force = true)
+                                            keyboardController?.hide()
+                                        }
+                                        showMenuMsgId = msgId
+                                    }
+                                },
+                                onImageClick = { msg, sourceBounds ->
+                                    if (!selectionMode) {
+                                        when (msg.contentType) {
+                                            MessageItem.CONTENT_TYPE_IMAGE,
+                                            MessageItem.CONTENT_TYPE_VIDEO -> {
+                                                buildChatMediaGallery(
+                                                    messages = uiState.messages,
+                                                    selectedMessageId = msg.msgId
+                                                )?.let { gallery ->
+                                                    showImageViewer(
+                                                        context = context,
+                                                        images = gallery.entries.map { entry ->
+                                                            when (entry.kind) {
+                                                                ChatMediaKind.IMAGE -> imageMessagePreviewItem(
+                                                                    url = entry.url,
+                                                                    messageId = entry.messageId,
+                                                                    imageId = entry.sequence
+                                                                )
+
+                                                                ChatMediaKind.VIDEO -> videoMessagePreviewItem(
+                                                                    url = entry.url,
+                                                                    messageId = entry.messageId,
+                                                                    sequence = entry.sequence
+                                                                )
+                                                            }
+                                                        },
+                                                        initialIndex = gallery.initialIndex,
+                                                        pagination = MediaViewerPagination(
+                                                            chatId = chatId,
+                                                            chatType = chatType
+                                                        ),
+                                                        sourceBounds = sourceBounds
+                                                    )
+                                                }
+                                            }
+
+                                            MessageItem.CONTENT_TYPE_STICKER -> {
+                                                val packId = msg.stickerPackId
+                                                if (packId != null && packId != 0L) {
+                                                    val stickerUrl = resolveStickerMessageUrl(
+                                                        imageUrl = msg.imageUrl,
+                                                        stickerUrl = msg.stickerUrl
+                                                    )
+                                                    StickerDetailActivity.start(
+                                                        context = context,
+                                                        packId = packId,
+                                                        token = viewModel.token,
+                                                        currentUserId = viewModel.currentUserId,
+                                                        stickerUrl = stickerUrl
+                                                    )
+                                                } else {
+                                                    resolveStickerMessageUrl(
+                                                        imageUrl = msg.imageUrl,
+                                                        stickerUrl = msg.stickerUrl
+                                                    )?.let { url ->
+                                                        showImageViewer(
+                                                            context = context,
+                                                            images = listOf(fullImagePreviewItem(url)),
+                                                            sourceBounds = sourceBounds
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    } else {
+                                        viewModel.toggleMessageSelection(msg)
+                                    }
+                                },
+                                onMarkdownImageClick = { url ->
+                                    showImageViewer(
+                                        context = context,
+                                        images = listOf(fullImagePreviewItem(url))
+                                    )
+                                },
+                                downloadProgress = downloadingFiles[message.msgId],
+                                isDownloaded = message.msgId in uiState.downloadedFiles,
+                                onDownloadClick = { msg ->
+                                    when {
+                                        selectionMode -> viewModel.toggleMessageSelection(msg)
+                                        downloadingFiles.containsKey(msg.msgId) -> viewModel.cancelDownload(msg.msgId)
+                                        msg.msgId in uiState.downloadedFiles -> viewModel.openDownloadedFile(msg, context)
+                                        else -> startDownload(msg)
+                                    }
+                                },
+                                onButtonClick = { msg, button ->
+                                    if (!selectionMode) {
+                                        viewModel.onButtonClick(msg, button)
+                                    } else {
+                                        viewModel.toggleMessageSelection(msg)
+                                    }
+                                },
+                                onEditIconClick = { msgId ->
+                                    currentMsgHistoryToShow = msgId
+                                },
+                                isHighlighted = highlightedMessageId == message.msgId,
+                                onCreateExpression = {
+                                    viewModel.createExpression(it)
+                                }
+                            )
+                        }
+
+                        if (uiState.isLoadingMore) {
+                            item {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    ContainedLoadingIndicator()
+                                }
+                            }
+                        }
+                    }
+
+                    FloatingAvatarsLayer(
+                        listState = listState,
+                        items = displayItems,
+                        listHeightPx = listHeightPx,
+                        composerHeightPx = composerHeightPx,
+                        showMyAvatar = showMyBubbleAvatarSetting,
+                        dividerMsgId = if (firstUnreadMsgId != null && initialUnreadCount > 0 &&
+                            firstUnreadMsgId != uiState.messages.firstOrNull()?.msgId
+                        ) firstUnreadMsgId else null,
+                        onAvatarClick = { message ->
+                            ConversationDetailActivity.start(
+                                context = context,
+                                chatId = message.senderId,
+                                chatType = message.senderType,
+                                chatName = message.senderName,
+                                chatAvatar = message.senderAvatar
+                            )
+                        },
+                        onAvatarLongClick = { message ->
+                            if (chatType == 2 && !message.isMine) {
+                                viewModel.mentionUser(message.senderId, message.senderName)
+                            }
+                        },
+                        modifier = Modifier
+                            .matchParentSize()
+                            .clipToBounds()
+                    )
+
+                    AnimatedVisibility(
+                        visible = firstUnreadMsgId != null && !hasJumpedToUnread && initialUnreadCount > 0,
+                        enter = fadeIn() + expandVertically(),
+                        exit = fadeOut() + shrinkVertically(),
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(
+                                top = innerPadding.calculateTopPadding() + 12.dp,
+                                end = 12.dp
+                            )
+                    ) {
+                        BadgedBox(
+                            badge = {
+                                Badge(
+                                    containerColor = MaterialTheme.colorScheme.error,
+                                    contentColor = MaterialTheme.colorScheme.onError
+                                ) {
+                                    Text(
+                                        text = if (initialUnreadCount > 99) "99+" else initialUnreadCount.toString(),
+                                        fontSize = 10.sp
+                                    )
+                                }
+                            }
+                        ) {
+                            SmallFloatingActionButton(
+                                onClick = {
+                                    val targetId = firstUnreadMsgId ?: return@SmallFloatingActionButton
+                                    scope.launch {
+                                        val existingIdx = displayItems.indexOfFirst { it.message.msgId == targetId }
+                                        if (existingIdx >= 0) {
+                                            listState.animateScrollToItem(existingIdx)
+                                        } else if (viewModel.loadQuotedMessage(targetId)) {
+                                            val idx = withTimeoutOrNull(2_000.milliseconds) {
+                                                snapshotFlow {
+                                                    displayItems.indexOfFirst { it.message.msgId == targetId }
+                                                }.first { it >= 0 }
+                                            }
+                                            if (idx != null) {
+                                                listState.animateScrollToItem(idx)
+                                            }
+                                        }
+                                        liveUnreadCount = 0
+                                        hasJumpedToUnread = true
+                                    }
+                                },
+                                shape = CircleShape
+                            ) {
+                                Icon(
+                                    imageVector = AppIcons.ArrowUpward,
+                                    contentDescription = "跳转到未读消息",
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
+                    }
+
+                    AnimatedScrollToBottomButton(
+                        visible = showScrollToBottom || uiState.hasNewer,
+                        unreadCount = liveUnreadCount,
+                        loadNewerMode = uiState.hasNewer && !showScrollToBottom,
+                        onClick = {
+                            if (showScrollToBottom) {
+                                scrollToBottom()
+                            } else if (uiState.hasNewer) {
+                                viewModel.loadNewer()
+                            }
+                        },
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(
+                                bottom = with(LocalDensity.current) {
+                                    composerHeightPx.toDp()
+                                }
+                            )
+                    )
+                }
+            }
+        }
+    }
+
+    if (uiState.mentionPicker.isVisible) {
+        GroupMemberSheet(
+            title = "选择要@的成员",
+            members = uiState.groupMembers.members,
+            isLoading = uiState.groupMembers.isLoading,
+            hasMore = uiState.groupMembers.hasMore,
+            onLoadMore = { viewModel.loadGroupMembers() },
+            onMemberClick = { member -> viewModel.selectMention(member) },
+            onDismiss = { viewModel.hideMentionPicker() }
+        )
+    }
+
+    if (recallDialog.isOpen) {
+        AlertDialog(
+            onDismissRequest = {
+                if (!recallDialog.isSubmitting) viewModel.hideRecallDialog()
+            },
+            title = { Text("撤回消息") },
+            text = { Text("确定要撤回这条消息吗？") },
+            confirmButton = {
+                TextButton(
+                    onClick = { viewModel.recallMessage() },
+                    enabled = !recallDialog.isSubmitting
+                ) {
+                    Text(if (recallDialog.isSubmitting) "撤回中…" else "确定")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { viewModel.hideRecallDialog() },
+                    enabled = !recallDialog.isSubmitting
+                ) {
+                    Text("取消")
+                }
+            }
+        )
+    }
+
+    instructionForm?.let { item ->
+        InstructionFormDialog(
+            item = item,
+            onDismiss = { viewModel.dismissInstructionForm() },
+            onSubmit = { formJson -> viewModel.submitInstructionForm(item, formJson) }
+        )
+    }
+
+    val conversationDetailRepository = ConversationDetailRepository()
+
+    if (showEditNickNameDialog) {
+        AlertDialog(
+            onDismissRequest = { showEditNickNameDialog = false },
+            icon = { Icon(AppIcons.DriveFileRenameOutline, contentDescription = null) },
+            title = { Text("我的群名称") },
+            text = {
+                OutlinedTextField(
+                    value = uiState.myGroupNickname ?: "",
+                    onValueChange = viewModel::updateNickName,
+                    label = { Text("群名称（为空复原）") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    showEditNickNameDialog = false
+                    scope.launch {
+                        conversationDetailRepository.editMyGroupNickname(
+                            viewModel.token,
+                            chatId,
+                            uiState.myGroupNickname ?: ""
+                        ).onSuccess {
+                            Toast.makeText(context, "修改成功", Toast.LENGTH_SHORT).show()
+                        }.onFailure {
+                            Toast.makeText(context, "修改失败", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }) {
+                    Text("确定")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showEditNickNameDialog = false }) {
+                    Text("取消")
+                }
+            }
+        )
+    }
+}
+
+@Composable
+private fun UnreadDivider(modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        HorizontalDivider(
+            modifier = Modifier.weight(1f),
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+        )
+        Text(
+            text = "以下为新消息",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.padding(horizontal = 8.dp)
+        )
+        HorizontalDivider(
+            modifier = Modifier.weight(1f),
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+        )
+    }
+}

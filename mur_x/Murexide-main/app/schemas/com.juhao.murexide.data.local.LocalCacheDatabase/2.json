@@ -1,0 +1,495 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 2,
+    "identityHash": "31454fcf4e6ba9392c68652b216fc12f",
+    "entities": [
+      {
+        "tableName": "cached_conversations",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`accountId` TEXT NOT NULL, `chatType` INTEGER NOT NULL, `chatId` TEXT NOT NULL, `name` TEXT NOT NULL, `remark` TEXT, `chatContent` TEXT NOT NULL, `timestampMs` INTEGER NOT NULL, `unreadMessage` INTEGER NOT NULL, `at` INTEGER NOT NULL, `avatarUrl` TEXT NOT NULL, `doNotDisturb` INTEGER NOT NULL, `certificationLevel` INTEGER NOT NULL, `sendTimestamp` INTEGER NOT NULL, `latestMessageId` TEXT, `latestMessageSeq` INTEGER NOT NULL, `latestContentType` INTEGER NOT NULL, `listPosition` INTEGER NOT NULL, PRIMARY KEY(`accountId`, `chatType`, `chatId`))",
+        "fields": [
+          {
+            "fieldPath": "accountId",
+            "columnName": "accountId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "chatType",
+            "columnName": "chatType",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "chatId",
+            "columnName": "chatId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "remark",
+            "columnName": "remark",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "chatContent",
+            "columnName": "chatContent",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestampMs",
+            "columnName": "timestampMs",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "unreadMessage",
+            "columnName": "unreadMessage",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "at",
+            "columnName": "at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "avatarUrl",
+            "columnName": "avatarUrl",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "doNotDisturb",
+            "columnName": "doNotDisturb",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "certificationLevel",
+            "columnName": "certificationLevel",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sendTimestamp",
+            "columnName": "sendTimestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "latestMessageId",
+            "columnName": "latestMessageId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "latestMessageSeq",
+            "columnName": "latestMessageSeq",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "latestContentType",
+            "columnName": "latestContentType",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "listPosition",
+            "columnName": "listPosition",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "accountId",
+            "chatType",
+            "chatId"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_cached_conversations_accountId_listPosition",
+            "unique": false,
+            "columnNames": [
+              "accountId",
+              "listPosition"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_cached_conversations_accountId_listPosition` ON `${TABLE_NAME}` (`accountId`, `listPosition`)"
+          },
+          {
+            "name": "index_cached_conversations_accountId_sendTimestamp",
+            "unique": false,
+            "columnNames": [
+              "accountId",
+              "sendTimestamp"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_cached_conversations_accountId_sendTimestamp` ON `${TABLE_NAME}` (`accountId`, `sendTimestamp`)"
+          }
+        ]
+      },
+      {
+        "tableName": "cached_sticky_conversations",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`accountId` TEXT NOT NULL, `id` INTEGER NOT NULL, `chatType` INTEGER NOT NULL, `chatId` TEXT NOT NULL, `chatName` TEXT NOT NULL, `avatarUrl` TEXT NOT NULL, `certificationLevel` INTEGER NOT NULL, `listPosition` INTEGER NOT NULL, PRIMARY KEY(`accountId`, `id`))",
+        "fields": [
+          {
+            "fieldPath": "accountId",
+            "columnName": "accountId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "chatType",
+            "columnName": "chatType",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "chatId",
+            "columnName": "chatId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "chatName",
+            "columnName": "chatName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "avatarUrl",
+            "columnName": "avatarUrl",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "certificationLevel",
+            "columnName": "certificationLevel",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "listPosition",
+            "columnName": "listPosition",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "accountId",
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_cached_sticky_conversations_accountId_listPosition",
+            "unique": false,
+            "columnNames": [
+              "accountId",
+              "listPosition"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_cached_sticky_conversations_accountId_listPosition` ON `${TABLE_NAME}` (`accountId`, `listPosition`)"
+          },
+          {
+            "name": "index_cached_sticky_conversations_accountId_chatType_chatId",
+            "unique": false,
+            "columnNames": [
+              "accountId",
+              "chatType",
+              "chatId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_cached_sticky_conversations_accountId_chatType_chatId` ON `${TABLE_NAME}` (`accountId`, `chatType`, `chatId`)"
+          }
+        ]
+      },
+      {
+        "tableName": "cached_messages",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`accountId` TEXT NOT NULL, `msgId` TEXT NOT NULL, `chatId` TEXT NOT NULL, `chatType` INTEGER NOT NULL, `senderId` TEXT NOT NULL, `senderType` INTEGER NOT NULL, `timestamp` INTEGER NOT NULL, `msgSeq` INTEGER NOT NULL, `updateTimestamp` INTEGER NOT NULL, `payload` TEXT NOT NULL, PRIMARY KEY(`accountId`, `msgId`))",
+        "fields": [
+          {
+            "fieldPath": "accountId",
+            "columnName": "accountId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "msgId",
+            "columnName": "msgId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "chatId",
+            "columnName": "chatId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "chatType",
+            "columnName": "chatType",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "senderId",
+            "columnName": "senderId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "senderType",
+            "columnName": "senderType",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "msgSeq",
+            "columnName": "msgSeq",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updateTimestamp",
+            "columnName": "updateTimestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "payload",
+            "columnName": "payload",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "accountId",
+            "msgId"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_cached_messages_accountId_chatType_chatId_timestamp",
+            "unique": false,
+            "columnNames": [
+              "accountId",
+              "chatType",
+              "chatId",
+              "timestamp"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_cached_messages_accountId_chatType_chatId_timestamp` ON `${TABLE_NAME}` (`accountId`, `chatType`, `chatId`, `timestamp`)"
+          },
+          {
+            "name": "index_cached_messages_accountId_chatType_chatId_msgSeq",
+            "unique": false,
+            "columnNames": [
+              "accountId",
+              "chatType",
+              "chatId",
+              "msgSeq"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_cached_messages_accountId_chatType_chatId_msgSeq` ON `${TABLE_NAME}` (`accountId`, `chatType`, `chatId`, `msgSeq`)"
+          },
+          {
+            "name": "index_cached_messages_accountId_chatType_chatId_updateTimestamp",
+            "unique": false,
+            "columnNames": [
+              "accountId",
+              "chatType",
+              "chatId",
+              "updateTimestamp"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_cached_messages_accountId_chatType_chatId_updateTimestamp` ON `${TABLE_NAME}` (`accountId`, `chatType`, `chatId`, `updateTimestamp`)"
+          }
+        ]
+      },
+      {
+        "tableName": "cached_message_senders",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`accountId` TEXT NOT NULL, `chatType` INTEGER NOT NULL, `chatId` TEXT NOT NULL, `senderType` INTEGER NOT NULL, `senderId` TEXT NOT NULL, `name` TEXT NOT NULL, `avatarUrl` TEXT NOT NULL, `tagsJson` TEXT NOT NULL, PRIMARY KEY(`accountId`, `chatType`, `chatId`, `senderType`, `senderId`))",
+        "fields": [
+          {
+            "fieldPath": "accountId",
+            "columnName": "accountId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "chatType",
+            "columnName": "chatType",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "chatId",
+            "columnName": "chatId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "senderType",
+            "columnName": "senderType",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "senderId",
+            "columnName": "senderId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "avatarUrl",
+            "columnName": "avatarUrl",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tagsJson",
+            "columnName": "tagsJson",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "accountId",
+            "chatType",
+            "chatId",
+            "senderType",
+            "senderId"
+          ]
+        }
+      },
+      {
+        "tableName": "cached_payloads",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`accountId` TEXT NOT NULL, `kind` TEXT NOT NULL, `scope` TEXT NOT NULL, `payload` TEXT NOT NULL, `updatedAt` INTEGER NOT NULL, `expiresAt` INTEGER NOT NULL, PRIMARY KEY(`accountId`, `kind`, `scope`))",
+        "fields": [
+          {
+            "fieldPath": "accountId",
+            "columnName": "accountId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "kind",
+            "columnName": "kind",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "scope",
+            "columnName": "scope",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "payload",
+            "columnName": "payload",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updatedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "expiresAt",
+            "columnName": "expiresAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "accountId",
+            "kind",
+            "scope"
+          ]
+        }
+      },
+      {
+        "tableName": "cache_sync_state",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`accountId` TEXT NOT NULL, `key` TEXT NOT NULL, `value` TEXT NOT NULL, `updatedAt` INTEGER NOT NULL, PRIMARY KEY(`accountId`, `key`))",
+        "fields": [
+          {
+            "fieldPath": "accountId",
+            "columnName": "accountId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "key",
+            "columnName": "key",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "value",
+            "columnName": "value",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updatedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "accountId",
+            "key"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '31454fcf4e6ba9392c68652b216fc12f')"
+    ]
+  }
+}

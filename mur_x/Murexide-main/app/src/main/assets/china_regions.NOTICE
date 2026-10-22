@@ -1,0 +1,6 @@
+china_regions.json contains administrative-division data derived from
+province-city-china 8.5.8: https://github.com/uiwjs/province-city-china
+
+The source project is distributed under the MIT License.
+The administrative codes are based on public data from China's Ministry of
+Civil Affairs and National Bureau of Statistics.
