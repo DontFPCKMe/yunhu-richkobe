@@ -94,6 +94,23 @@ export function parse(content: any = {}, contentType: number = ContentType.text,
     default: out.push(h('unknown', { contentType, content }))
   }
   const el = out[0]
+  // content.buttons（字段2）：消息内按钮，形态容错 JSON 数组 / 换行分隔文本
+  if (content.buttons) {
+    let btns: any[] = []
+    try {
+      const j = JSON.parse(content.buttons)
+      btns = Array.isArray(j) ? j : []
+    } catch {
+      btns = String(content.buttons).split('\n').filter(Boolean).map((t: string) => ({ text: t }))
+    }
+    for (const b of btns) {
+      out.push(h('button', {
+        text: b.text || b.label || b.name || String(b),
+        id: b.id ?? b.buttonId ?? '',
+        value: b.value ?? '',
+      }))
+    }
+  }
   if (el && quote) el.attrs = { ...el.attrs, quote }
   return out
 }
