@@ -27,6 +27,31 @@ const members = computed(() => (g.state.members || []).slice(0, 14))
 const nick = ref('')
 const remark = ref('')
 const busy = ref(false)
+
+/* 群消息设置（消息类型限制，/v1/group/msg-type-limit） */
+const MSG_TYPES = [
+  { v: 1, n: '文本' }, { v: 2, n: '图片' }, { v: 3, n: 'Markdown' },
+  { v: 4, n: '文件' }, { v: 7, n: '表情' }, { v: 10, n: '视频' }, { v: 11, n: '语音' },
+]
+const limit = ref<number[]>([])
+watch([isOpen, info], () => {
+  const raw = String(info.value?.limitedMsgType || '')
+  limit.value = raw ? raw.split(',').map(Number).filter(Boolean) : []
+})
+function toggleLimit(v: number) {
+  const i = limit.value.indexOf(v)
+  if (i >= 0) limit.value.splice(i, 1)
+  else limit.value.push(v)
+}
+async function saveLimit() {
+  if (busy.value || !cur.value) return
+  busy.value = true
+  try {
+    await ctx.api.setMsgTypeLimit(cur.value.id, limit.value.join(','))
+    ctx.ui?.toast?.('群消息设置已保存', 'success')
+  } catch (e: any) { ctx.ui?.toast?.('保存失败：' + e.message, 'error') }
+  finally { busy.value = false }
+}
 watch([isOpen, cur], async () => {
   if (!isOpen.value || !cur.value) return
   nick.value = info.value?.myGroupNickname || ''
@@ -151,7 +176,20 @@ onMounted(() => { if (isOpen.value && isGroup.value) g.loadMembers() })
         <label class="gp-switch"><span>消息免打扰</span>
           <button class="sw" :class="{ on: muted }" @click="toggleMute"><i></i></button>
         </label>
-        <!-- 退出群聊：云湖公开接口无 quit/leave-group 端点（Murexide 亦无）→ 按「无后端即砍」不做 -->
+
+        <!-- 群消息设置（/v1/group/msg-type-limit，QQ 截图同款） -->
+        <div class="gp-sec"><span>群消息设置</span></div>
+        <div class="gp-msglimit">
+          <div class="gp-chips">
+            <button v-for="t in MSG_TYPES" :key="t.v" class="ghost small"
+                    :class="{ on: limit.includes(t.v) }" @click="toggleLimit(t.v)">{{ t.n }}</button>
+          </div>
+          <div class="gp-row">
+            <span class="dim small">仅允许以上类型（空=不限制）</span>
+            <span class="grow"></span>
+            <button class="ghost small" :disabled="busy" @click="saveLimit">保存</button>
+          </div>
+        </div>
       </template>
 
       <!-- ============ 私聊 ============ -->
@@ -246,6 +284,8 @@ onMounted(() => { if (isOpen.value && isGroup.value) g.loadMembers() })
 }
 .gp-danger:hover { background: color-mix(in srgb, var(--err) 24%, transparent); }
 .mt { margin-top: 10px; }
+.gp-msglimit { display: flex; flex-direction: column; gap: 8px; }
+.gp-chips { display: flex; flex-wrap: wrap; gap: 6px; }
 /* 成员右键菜单 */
 .mm {
   position: fixed; z-index: 90; min-width: 150px; background: var(--card);
