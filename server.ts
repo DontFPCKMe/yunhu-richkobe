@@ -309,6 +309,89 @@ async function handleUpdateCheck(res: http.ServerResponse): Promise<void> {
   } catch { res.writeHead(502, JSON_HDR).end(JSON.stringify({ ok: false, msg: 'bad github payload' })) }
 }
 
+/** GET/PUT /file-dir：文件保存目录（默认 <数据目录>/file，即 文档/yhchat/file） */
+const FILE_DIR_FILE = join(homedir(), '.yhchat-filedir')
+function defaultFileDir(): string { return join(DATA_DIR, 'file') }
+function resolveFileDir(): string {
+  if (process.env.YH_FILE_DIR) return process.env.YH_FILE_DIR
+  try {
+    const custom = readFileSync(FILE_DIR_FILE, 'utf8').trim()
+    if (custom) return custom
+  } catch { /* 用默认 */ }
+  return defaultFileDir()
+}
+let FILE_DIR = resolveFileDir()
+try { mkdirSync(FILE_DIR, { recursive: true }) } catch { /* 忽略 */ }
+
+async function handleFileDir(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
+  if (req.method === 'GET') {
+    res.writeHead(200, JSON_HDR)
+    res.end(JSON.stringify({ dir: FILE_DIR, custom: existsSync(FILE_DIR_FILE), default: defaultFileDir() }))
+    return
+  }
+  if (req.method === 'PUT' || req.method === 'POST') {
+    try {
+      const body = JSON.parse(await readBody(req))
+      const dir = String(body.dir || '').trim()
+      if (!dir || dir.length > 260) { res.writeHead(400, JSON_HDR).end(JSON.stringify({ ok: false, msg: '目录路径不合法' })); return }
+      mkdirSync(dir, { recursive: true })
+      await writeFile(FILE_DIR_FILE, dir, 'utf8')
+      FILE_DIR = dir
+      res.writeHead(200, JSON_HDR)
+      res.end(JSON.stringify({ ok: true, dir }))
+    } catch (e: any) {
+      res.writeHead(500, JSON_HDR)
+      res.end(JSON.stringify({ ok: false, msg: e.message }))
+    }
+    return
+  }
+  res.writeHead(405).end('method not allowed')
+}
+
+/**
+ * POST /local-open {url, name} —— 「在文件夹中打开」/「保存文件」：
+ * 把远程文件下载到**文件保存目录**（默认 文档/yhchat/file，可自定义），
+ * 然后调系统资源管理器定位选中（Windows: explorer /select,xxx；其它平台打开目录）。
+ * url 限本站 /res 代理或云湖数据床域名，防任意下载。
+ */
+async function handleLocalOpen(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
+  if (req.method !== 'POST') { res.writeHead(405, JSON_HDR).end(JSON.stringify({ ok: false })); return }
+  try {
+    const body = JSON.parse(await readBody(req))
+    const url = String(body.url || '')
+    const name = String(body.name || '').replace(/[\\/:*?"<>|]/g, '_').slice(0, 120) || 'file'
+    const u = new URL(url, 'http://localhost')
+    const allowed = u.pathname.startsWith('/res/') || RES_HOST_RE.test(u.hostname) || u.hostname === 'localhost' || u.hostname === '127.0.0.1'
+    if (!allowed) { res.writeHead(403, JSON_HDR).end(JSON.stringify({ ok: false, msg: 'url not allowed' })); return }
+    mkdirSync(FILE_DIR, { recursive: true })
+    const dest = join(FILE_DIR, name)
+    // 下载（http/https 都支持：/res 走本站代理）
+    const target = u.hostname === 'localhost' || u.hostname === '127.0.0.1'
+      ? `http://127.0.0.1:${PORT}${u.pathname}${u.search}`
+      : url
+    const data = await new Promise<Buffer>((resolve, reject) => {
+      const mod = target.startsWith('https') ? https : http
+      mod.get(target, { headers: u.pathname.startsWith('/res/') ? { referer: RES_REFERER } : {} }, (up) => {
+        if ((up.statusCode || 0) >= 400) { up.resume(); reject(new Error('HTTP ' + up.statusCode)); return }
+        const chunks: Buffer[] = []
+        up.on('data', (c) => chunks.push(c))
+        up.on('end', () => resolve(Buffer.concat(chunks)))
+        up.on('error', reject)
+      }).on('error', reject)
+    })
+    await writeFile(dest, data)
+    // 系统资源管理器定位
+    if (process.platform === 'win32') {
+      execFileSync('explorer.exe', ['/select,' + dest], { stdio: 'ignore', windowsHide: true })
+    } else {
+      execFileSync(process.platform === 'darwin' ? 'open' : 'xdg-open', [FILE_DIR], { stdio: 'ignore' })
+    }
+    res.writeHead(200, JSON_HDR).end(JSON.stringify({ ok: true, path: dest }))
+  } catch (e: any) {
+    res.writeHead(500, JSON_HDR).end(JSON.stringify({ ok: false, msg: e.message }))
+  }
+}
+
 async function staticFile(res: http.ServerResponse, pathname: string): Promise<void> {
   let rel = pathname === '/' ? '/index.html' : pathname
   rel = normalize(rel).replace(/^(\.\.[/\\])+/, '')
@@ -339,6 +422,8 @@ function serverApp(req: any, res: any) {
   if (dataM) { handleData(req, res, dataM[1]); return }
   if (pathname === '/data-dir') { handleDataDir(req, res).catch(e => { res.writeHead(500, JSON_HDR).end(JSON.stringify({ ok: false, msg: e.message })) }); return }
   if (pathname === '/update-check' && req.method === 'GET') { handleUpdateCheck(res).catch(e => { res.writeHead(502, JSON_HDR).end(JSON.stringify({ ok: false, msg: e.message })) }); return }
+  if (pathname === '/local-open' && req.method === 'POST') { handleLocalOpen(req, res).catch(e => { res.writeHead(500, JSON_HDR).end(JSON.stringify({ ok: false, msg: e.message })) }); return }
+  if (pathname === '/file-dir') { handleFileDir(req, res).catch(e => { res.writeHead(500, JSON_HDR).end(JSON.stringify({ ok: false, msg: e.message })) }); return }
   // 标准 Satori 协议端点
   if (pathname.startsWith('/satori/')) {
     handleSatori(req, res, pathname, search).catch((e) => { try { res.writeHead(500, {'Content-Type':'application/json'}); res.end(JSON.stringify({code:500,message:e.message})) } catch {} })
