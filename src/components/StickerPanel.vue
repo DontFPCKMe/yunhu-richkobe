@@ -243,7 +243,7 @@ function qrDrop(targetId: string) {
           <template v-if="tab === 'fav'">
             <button v-for="e in list" :key="e.id" class="cell" :title="'点击发送 · 右键更多'"
                     @click="st.send(e)" @contextmenu.prevent="askFav(e, $event)">
-              <img :src="src(e)" alt="
+              <img :src="src(e)" alt=""
                    @error="(ev: any) => { ev.target.style.visibility = 'hidden' }" />
               <span class="cell-name" :title="nameOf(e)">{{ nameOf(e) }}</span>
               <span class="top" @click.stop="st.topping(e)" title="置顶">↑</span>
@@ -257,7 +257,7 @@ function qrDrop(targetId: string) {
           <template v-else>
             <button v-for="e in packItems" :key="e.id" class="cell" :title="'点击发送 · 右键更多'"
                     @click="st.send(e)" @contextmenu.prevent="askFav(e, $event)">
-              <img :src="src(e)" alt="
+              <img :src="src(e)" alt=""
                    @error="(ev: any) => { ev.target.style.visibility = 'hidden' }" />
               <span class="cell-name" :title="nameOf(e)">{{ nameOf(e) }}</span>
               <!-- 右键小菜单：收藏 / 重命名 -->
