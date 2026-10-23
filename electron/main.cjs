@@ -137,7 +137,14 @@ async function handle(request) {
     return new Response('forbidden', { status: 403 })
   }
   try {
-    return await net.fetch(pathToFileURL(full).toString())
+    const resp = await net.fetch(pathToFileURL(full).toString())
+    // index.html 必须 no-store：否则渲染进程缓存旧 html → 永远跑旧 bundle（「修了但界面不变」根因）
+    if (filePath.endsWith('.html') || filePath === '/') {
+      const h = new Headers(resp.headers)
+      h.set('cache-control', 'no-store')
+      return new Response(resp.body, { status: resp.status, headers: h })
+    }
+    return resp
   } catch (e) {
     return new Response('not found: ' + filePath, { status: 404 })
   }
