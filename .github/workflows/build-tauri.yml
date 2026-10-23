@@ -118,16 +118,16 @@ jobs:
           set -e
           VER=$(node -p "require('./package.json').version")
           mkdir -p out
-          # NSIS 安装包
-          for f in artifacts/*.exe; do
-            [ -e "$f" ] || continue
-            cp "$f" "out/yunhulaoda-$VER-windows-x64-tauri-setup.exe"
-          done
-          # 便携 zip（CI 已按规范命名，直接收）
-          for f in artifacts/*-tauri-portable.zip; do
-            [ -e "$f" ] && cp "$f" out/
-          done
+          # download-artifact 的 merge-multiple 会保留 LCA 相对目录结构，
+          # 产物可能在 artifacts/src-tauri/... 或 artifacts/portable/... 下 —— 递归找
+          EXE=$(find artifacts -type f -name '*.exe' | head -1 || true)
+          ZIP=$(find artifacts -type f -name '*-tauri-portable.zip' | head -1 || true)
+          echo "found exe: $EXE"
+          echo "found zip: $ZIP"
+          [ -n "$EXE" ] && cp "$EXE" "out/yunhulaoda-$VER-windows-x64-tauri-setup.exe"
+          [ -n "$ZIP" ] && cp "$ZIP" out/
           ls -la out/
+          [ -n "$EXE" ] || { echo "::error::no exe in artifacts"; exit 1; }
 
       - name: 发布到 Release（存在则覆盖上传，不删不重建）
         env:
