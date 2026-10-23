@@ -1,0 +1,35 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "云湖牢大版",
+  "version": "1.0.3",
+  "identifier": "com.richkobe.yunhulaoda",
+  "build": {
+    "beforeBuildCommand": "",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis", "portable"],
+    "resources": [
+      "resources/server-bundle.mjs",
+      "resources/node.exe",
+      "resources/dist/**"
+    ],
+    "icon": [
+      "icons/icon.ico",
+      "icons/icon.png"
+    ],
+    "windows": {
+      "nsis": {
+        "installMode": "both",
+        "displayLanguageSelector": false
+      }
+    }
+  }
+}

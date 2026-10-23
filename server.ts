@@ -22,11 +22,14 @@ import { handleSatori } from './satori.ts'
 import { SatoriSocket, acceptKey, isSatoriWs } from './satori-ws.ts'
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
+/* Tauri sidecar 场景：资源目录与代码目录分离，用 YH_ROOT 指定 dist/config/certs 所在目录；
+   未设置时保持原行为（__dirname），Electron/裸 node 运行不受影响 */
+const BASE: string = process.env.YH_ROOT || __dirname
 const PORT: number = Number(process.env.PORT || 8902)
 const HOST: string = process.env.HOST || '0.0.0.0'
 const UPSTREAM: string = process.env.UPSTREAM || 'https://chat-go.jwzhd.com'
-const ROOT: string = join(__dirname, 'dist')
-const CONFIG_FILE: string = join(__dirname, 'yunhu.config.yml')
+const ROOT: string = join(BASE, 'dist')
+const CONFIG_FILE: string = join(BASE, 'yunhu.config.yml')
 
 /* ============ 用户数据目录（登录态/会话缓存/锁屏 PIN/扫码中继） ============
  * 解析顺序：YH_DATA_DIR 环境变量 → 用户自定义（~/.yhchat-dir 文件）→ 默认「文档/yhchat」。
@@ -379,7 +382,7 @@ const server = http.createServer(serverApp).listen(PORT, HOST, () => {
  * 证书放 ./certs/{key,cert}.pem；没有就用 openssl 自签一张（会提示不安全，手动信任即可）。
  */
 const HTTPS_PORT = Number(process.env.HTTPS_PORT || 8903)
-const CERT_DIR = join(__dirname, 'certs')
+const CERT_DIR = join(BASE, 'certs')
 try {
   const keyFile = join(CERT_DIR, 'key.pem')
   const certFile = join(CERT_DIR, 'cert.pem')
