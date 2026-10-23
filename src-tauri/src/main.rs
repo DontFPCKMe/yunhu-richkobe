@@ -18,7 +18,12 @@ use tauri::{
 
 const PORT: u16 = 8902;
 
-struct Sidecar(Mutex<Option<Child>>);
+/// sidecar 子进程句柄：用全局 static 持有，避开 Tauri State 在
+/// on_window_event 闭包里的生命周期问题（E0597）
+static SIDECAR: std::sync::OnceLock<Mutex<Option<Child>>> = std::sync::OnceLock::new();
+fn sidecar_slot() -> &'static Mutex<Option<Child>> {
+    SIDECAR.get_or_init(|| Mutex::new(None))
+}
 
 fn wait_port(port: u16, timeout: Duration) -> bool {
     let start = Instant::now();
@@ -33,7 +38,6 @@ fn wait_port(port: u16, timeout: Duration) -> bool {
 
 fn main() {
     tauri::Builder::default()
-        .manage(Sidecar(Mutex::new(None)))
         .setup(|app| {
             // 先 clone handle 再进闭包/线程，避免借用冲突
             let handle = app.handle().clone();
@@ -55,7 +59,7 @@ fn main() {
                     .spawn()
                 {
                     Ok(child) => {
-                        if let Ok(mut guard) = handle.state::<Sidecar>().0.lock() {
+                        if let Ok(mut guard) = sidecar_slot().lock() {
                             *guard = Some(child);
                         }
                     }
@@ -112,9 +116,7 @@ fn main() {
         .on_window_event(|window, event| {
             if let tauri::WindowEvent::Destroyed = event {
                 // 主窗口关闭 = 退出应用并清理 sidecar
-                let app = window.app_handle().clone();
-                let state = app.state::<Sidecar>();
-                if let Ok(mut guard) = state.0.lock() {
+                if let Ok(mut guard) = sidecar_slot().lock() {
                     if let Some(mut child) = guard.take() {
                         let _ = child.kill();
                         let _ = child.wait();
