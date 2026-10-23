@@ -15,7 +15,7 @@
   },
   "bundle": {
     "active": true,
-    "targets": ["nsis", "portable"],
+    "targets": ["nsis"],
     "resources": [
       "resources/server-bundle.mjs",
       "resources/node.exe",
