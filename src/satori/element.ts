@@ -57,7 +57,7 @@ export const h = Object.assign(_h, {
   pre: (content: string, lang = ''): Element => h('pre', { content, lang }),
   markdown: (content: string): Element => h('markdown', { content }),
   html: (content: string): Element => h('html', { content }),
-  sticker: (src: string, itemId = 0, packId = 0): Element => h('sticker', { src, itemId, packId }),
+  sticker: (src: string, itemId = 0, packId = 0, expressionId = 0): Element => h('sticker', { src, itemId, packId, expressionId }),
   a2ui: (data: any): Element => h('a2ui', { data }),
   form: (data: any): Element => h('form', { data }),
   post: (title: string, content = '', id = ''): Element => h('post', { title, content, id }),
@@ -82,7 +82,7 @@ export function parse(content: any = {}, contentType: number = ContentType.text,
     case ContentType.html: out.push(h.html(content.text ?? '')); break
     case ContentType.image: out.push(h.img(content.image_url || content.image || '', { width: content.width, height: content.height })); break
     // 表情：content.image 往往是相对 key，优先用带域名的 image_url
-    case ContentType.sticker: out.push(h.sticker(content.image_url || content.image || '', content.sticker_item_id, content.sticker_pack_id)); break
+    case ContentType.sticker: out.push(h.sticker(content.image_url || content.image || '', content.sticker_item_id, content.sticker_pack_id, content.expression_id)); break
     case ContentType.file: out.push(h.file(content.file_url, content.file_name, content.file_size)); break
     case ContentType.video: out.push(h.video(content.video_url || content.video, content.video_time)); break
     case ContentType.audio: out.push(h.audio(content.audio_url, content.audio_time)); break
@@ -148,7 +148,9 @@ export function render(elements: Element[] = []): { contentType: number; content
       case 'img': return { contentType: ContentType.image, content: { image_url: only.attrs.src } }
       case 'sticker': return {
         contentType: ContentType.sticker,
-        content: { image: only.attrs.src, sticker_item_id: only.attrs.itemId, sticker_pack_id: only.attrs.packId },
+        // ⚠️ 个人收藏表情必须带 expression_id（字段15）：官方手机端按它识别收藏表情，
+        //    只发 sticker_item_id（字段25，表情包内贴纸 id）会导致手机端不认
+        content: { image: only.attrs.src, sticker_item_id: only.attrs.itemId, sticker_pack_id: only.attrs.packId, expression_id: only.attrs.expressionId || only.attrs.itemId },
       }
       case 'file': return { contentType: ContentType.file, content: { file_url: only.attrs.src, file_name: only.attrs.name, file_size: only.attrs.size } }
       case 'audio': return { contentType: ContentType.audio, content: { audio_url: only.attrs.src, audio_time: only.attrs.time } }
