@@ -395,6 +395,25 @@ async function handleLocalOpen(req: http.IncomingMessage, res: http.ServerRespon
   }
 }
 
+/** GET /local-read?path=... —— Tauri 拖放文件读取：把本地文件以流形式返回给前端转 File。
+ *  需带 token 头（与 /api 同源凭据），防本地其它进程/网页滥用读任意文件。 */
+async function handleLocalRead(req: http.IncomingMessage, res: http.ServerResponse, search: string): Promise<void> {
+  const tok = String(req.headers.token || '').trim()
+  if (!tok) { res.writeHead(401, JSON_HDR).end(JSON.stringify({ ok: false, msg: 'token required' })); return }
+  const q = new URLSearchParams(search || '')
+  const p = String(q.get('path') || '')
+  if (!p || !existsSync(p)) { res.writeHead(404, JSON_HDR).end(JSON.stringify({ ok: false, msg: 'file not found' })); return }
+  try {
+    const data = await readFile(p)
+    res.writeHead(200, {
+      'content-type': 'application/octet-stream',
+      'x-file-name': encodeURIComponent(extname(p) ? p.slice(0, -extname(p).length).split(/[\\/]/).pop() + extname(p) : p.split(/[\\/]/).pop()),
+      'access-control-allow-origin': '*',
+    })
+    res.end(data)
+  } catch (e: any) { res.writeHead(500, JSON_HDR).end(JSON.stringify({ ok: false, msg: e.message })) }
+}
+
 async function staticFile(res: http.ServerResponse, pathname: string): Promise<void> {
   let rel = pathname === '/' ? '/index.html' : pathname
   rel = normalize(rel).replace(/^(\.\.[/\\])+/, '')
@@ -427,6 +446,7 @@ function serverApp(req: any, res: any) {
   if (pathname === '/update-check' && req.method === 'GET') { handleUpdateCheck(res).catch(e => { res.writeHead(502, JSON_HDR).end(JSON.stringify({ ok: false, msg: e.message })) }); return }
   if (pathname === '/local-open' && req.method === 'POST') { handleLocalOpen(req, res).catch(e => { res.writeHead(500, JSON_HDR).end(JSON.stringify({ ok: false, msg: e.message })) }); return }
   if (pathname === '/file-dir') { handleFileDir(req, res).catch(e => { res.writeHead(500, JSON_HDR).end(JSON.stringify({ ok: false, msg: e.message })) }); return }
+  if (pathname === '/local-read' && req.method === 'GET') { handleLocalRead(req, res, search).catch(e => { res.writeHead(500, JSON_HDR).end(JSON.stringify({ ok: false, msg: e.message })) }); return }
   // 标准 Satori 协议端点
   if (pathname.startsWith('/satori/')) {
     handleSatori(req, res, pathname, search).catch((e) => { try { res.writeHead(500, {'Content-Type':'application/json'}); res.end(JSON.stringify({code:500,message:e.message})) } catch {} })

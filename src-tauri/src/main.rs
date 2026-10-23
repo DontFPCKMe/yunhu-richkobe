@@ -81,10 +81,7 @@ fn main() {
                     )
                     .title("云湖牢大版")
                     .inner_size(1280.0, 820.0)
-                    .min_inner_size(900.0, 600.0)
-                    // 禁用 Tauri 的文件拖放拦截（v2 方法名 drag_drop_enabled），
-                    // 恢复 WebView2 原生 HTML5 drag&drop —— 前端 Composer 的 onDrop 才能收到文件
-                    .drag_drop_enabled(false);
+                    .min_inner_size(900.0, 600.0);
                     if !ready {
                         builder = builder.title("云湖牢大版（服务启动中…）");
                     }
