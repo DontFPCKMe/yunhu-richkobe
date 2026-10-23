@@ -57,7 +57,7 @@ export const h = Object.assign(_h, {
   pre: (content: string, lang = ''): Element => h('pre', { content, lang }),
   markdown: (content: string): Element => h('markdown', { content }),
   html: (content: string): Element => h('html', { content }),
-  sticker: (src: string, itemId = 0, packId = 0, expressionId = 0): Element => h('sticker', { src, itemId, packId, expressionId }),
+  sticker: (src: string, itemId = 0, packId = 0, expressionId = 0, width = 0, height = 0): Element => h('sticker', { src, itemId, packId, expressionId, width, height }),
   a2ui: (data: any): Element => h('a2ui', { data }),
   form: (data: any): Element => h('form', { data }),
   post: (title: string, content = '', id = ''): Element => h('post', { title, content, id }),
@@ -150,7 +150,7 @@ export function render(elements: Element[] = []): { contentType: number; content
         contentType: ContentType.sticker,
         // ⚠️ 个人收藏表情必须带 expression_id（字段15）：官方手机端按它识别收藏表情，
         //    只发 sticker_item_id（字段25，表情包内贴纸 id）会导致手机端不认
-        content: { image: only.attrs.src, sticker_item_id: only.attrs.itemId, sticker_pack_id: only.attrs.packId, expression_id: only.attrs.expressionId || only.attrs.itemId },
+        content: { image: only.attrs.src, sticker_item_id: only.attrs.itemId, sticker_pack_id: only.attrs.packId, expression_id: only.attrs.expressionId ? String(only.attrs.expressionId) : '', width: only.attrs.width || 0, height: only.attrs.height || 0 },
       }
       case 'file': return { contentType: ContentType.file, content: { file_url: only.attrs.src, file_name: only.attrs.name, file_size: only.attrs.size } }
       case 'audio': return { contentType: ContentType.audio, content: { audio_url: only.attrs.src, audio_time: only.attrs.time } }
