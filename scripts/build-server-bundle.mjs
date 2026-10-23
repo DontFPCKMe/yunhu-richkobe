@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url'
 import { dirname, join, resolve } from 'node:path'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-const outfile = process.argv[2] || join(root, 'tauri', 'resources', 'server-bundle.mjs')
+const outfile = process.argv[2] || join(root, 'src-tauri', 'resources', 'server-bundle.mjs')
 
 await build({
   entryPoints: [join(root, 'server.ts')],
