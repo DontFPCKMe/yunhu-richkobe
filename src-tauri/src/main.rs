@@ -88,9 +88,12 @@ fn main() {
                 });
             });
 
-            // 托盘
-            let icon = Image::from_bytes(include_bytes!("../icons/tray.png"))
-                .unwrap_or_else(|_| Image::new(&[], 0, 0));
+            // 托盘（复用 bundle 的窗口图标，避免自解 png）
+            let icon = app
+                .handle()
+                .default_window_icon()
+                .cloned()
+                .unwrap_or_else(|| Image::new(&[], 0, 0));
             let _tray = TrayIconBuilder::new()
                 .icon(icon)
                 .tooltip("云湖牢大版")
