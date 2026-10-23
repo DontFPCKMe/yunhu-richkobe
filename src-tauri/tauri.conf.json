@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "云湖牢大版",
+  "productName": "YunhuLaoda",
   "version": "1.0.3",
   "identifier": "com.richkobe.yunhulaoda",
   "build": {
@@ -15,7 +15,9 @@
   },
   "bundle": {
     "active": true,
-    "targets": ["nsis"],
+    "targets": [
+      "nsis"
+    ],
     "resources": {
       "resources/dist": "dist/",
       "resources/node.exe": "node.exe",
@@ -28,7 +30,11 @@
     "windows": {
       "nsis": {
         "installMode": "both",
-        "displayLanguageSelector": false
+        "displayLanguageSelector": false,
+        "languages": [
+          "SimpChinese"
+        ],
+        "installerIcon": "icons/icon.ico"
       }
     }
   }
