@@ -7,7 +7,7 @@
  * 过滤：url 为空或 CDN 上已不存在的 .tmp 条目直接不显示（否则一片裂图）。
  * 收藏/置顶/删除：expression/create、expression/topping、expression/delete。
  */
-import { inject, computed, ref, watch, onUnmounted } from 'vue'
+import { inject, computed, ref, watch, onUnmounted, nextTick } from 'vue'
 import { resUrl } from '../core/res'
 import Icon from '../console/components/Icon.vue'
 
@@ -20,6 +20,7 @@ const tab = ref<'fav' | number>('fav')
 function pickTab(t: 'fav' | number) {
   tab.value = t
   s.activeTab = t
+  s.locateSticker = null          // 手动切页签即取消圈线定位
   if (t !== 'fav' && !s.packs.length) st.loadPacks?.()
 }
 // 外部定位（聊天里点表情 → openPackOf 设 activeTab）
@@ -41,10 +42,30 @@ const list = computed(() => {
 /** 当前页签的表情包组内容 */
 const packItems = computed(() => {
   if (tab.value === 'fav') return []
-  const p = (s.packs || []).find((x: any) => x.id === tab.value)
+  // ⚠️ 包 id 可能是字符串、activeTab 可能是数字：双侧强转再比，否则合集页签空
+  const p = (s.packs || []).find((x: any) => Number(x.id) === Number(tab.value))
   return (p?.items || []).filter((e: any) => e.urlOriginal || e.url)
 })
-const curPack = computed(() => (s.packs || []).find((x: any) => x.id === tab.value) || null)
+const curPack = computed(() => (s.packs || []).find((x: any) => Number(x.id) === Number(tab.value)) || null)
+
+/** 是否是「聊天里点进来的」要圈线高亮的那一张。
+ *  收藏页签按 expression id 比，合集页签按包内贴纸 itemId 比。 */
+function isLocated(e: any): boolean {
+  const loc = s.locateSticker
+  if (!loc || Number(loc.tab) !== Number(tab.value)) return false
+  const id = Number(tab.value === 'fav' ? e.id : (e.id || e.itemId))
+  return !!id && id === loc.id
+}
+/** 定位到目标表情并滚到可视区（圈线 + 居中） */
+const bodyEl = ref<HTMLElement | null>(null)
+function scrollLocateIntoView() {
+  nextTick(() => {
+    const hit = bodyEl.value?.querySelector('.cell.located') as HTMLElement | null
+    hit?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+  })
+}
+// activeTab / locateSticker 变化（外部定位）后，等渲染完滚动到那张
+watch(() => [s.activeTab, s.locateSticker], () => { if (s.locateSticker) scrollLocateIntoView() }, { flush: 'post' })
 
 /** 收藏里的 url 是相对 key（expression/xxx.jpg），要补域名 */
 function src(e: any) {
@@ -238,10 +259,10 @@ function qrDrop(targetId: string) {
         <button class="ghost tiny" @click="renaming = null">取消</button>
       </div>
 
-      <div class="sp-body">
+      <div class="sp-body" ref="bodyEl">
         <div class="grid">
           <template v-if="tab === 'fav'">
-            <button v-for="e in list" :key="e.id" class="cell" :title="'点击发送 · 右键更多'"
+            <button v-for="e in list" :key="e.id" class="cell" :class="{ located: isLocated(e) }" :title="'点击发送 · 右键更多'"
                     @click="st.send(e)" @contextmenu.prevent="askFav(e, $event)">
               <img :src="src(e)" alt=""
                    @error="(ev: any) => { ev.target.style.visibility = 'hidden' }" />
@@ -255,7 +276,7 @@ function qrDrop(targetId: string) {
             </button>
           </template>
           <template v-else>
-            <button v-for="e in packItems" :key="e.id" class="cell" :title="'点击发送 · 右键更多'"
+            <button v-for="e in packItems" :key="e.id" class="cell" :class="{ located: isLocated(e) }" :title="'点击发送 · 右键更多'"
                     @click="st.send(e)" @contextmenu.prevent="askFav(e, $event)">
               <img :src="src(e)" alt=""
                    @error="(ev: any) => { ev.target.style.visibility = 'hidden' }" />
@@ -357,6 +378,16 @@ function qrDrop(targetId: string) {
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(78px, 1fr)); gap: 8px; }
 .cell { position: relative; aspect-ratio: 1; border: 1px solid var(--line); border-radius: 9px; background: var(--card2); padding: 4px; cursor: pointer; overflow: hidden; }
 .cell:hover { border-color: var(--acc); }
+/* 聊天里点表情后定位到这张：圈线高亮（紫色描边环 + 外发光），一眼看到在哪 */
+.cell.located {
+  border-color: var(--acc);
+  box-shadow: 0 0 0 2px var(--acc), 0 0 12px color-mix(in srgb, var(--acc) 60%, transparent);
+  animation: cell-locate 1.6s ease-in-out infinite;
+}
+@keyframes cell-locate {
+  0%, 100% { box-shadow: 0 0 0 2px var(--acc), 0 0 8px color-mix(in srgb, var(--acc) 45%, transparent); }
+  50% { box-shadow: 0 0 0 3px var(--acc), 0 0 16px color-mix(in srgb, var(--acc) 75%, transparent); }
+}
 .cell img { width: 100%; height: 100%; object-fit: contain; }
 .top { position: absolute; top: 2px; left: 4px; font-size: 12px; color: var(--fg2); background: var(--card); border-radius: 50%; width: 18px; height: 18px; display: grid; place-items: center; line-height: 1; opacity: 0; }
 .cell:hover .top { opacity: .9; }

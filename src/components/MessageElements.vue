@@ -47,6 +47,14 @@ const list = computed(() => props.elements || [])
  */
 function onHtmlClick(e: MouseEvent) {
   const t = e.target as HTMLElement | null
+  // 群卡片深链：yunhu://chat-add?id=<群号>&type=group → 打开该群并看群资料（官方语义「点击查看群聊信息」）
+  const link = t?.closest?.('a[href^="yunhu://"]') as HTMLAnchorElement | null
+  if (link) {
+    e.preventDefault()
+    e.stopPropagation()
+    openYunhuLink(link.getAttribute('href') || '')
+    return
+  }
   const btn = t?.closest?.('[data-a2ui-action]') as HTMLElement | null
   if (!btn) return
   e.preventDefault()
@@ -56,6 +64,43 @@ function onHtmlClick(e: MouseEvent) {
     sourceComponentId: btn.getAttribute('data-a2ui-id') || btn.getAttribute('data-a2ui-source') || '',
     context: {},
   })
+}
+
+/** 解析 yunhu:// 深链：chat-add（群卡片）→ 弹确认框（加入群聊 / 发消息 / 关闭）。
+ *  已加入 → 按钮「发消息」直接进会话；未加入 → 「加入群聊」走官方
+ *  /v1/friend/apply（chatType=2，官方注释「添加好友/加入群聊/机器人」同端点）。 */
+const cardAsk = ref<{ id: string; type: number; name: string; joined: boolean } | null>(null)
+async function openYunhuLink(href: string) {
+  try {
+    const u = new URL(href)
+    if (u.protocol !== 'yunhu:') return
+    const id = u.searchParams.get('id') || ''
+    const type = Number(u.searchParams.get('type')) || 2
+    if (!id) return
+    if (ctx.chat?.state?.current?.id === id) return   // 已在该群：无需弹窗
+    await ctx.social?.loadBook?.()
+    const hit = (ctx.social?.state?.book?.groups || []).find((g: any) => String(g.id) === id)
+    cardAsk.value = { id, type, name: hit?.name || `群 ${id}`, joined: !!hit }
+  } catch (e: any) {
+    ctx.ui?.toast?.('打开群卡片失败：' + (e?.message || '链接无效'), 'error')
+  }
+}
+/** 弹窗动作：发消息=进会话；加入群聊=发申请 */
+function cardGo() {
+  const c = cardAsk.value
+  cardAsk.value = null
+  if (!c) return
+  const hit = (ctx.social?.state?.book?.groups || []).find((g: any) => String(g.id) === c.id)
+  ctx.chat?.open?.({ id: c.id, type: c.type, name: hit?.name || c.name, avatar: hit?.avatar })
+}
+async function cardJoin() {
+  const c = cardAsk.value
+  cardAsk.value = null
+  if (!c) return
+  try {
+    await ctx.social?.apply?.(c.id, 2, '通过群聊卡片申请加入')
+    ctx.ui?.toast?.('加群申请已发送（开放群会直接加入）', 'success')
+  } catch (e: any) { ctx.ui?.toast?.('加群失败：' + e.message, 'error') }
 }
 const mdHtml = (el: Element) => renderMarkdown(el.attrs.content)
 const htmlHtml = (el: Element) => sanitizeHtml(el.attrs.content)
@@ -96,6 +141,15 @@ function openVideo(src: string) {
   const u = mediaUrl(src, 'video')
   if (u) { viewer.value = { kind: 'video', url: u }; zoom.value = 1; pan.value = { x: 0, y: 0 } }
 }
+/** 放大播放：开灯箱并直接进伪全屏（视频原生全屏键在 WebView2 常被拒） */
+function openVideoFull(src: string) {
+  openVideo(src)
+  videoFull.value = true
+  nextTick(() => {
+    const v = viewerVideo.value
+    if (v?.requestFullscreen) v.requestFullscreen().catch(() => {})
+  })
+}
 /** 视频全屏：CSS 伪全屏铺满灯箱（WebView2 里 Fullscreen API 常被拒），原生全屏作增强 */
 const videoFull = ref(false)
 function toggleVideoFull() {
@@ -106,10 +160,15 @@ function toggleVideoFull() {
 }
 function closeViewer() { viewer.value = null; videoFull.value = false }
 
-/** 聊天里左键点表情 → 打开表情面板并定位到它所属合集（未收藏则提示可添加） */
+/** 聊天里左键点表情 → 打开表情面板并定位到它所属合集中的那一张（圈线高亮）。
+ *  传完整 attrs：packId 决定合集、itemId/expressionId 决定高亮哪张。 */
 function openStickerPack(el: any) {
   const a = el.attrs || {}
-  ctx.stickers?.openPackOf?.(a.packId || 0, a.expressionId || a.itemId || 0)
+  ctx.stickers?.openPackOf?.({
+    packId: Number(a.packId) || 0,
+    itemId: Number(a.itemId) || 0,
+    expressionId: Number(a.expressionId) || 0,
+  })
 }
 /** 滚轮缩放（以 1.25 步进，限 0.2–8 倍） */
 function onWheel(e: WheelEvent) {
@@ -149,9 +208,13 @@ async function openPost(el: any) {
     postView.value = { ...a, content: '', loading: true }
     try {
       const d = await ctx.api?.baPostDetail?.(Number(a.id))
-      // 详情字段兼容：content / body / text 都可能出现
-      const body = d?.content ?? d?.body ?? d?.text ?? ''
-      postView.value = { title: d?.title || a.title || '文章', content: body, id: a.id }
+      // ⚠️ 详情响应正文常嵌套在 d.post 里（community.openPost 已验证）：
+      //    只查 d.content 会拿到空正文 → 聊天里文章「打不开」。逐层兼容取值。
+      const p = d?.post || d
+      const body = p?.content ?? p?.body ?? p?.text ?? d?.content ?? d?.postContent ?? ''
+      const title = p?.title ?? d?.title ?? a.title ?? '文章'
+      postView.value = { title, content: body, id: a.id }
+      if (!body) ctx.ui?.toast?.('这篇正文为空或已删除', 'warn')
     } catch (e: any) {
       postView.value = { title: a.title || '文章', content: `正文加载失败：${e.message}`, id: a.id }
     } finally { postLoading.value = false }
@@ -257,6 +320,11 @@ watch(() => props.elements, fix, { deep: true })
            title="点击查看所属合集" style="cursor:pointer" @click.stop="openStickerPack(el)" />
       <div v-else-if="el.type === 'video'" class="video-wrap">
         <video class="media" :src="mediaUrl(el.attrs.src, 'video')" controls preload="metadata" @click="openVideo(el.attrs.src)"></video>
+        <!-- 放大按钮：WebView2 里视频原生控件的全屏键常被拒，给显式入口
+             （开灯箱并直接进伪全屏），不再依赖原生 controls -->
+        <button class="vfull" title="放大播放" @click.stop="openVideoFull(el.attrs.src)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+        </button>
         <span v-if="el.attrs.time" class="vtime">{{ el.attrs.time }}s</span>
       </div>
       <audio v-else-if="el.type === 'audio'" :src="mediaUrl(el.attrs.src, 'audio')" controls preload="metadata" />
@@ -356,6 +424,18 @@ watch(() => props.elements, fix, { deep: true })
         <div ref="postBody" class="post-body rich" v-html="renderRich(postView.content || '')"></div>
       </div>
     </div>
+    <!-- 群卡片确认弹窗：加入群聊 / 发消息（已加入）/ 关闭 -->
+    <div v-if="cardAsk" class="post-mask" @click.self="cardAsk = null">
+      <div class="card-ask">
+        <b>群聊卡片</b>
+        <p>{{ cardAsk.name }}（群号 {{ cardAsk.id }}）</p>
+        <div class="card-ask-row">
+          <button v-if="cardAsk.joined" class="ca-btn primary" @click="cardGo">发消息</button>
+          <button v-else class="ca-btn primary" @click="cardJoin">加入群聊</button>
+          <button class="ca-btn" @click="cardAsk = null">关闭</button>
+        </div>
+      </div>
+    </div>
   </Teleport>
 </template>
 
@@ -375,12 +455,11 @@ watch(() => props.elements, fix, { deep: true })
 .quote.clickable:hover { background: var(--acc-soft); }
 
 .at { color: var(--acc); background: var(--acc-soft); border-radius: 5px; padding: 0 4px; }
-.rich :deep(p) { margin: 4px 0; }
 .rich :deep(a) { color: var(--acc); }
 .rich :deep(code) { background: rgba(127, 127, 127, .18); padding: 1px 4px; border-radius: 4px; font-size: 12px; }
 .rich :deep(pre) { background: rgba(0, 0, 0, .25); padding: 8px; border-radius: 8px; overflow-x: auto; }
 .rich :deep(img) { max-width: 100%; border-radius: 8px; }
-.rich :deep(blockquote) { margin: 4px 0; padding-left: 8px; border-left: 3px solid var(--line); opacity: .85; }
+.rich :deep(blockquote) { padding-left: 8px; border-left: 3px solid var(--line); opacity: .85; }
 .media { max-width: min(320px, 100%); max-height: 460px; border-radius: 10px; display: block; object-fit: contain; cursor: zoom-in; background: var(--card2); }
 /* 文件气泡旁的保存按钮 */
 .file-save {
@@ -389,12 +468,16 @@ watch(() => props.elements, fix, { deep: true })
   font-size: 12px; display: inline-flex; align-items: center; gap: 4px; cursor: pointer;
 }
 .file-save:hover { color: var(--acc); border-color: var(--acc); }
-/* markdown 消息行距收紧（用户反馈空太大） */
-.rich :deep(p) { margin: 2px 0; }
+/* markdown 消息行距收紧（用户反馈隔行空太大）：
+   段落只留下边距、不留上边距，避免相邻段 margin 叠加成双倍空隙 */
+.rich { line-height: 1.5; }
+.rich :deep(p) { margin: 0 0 2px; }
+.rich :deep(p:last-child) { margin-bottom: 0; }
 .rich :deep(h1), .rich :deep(h2), .rich :deep(h3) { margin: 4px 0 2px; }
 .rich :deep(ul), .rich :deep(ol) { margin: 2px 0; padding-left: 20px; }
+.rich :deep(li) { margin: 0; }
 .rich :deep(pre) { margin: 4px 0; }
-.rich :deep(blockquote) { margin: 4px 0; }
+.rich :deep(blockquote) { margin: 2px 0; }
 /* 灯箱（Teleport 到 body，scoped 样式需 :deep 或直接写全局类） */
 .viewer-mask {
   position: fixed; inset: 0; z-index: 92; background: rgba(0, 0, 0, .82);
@@ -427,8 +510,31 @@ watch(() => props.elements, fix, { deep: true })
 }
 .viewer-mask.video-full .viewer-bar { z-index: 94; }
 .sticker { max-width: 96px; max-height: 96px; display: block; object-fit: contain; }
-.video-wrap { display: inline-flex; flex-direction: column; gap: 3px; }
+.video-wrap { display: inline-flex; flex-direction: column; gap: 3px; position: relative; }
+/* 视频放大悬浮按钮：右上角小圆钮，hover 视频时显现 */
+.vfull {
+  position: absolute; top: 6px; right: 6px; width: 26px; height: 26px;
+  border-radius: 50%; border: none; background: rgba(0, 0, 0, .55); color: #fff;
+  display: grid; place-items: center; cursor: pointer; opacity: 0; transition: opacity .12s;
+}
+.video-wrap:hover .vfull { opacity: 1; }
+.vfull:hover { background: var(--acc); }
 .vtime { font-size: 11px; color: var(--fg2); }
+/* 群卡片确认弹窗（居中紧凑） */
+.card-ask {
+  width: min(320px, 88vw); background: var(--card); border: 1px solid var(--line);
+  border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 8px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, .5);
+}
+.card-ask b { font-size: 15px; }
+.card-ask p { font-size: 13px; color: var(--fg2); margin: 0; word-break: break-all; }
+.card-ask-row { display: flex; gap: 8px; justify-content: flex-end; margin-top: 6px; }
+.ca-btn {
+  padding: 7px 16px; border-radius: 9px; border: 1px solid var(--line);
+  background: var(--card2); color: var(--fg); font-size: 13px; cursor: pointer;
+}
+.ca-btn.primary { background: var(--acc); border-color: transparent; color: #fff; }
+.ca-btn:hover { filter: brightness(1.1); }
 .pre { font-size: 12px; white-space: pre-wrap; margin: 0; }
 .file { display: flex; gap: 8px; align-items: center; text-decoration: none; color: inherit; }
 .fico { font-size: 22px; }

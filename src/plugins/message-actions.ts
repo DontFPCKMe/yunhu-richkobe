@@ -162,7 +162,8 @@ export const messageActionsPlugin = {
 
     chat.action('msg.recall', {
       action: async ({ msg }: any) => {
-        // QQ 式：撤回不做生硬的 confirm 弹窗，直接执行 + 轻量 toast；失败才提示原因
+        // 用户要求：撤回前弹确认对话框（防误触，撤回不可逆）
+        if (!(await ui.confirm('撤回消息', `确定撤回这条消息？撤回后所有人都不再可见。`, { danger: true }))) return
         try {
           await chat.recall([msg.id])
           ui.toast(msg.right ? '已撤回' : `已撤回「${msg.sender}」的消息`, 'success')

@@ -8,6 +8,7 @@
  * （戳一戳/举报云湖无接口，按「无后端即砍」不做。）
  */
 import { inject, ref, computed, onMounted, watch } from 'vue'
+import QRCode from 'qrcode'
 import { resUrl } from '../core/res'
 import { fallbackAvatar } from '../core/util'
 import { renderRich } from '../core/render'
@@ -118,8 +119,12 @@ async function setNotifyMode(v: number) {
   if (muted.value !== wantMute) await toggleMute()
 }
 
-/** 分享群：弹群二维码（/v1/share/create 返回二维码图 + 分享链接），供大家扫码进群 */
-const qrView = ref<{ url: string; shareUrl: string } | null>(null)
+/** 分享群：官方式分享链接 + 二维码。
+ *  · 链接：/v1/share/create 返回 shareUrl 就用它；只回 key 时按官方格式
+ *    https://yhfx.jwznb.com/share?key=…&ts=<秒级时间戳> 自行拼装（对照官方分享链接实测格式）；
+ *  · 二维码：优先本地用开源库 qrcode（MIT）由链接生成——不依赖云端 imageKey，
+ *    云端回了官方群二维码图则一并保留作兜底展示。 */
+const qrView = ref<{ url: string; qr: string; link: string; shareUrl: string } | null>(null)
 const qrBusy = ref(false)
 async function shareGroup() {
   const c = cur.value
@@ -127,11 +132,84 @@ async function shareGroup() {
   qrBusy.value = true
   try {
     const d = await ctx.api.shareCreate(c.id, c.type || 2, c.name || '')
-    if (!d.imageKey && !d.shareUrl) { ctx.ui?.toast?.('云端未返回二维码', 'warn'); return }
+    // ⚠️ 实测（/v1/share/create dump）：云端 shareUrl 只回**裸域名** https://yhfx.jwznb.com/，
+    //    完整分享链接要客户端拼：/share?key=<key>&ts=<云端ts>（对照官方分享链接格式）。
+    //    仅当云端回的 shareUrl 自带 key 参数时才直接用它。
+    const link = (d.shareUrl && /key=/.test(d.shareUrl))
+      ? d.shareUrl
+      : (d.key ? `https://yhfx.jwznb.com/share?key=${encodeURIComponent(d.key)}&ts=${d.ts || Math.floor(Date.now() / 1000)}` : '')
+    let qr = ''
+    if (link) {
+      try { qr = await QRCode.toDataURL(link, { width: 240, margin: 1, color: { dark: '#000000', light: '#ffffff' } }) }
+      catch { qr = '' }
+    }
     const u = d.imageKey ? (/^https?:/.test(d.imageKey) ? d.imageKey : resUrl(`https://chat-img.jwznb.com/${d.imageKey.replace(/^\/+/, '')}`)) : ''
-    qrView.value = { url: u, shareUrl: d.shareUrl || '' }
-  } catch (e: any) { ctx.ui?.toast?.('生成二维码失败：' + e.message, 'error') }
+    if (!qr && !u) { ctx.ui?.toast?.('云端未返回二维码，链接仍可复制分享', 'warn') }
+    qrView.value = { url: u, qr, link, shareUrl: d.shareUrl || '' }
+  } catch (e: any) { ctx.ui?.toast?.('生成分享失败：' + e.message, 'error') }
   finally { qrBusy.value = false }
+}
+async function copyShareLink() {
+  const l = qrView.value?.link
+  if (!l) return
+  try { await navigator.clipboard.writeText(l); ctx.ui?.toast?.('分享链接已复制', 'success') }
+  catch { ctx.ui?.toast?.('复制失败，请手动选择链接复制', 'error') }
+}
+
+/** 分享群卡片：官方云湖的「群卡片」本质是 HTML 消息（content_type 8），
+ *  无专门端点——把群头像/群名/群号/简介拼成卡片 HTML 发给选中的会话。 */
+const cardOpen = ref(false)
+const cardBusy = ref(false)
+const cardSel = ref<Set<string>>(new Set())
+function openCardPick() {
+  cardSel.value = new Set()
+  cardOpen.value = true
+  ctx.social?.loadBook?.()
+}
+function toggleCard(id: string) {
+  const s = new Set(cardSel.value)
+  if (s.has(id)) s.delete(id)
+  else s.add(id)
+  cardSel.value = s
+}
+function cardHtml(): string {
+  const c = cur.value
+  if (!c) return ''
+  const esc = (s: string) => String(s ?? '').replace(/[&<>"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch] as string))
+  // 头像可能是相对 key：官方客户端直接读完整 URL，补图片桶域名
+  const av = info.value?.avatar
+    ? (/^https?:/.test(info.value.avatar) ? info.value.avatar : `https://chat-img.jwznb.com/${String(info.value.avatar).replace(/^\/+/, '')}`)
+    : ''
+  // 官方群卡片结构（yunhu://chat-add 深链 + table 布局 + 圆头像 + 群名 + 提示行），
+  // 按用户要求整体压缩：padding 12→8、头像 36→32、字号 16/13→14/12，去掉多余行
+  return '<a href="yunhu://chat-add?id=' + encodeURIComponent(c.id) + '&type=group" style="display:block;text-decoration:none;color:inherit;">'
+    + '<table cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:240px;">'
+    + '<tr><td style="padding:8px;">'
+    + '<table cellpadding="0" cellspacing="0" border="0"><tr>'
+    + (av ? '<td style="padding-right:8px;"><img src="' + esc(av) + '" width="32" height="32" style="border-radius:50%;"></td>' : '')
+    + '<td><div style="font-size:14px;font-weight:bold;margin-bottom:3px;color:#333;">' + esc(c.name) + '</div>'
+    + '<div style="font-size:12px;color:#666;">点击查看群聊信息</div></td>'
+    + '</tr></table>'
+    + '</td></tr></table></a>'
+}
+async function sendCard() {
+  const ids = [...cardSel.value]
+  const c = cur.value
+  if (!c || !ids.length || cardBusy.value) return
+  cardBusy.value = true
+  const html = cardHtml()
+  let ok = 0
+  try {
+    for (const id of ids) {
+      // 目标类型：好友=1（用户），群=2；从通讯录两份列表里反查
+      const isGroup = (ctx.social?.state?.book?.groups || []).some((g: any) => g.id === id)
+      await ctx.api.send(id, isGroup ? 2 : 1, 8, { text: html })
+      ok++
+    }
+    ctx.ui?.toast?.(`群卡片已发送给 ${ok} 个会话`, 'success')
+    cardOpen.value = false
+  } catch (e: any) { ctx.ui?.toast?.('发送群卡片失败：' + e.message, 'error') }
+  finally { cardBusy.value = false }
 }
 
 /** 删除聊天记录（本地缓存）：清当前会话消息与本地快照；云端记录不受影响（云湖无删记录端点） */
@@ -141,6 +219,22 @@ async function clearLocalHistory() {
   if (!(await ctx.ui?.confirm?.('删除聊天记录', `清除「${c.name}」在本机的消息缓存？\n（云端记录不受影响）`, { danger: true }))) return
   chat.clearLocal?.(c.id)
   ctx.ui?.toast?.('本地聊天记录已清除', 'success')
+}
+
+/** 退出群聊：官方端点 /v1/friend/delete-friend（注释「删除好友/群聊/机器人」）带 chatType=2。
+ *  群主不能退群（要先转让/解散），服务端会拒绝。 */
+async function leaveGroup() {
+  const c = cur.value
+  if (!c) return
+  if (isOwner.value) { ctx.ui?.toast?.('群主不能直接退群（需先转让或解散）', 'warn'); return }
+  if (!(await ctx.ui?.confirm?.('退出群聊', `确定退出「${c.name}」？退出后不再接收该群消息。`, { danger: true }))) return
+  try {
+    await ctx.api.deleteFriend(c.id, 2)
+    ctx.ui?.toast?.('已退出群聊', 'success')
+    g.close()
+    if (ctx.chat?.state?.current?.id === c.id) ctx.chat.state.current = null   // 离开已退的会话
+    ctx.chat?.loadConversations?.()
+  } catch (e: any) { ctx.ui?.toast?.('退群失败：' + e.message, 'error') }
 }
 
 
@@ -183,9 +277,11 @@ async function sendInvite() {
     if (!isGroups) {
       await ctx.api.inviteToGroup(c.id, ids)
     } else {
-      // 发到群聊：把群号卡片文本发过去（云湖无跨群邀请端点，用消息承载）
+      // 发到群聊：发**群卡片**（官方形态 = content_type 8 HTML 消息，yunhu://chat-add 深链 + table 布局），
+      // 对方点开卡片可一键加群；不再发纯文本群号
+      const html = cardHtml()
       for (const gid of ids) {
-        await ctx.api.send(gid, 2, 1, { text: `【入群邀请】${c.name}（群号 ${c.id}）欢迎加入！` })
+        await ctx.api.send(gid, 2, 8, { text: html })
       }
     }
     ctx.ui?.toast?.('邀请已发送', 'success')
@@ -287,12 +383,16 @@ onMounted(() => { if (isOpen.value && isGroup.value) g.loadMembers() })
 
         <!-- 群看板（原「群公告」位改显示看板内容；群简介只在群主编辑区出现，不重复） -->
         <div class="gp-sec"><span>群看板</span>
-          <button v-if="boardLong" class="gp-link" @click="boardOpen = !boardOpen">
-            {{ boardOpen ? '收起' : '展开' }}
-          </button>
+          <span class="gp-link-group">
+            <button v-if="boardLong" class="gp-link" @click="boardOpen = !boardOpen">
+              {{ boardOpen ? '收起' : '展开' }}
+            </button>
+            <button v-if="boardHtml" class="gp-link" title="在完整界面查看看板" @click="g.setDockTab('board')">全屏 ›</button>
+          </span>
         </div>
         <div ref="boardBox" class="gp-notice rich" :class="{ open: boardOpen }"
              v-html="boardHtml || '<span class=\'dim\'>暂无看板</span>'"></div>
+        <p class="gp-board-note dim">看板由群机器人发布，客户端不支持群主直接编辑。</p>
 
         <!-- 我的本群昵称 -->
         <div class="gp-sec"><span>我的本群昵称</span></div>
@@ -336,6 +436,10 @@ onMounted(() => { if (isOpen.value && isGroup.value) g.loadMembers() })
 
         <!-- 删除聊天记录：云端无删记录端点，此处清本地缓存（消息 state + 会话快照），隐私向实质功能 -->
         <button class="gp-clear" @click="clearLocalHistory">删除聊天记录（本地缓存）</button>
+        <!-- 退出群聊：官方 /v1/friend/delete-friend chatType=2；群主禁用（需先转让/解散） -->
+        <button class="gp-clear" :disabled="isOwner" @click="leaveGroup">
+          {{ isOwner ? '群主不能退群（需先转让/解散）' : '退出群聊' }}
+        </button>
 
       </template>
 
@@ -390,19 +494,50 @@ onMounted(() => { if (isOpen.value && isGroup.value) g.loadMembers() })
           </div>
         </div>
       </div>
-      <!-- 群二维码弹窗（分享） -->
+      <!-- 群分享弹窗：二维码（本地 qrcode 库生成，官方链接为内容）+ 可复制链接 -->
       <div v-if="qrView" class="qr-mask" @click.self="qrView = null">
         <div class="qr-box">
           <div class="qr-head">
-            <b>群二维码 · {{ cur?.name }}</b>
+            <b>群分享 · {{ cur?.name }}</b>
             <button class="gp-x" title="关闭" @click="qrView = null">×</button>
           </div>
-          <img v-if="qrView.url" :src="qrView.url" alt="群二维码" class="qr-img" />
-          <p v-else class="dim small">云端未返回二维码图片</p>
-          <p class="dim small">扫码或复制群号 {{ cur?.id }} 加入本群</p>
+          <img v-if="qrView.qr" :src="qrView.qr" alt="群分享二维码" class="qr-img" />
+          <img v-else-if="qrView.url" :src="qrView.url" alt="群二维码" class="qr-img" />
+          <p v-else class="dim small">二维码生成失败，链接仍可复制分享</p>
+          <p v-if="qrView.link" class="qr-link" :title="qrView.link">{{ qrView.link }}</p>
+          <p v-else class="dim small">云端未返回分享链接</p>
+          <p class="dim small">扫码或打开链接加入本群（群号 {{ cur?.id }}）</p>
           <div class="gp-row">
+            <button class="ghost small" :disabled="!qrView.link" @click="copyShareLink">复制分享链接</button>
             <button class="ghost small" @click="copyGroupId">复制群号</button>
+            <button class="ghost small" @click="openCardPick">分享群卡片</button>
             <a v-if="qrView.shareUrl" class="ghost small" :href="qrView.shareUrl" target="_blank" rel="noreferrer">打开分享页</a>
+          </div>
+        </div>
+      </div>
+      <!-- 分享群卡片：选目标会话（好友/群），把群信息以 HTML 卡片消息发出 -->
+      <div v-if="cardOpen" class="qr-mask" @click.self="cardOpen = false">
+        <div class="qr-box wide">
+          <div class="qr-head">
+            <b>分享「{{ cur?.name }}」群卡片（已选 {{ cardSel.size }}）</b>
+            <button class="gp-x" title="关闭" @click="cardOpen = false">×</button>
+          </div>
+          <div class="inv-list">
+            <label v-for="u in friends" :key="u.id" class="inv-row">
+              <input type="checkbox" :checked="cardSel.has(u.id)" @change="toggleCard(u.id)" />
+              <img :src="u.avatar ? resUrl(u.avatar) : fallbackAvatar(u.name)" alt="" />
+              <span>{{ u.name }}</span>
+            </label>
+            <label v-for="g2 in groups.filter(x => x.id !== cur?.id)" :key="g2.id" class="inv-row">
+              <input type="checkbox" :checked="cardSel.has(g2.id)" @change="toggleCard(g2.id)" />
+              <img :src="g2.avatar ? resUrl(g2.avatar) : fallbackAvatar(g2.name)" alt="" />
+              <span>{{ g2.name }}（群）</span>
+            </label>
+            <p v-if="!friends.length && !groups.length" class="dim small">通讯录为空，无法分享卡片</p>
+          </div>
+          <div class="gp-row">
+            <button class="ghost small" @click="cardOpen = false">取消</button>
+            <button class="ghost small" :disabled="!cardSel.size || cardBusy" @click="sendCard">发送群卡片</button>
           </div>
         </div>
       </div>
@@ -446,9 +581,12 @@ onMounted(() => { if (isOpen.value && isGroup.value) g.loadMembers() })
 .gp-notice {
   font-size: 12.5px; color: var(--fg2); background: var(--card2); border-radius: 8px;
   padding: 8px 10px; cursor: pointer; white-space: pre-wrap; word-break: break-word;
+  min-height: 60px;
   display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
 }
 .gp-notice.open { display: block; -webkit-line-clamp: unset; overflow: visible; }
+.gp-link-group { display: inline-flex; gap: 10px; align-items: center; }
+.gp-board-note { font-size: 11px; margin: 5px 0 2px; opacity: .8; }
 .gp-more { font-style: normal; color: var(--acc); }
 .gp-row { display: flex; gap: 8px; align-items: center; }
 .gp-row input {
@@ -486,6 +624,7 @@ onMounted(() => { if (isOpen.value && isGroup.value) g.loadMembers() })
   font-size: 13px; cursor: pointer;
 }
 .gp-clear:hover { background: color-mix(in srgb, var(--err) 22%, transparent); }
+.gp-clear:disabled { opacity: .5; cursor: not-allowed; }
 /* 群二维码弹窗 */
 .qr-mask { position: fixed; inset: 0; z-index: 90; background: rgba(0, 0, 0, .5); display: grid; place-items: center; backdrop-filter: blur(3px); }
 .qr-box {
@@ -495,6 +634,10 @@ onMounted(() => { if (isOpen.value && isGroup.value) g.loadMembers() })
 }
 .qr-head { width: 100%; display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
 .qr-img { width: 200px; height: 200px; object-fit: contain; background: #fff; border-radius: 10px; padding: 8px; }
+.qr-link {
+  font-size: 11px; color: var(--acc); word-break: break-all; text-align: center;
+  max-width: 100%; user-select: all; cursor: text; line-height: 1.5;
+}
 .qr-box.wide { width: min(380px, 92vw); align-items: stretch; }
 .inv-list { max-height: 46vh; overflow: auto; display: flex; flex-direction: column; gap: 2px; }
 .inv-row {

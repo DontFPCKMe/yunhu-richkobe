@@ -234,7 +234,9 @@ async function dlgOk() {
             <img :src="c.avatar ? resUrl(c.avatar) : fallbackAvatar(c.name)" alt=""
                  @error="(e: any) => (e.target.src = fallbackAvatar(c.name))" />
             <div class="mid">
-              <div class="top"><span class="cname">{{ c.at ? '[有人@我] ' : '' }}{{ c.name }}</span><span class="time">{{ fmtTime(c.ts) }}</span></div>
+              <div class="top"><span class="cname">{{ c.at ? '[有人@我] ' : '' }}{{ c.name }}</span>
+                <Icon v-if="chat.isMuted(c.id)" name="bellOff" :size="12" class="mute-ico" title="免打扰" />
+                <span class="time">{{ fmtTime(c.ts) }}</span></div>
               <div class="prev">{{ c.preview }}</div>
             </div>
             <span v-if="c.unread && !chat.isMuted(c.id)" class="badge">{{ c.unread > 99 ? '99+' : c.unread }}</span>
@@ -249,6 +251,7 @@ async function dlgOk() {
         <div class="mid">
           <div class="top">
             <span class="cname">{{ c.at ? '[有人@我] ' : '' }}{{ c.name }}</span>
+            <Icon v-if="chat.isMuted(c.id)" name="bellOff" :size="12" class="mute-ico" title="免打扰" />
             <span class="time">{{ fmtTime(c.ts) }}</span>
           </div>
           <div class="prev">{{ c.preview }}</div>

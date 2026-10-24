@@ -91,7 +91,7 @@ async function renameDiskOk() {
 async function delDisk(f: any) {
   if (!(await ctx.ui?.confirm?.('删除文件', `确定删除「${f.name}」？`, { danger: true }))) return
   try {
-    await ctx.api.diskDelete(f.id)
+    await ctx.api.diskDelete(f.id, f.objectType ?? (f.isFolder ? 1 : 2))
     ctx.ui?.toast?.('已删除', 'success')
     g.loadDisk()
   } catch (e: any) { ctx.ui?.toast?.('删除失败：' + e.message, 'error') }
@@ -151,20 +151,16 @@ async function jumpToMsg(r: any) {
   ctx.ui?.toast?.('该消息不在最近 30 条内，已回到最新；可用「加载更多」往上翻', 'info')
 }
 
-/* ---- 成员「管理」小弹窗（禁言/设管理/标签/资料集中一处，行内不再平铺控件） ---- */
+/* ---- 成员「管理」弹窗（居中模态：发言权限/成员角色/其它操作分组，不再只是行内禁言小浮层） ---- */
 const mgmt = ref<any>(null)
-function openMemberMgmt(m: any, e: MouseEvent) {
-  mgmt.value = mgmt.value?.id === m.id ? null : m
-  if (mgmt.value) {
-    setTimeout(() => {
-      const off = (ev: MouseEvent) => {
-        const wrap = (ev.target as HTMLElement)?.closest?.('.mm-wrap')
-        if (!wrap) { mgmt.value = null; document.removeEventListener('click', off) }
-      }
-      document.addEventListener('click', off)
-    }, 0)
-  }
-}
+function openMemberMgmt(m: any) { mgmt.value = m }
+function closeMgmt() { mgmt.value = null }
+/** 弹窗内各操作执行后关闭弹窗 */
+async function mgmtGag(seconds: number) { const m = mgmt.value; closeMgmt(); if (m) await g.gag(m, seconds) }
+async function mgmtSetAdmin() { const m = mgmt.value; closeMgmt(); if (m) await setAdmin(m) }
+function mgmtTag() { const m = mgmt.value; closeMgmt(); if (m) { g.setDockTab('tags'); g.openTagMember(m) } }
+function mgmtProfile() { const m = mgmt.value; closeMgmt(); if (m) g.openProfile(m) }
+async function mgmtKick() { const m = mgmt.value; closeMgmt(); if (m) await g.kick(m) }
 
 /* ---- 群主管理：编辑群资料 / 消息自动删除 / 入群口令 ---- */
 const gEdit = reactive({ name: '', intro: '', autoDel: 0, keyword: '' })
@@ -365,25 +361,8 @@ function boardHtmlOf(b: any) { return b?.content ? renderRich(b.content) : '' }
             <em v-else-if="m.level >= 2" class="role admin">管理员</em>
             <em v-if="m.isGag" class="role gag">已禁言</em>
             <span class="grow"></span>
-            <!-- 管理小弹窗：禁言/设管理/标签/资料（不再把控件平铺在行里） -->
-            <div class="mm-wrap">
-              <button class="ghost small" @click.stop="openMemberMgmt(m, $event)">管理</button>
-              <div v-if="mgmt?.id === m.id" class="mm-pop" @click.stop>
-                <!-- 禁言：按钮列表小弹窗（不用原生下拉） -->
-                <div class="mm-sec">禁言时长</div>
-                <div class="mm-chips">
-                  <button v-for="o in g.GAG_OPTIONS" :key="o.value" class="ghost small"
-                          :class="{ on: m.isGag && o.value !== 0 }"
-                          @click="g.gag(m, o.value); mgmt = null">{{ o.label }}</button>
-                </div>
-                <button v-if="isOwner && m.level < 100" class="ghost small" @click="setAdmin(m); mgmt = null">
-                  {{ m.level >= 2 ? '取消管理员' : '设为管理员' }}
-                </button>
-                <button v-if="g.state.tags.length" class="ghost small" @click="g.setDockTab('tags'); g.openTagMember(m); mgmt = null">打标签</button>
-                <button class="ghost small" @click="g.openProfile(m); mgmt = null">查看资料</button>
-              </div>
-            </div>
-            <button class="ghost small danger" @click="g.kick(m)">踢出</button>
+            <!-- 「管理」按钮：打开居中弹窗（发言权限/角色/资料/踢出集中一处，一目了然） -->
+            <button class="ghost small" @click.stop="openMemberMgmt(m)">管理</button>
           </li>
           <li v-if="!g.state.members.length" class="dim center">
             {{ g.state.membersLoading ? '加载中…' : '暂无成员' }}
@@ -635,6 +614,56 @@ function boardHtmlOf(b: any) { return b?.content ? renderRich(b.content) : '' }
     </div>
   </div>
   </div>
+
+  <!-- 成员「管理」弹窗：居中模态，分组展示所有管理动作（不再只是禁言小浮层） -->
+  <Teleport to="body">
+    <div v-if="mgmt" class="mgmt-mask" @click.self="closeMgmt">
+      <div class="mgmt-box">
+        <div class="mgmt-head">
+          <img :src="mgmt.avatar ? resUrl(mgmt.avatar) : fallbackAvatar(mgmt.name)"
+               @error="(e: any) => (e.target.src = fallbackAvatar(mgmt.name))" alt="" />
+          <div class="mgmt-hi">
+            <b>{{ mgmt.name }}</b>
+            <span class="dim small">
+              {{ mgmt.level >= 100 ? '群主' : mgmt.level >= 2 ? '管理员' : '成员' }}
+              <template v-if="mgmt.isGag"> · 已禁言</template>
+            </span>
+          </div>
+          <span class="grow"></span>
+          <button class="mgmt-x" title="关闭" @click="closeMgmt">×</button>
+        </div>
+
+        <div class="mgmt-body">
+          <!-- 发言权限（禁言） -->
+          <div class="mgmt-sec">发言权限</div>
+          <div class="mgmt-chips">
+            <button v-for="o in g.GAG_OPTIONS" :key="o.value" class="ghost small"
+                    :class="{ on: mgmt.isGag && o.value !== 0 }"
+                    :disabled="mgmt.level >= 100" @click="mgmtGag(o.value)">{{ o.label }}</button>
+          </div>
+          <p v-if="mgmt.level >= 100" class="dim small">群主不可被禁言。</p>
+
+          <!-- 成员角色（仅群主可改，且不能改自己/群主） -->
+          <template v-if="isOwner && mgmt.level < 100">
+            <div class="mgmt-sec">成员角色</div>
+            <div class="mgmt-chips">
+              <button class="ghost small" @click="mgmtSetAdmin">
+                {{ mgmt.level >= 2 ? '取消管理员' : '设为管理员' }}
+              </button>
+            </div>
+          </template>
+
+          <!-- 其它操作 -->
+          <div class="mgmt-sec">其它操作</div>
+          <div class="mgmt-chips">
+            <button class="ghost small" @click="mgmtProfile">查看资料</button>
+            <button v-if="g.state.tags.length" class="ghost small" @click="mgmtTag">打群标签</button>
+            <button v-if="mgmt.level < 100" class="ghost small danger" @click="mgmtKick">踢出群聊</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Teleport>
 </template>
 
 <style scoped>
@@ -718,15 +747,32 @@ function boardHtmlOf(b: any) { return b?.content ? renderRich(b.content) : '' }
 .ginfo-name { font-size: 16px; font-weight: 600; }
 .gp-results .r-hit { cursor: pointer; border-radius: 8px; padding: 6px 8px; }
 .gp-results .r-hit:hover { background: color-mix(in srgb, var(--acc) 14%, transparent); }
-/* 成员「管理」小弹窗 */
-.mm-wrap { position: relative; }
-.mm-pop {
-  position: absolute; right: 0; top: 105%; z-index: 79; min-width: 150px;
-  display: flex; flex-direction: column; gap: 5px; padding: 8px;
-  background: var(--card); border: 1px solid var(--line); border-radius: 10px;
-  box-shadow: var(--shadow);
+/* 成员「管理」弹窗：居中模态，明显分组（发言权限/角色/其它） */
+.mgmt-mask {
+  position: fixed; inset: 0; z-index: 88; background: rgba(0, 0, 0, .5);
+  display: grid; place-items: center; backdrop-filter: blur(2px);
 }
-.mm-pop .gag-sel { width: 100%; }
+.mgmt-box {
+  width: min(360px, 92vw); max-height: 84vh; overflow: auto;
+  background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, .5); padding: 4px 0 8px;
+}
+.mgmt-head {
+  display: flex; align-items: center; gap: 10px; padding: 12px 14px;
+  border-bottom: 1px solid var(--line);
+}
+.mgmt-head img { width: 40px; height: 40px; border-radius: 10px; object-fit: cover; background: var(--card2); }
+.mgmt-hi { min-width: 0; }
+.mgmt-hi b { display: block; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mgmt-head .grow { flex: 1; }
+.mgmt-x { background: transparent; color: var(--fg2); font-size: 20px; line-height: 1; padding: 0 6px; }
+.mgmt-x:hover { color: var(--fg); }
+.mgmt-body { padding: 10px 14px; }
+.mgmt-sec { font-size: 11.5px; color: var(--fg2); margin: 12px 0 7px; }
+.mgmt-sec:first-child { margin-top: 2px; }
+.mgmt-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.mgmt-chips .ghost.on { background: var(--acc); color: #fff; border-color: transparent; }
+.mgmt-body .dim.small { margin-top: 6px; }
 /* 上传文件 label 按钮：补边框（label 不吃 button 样式） */
 label.file, .dock label.ghost {
   display: inline-flex; align-items: center; gap: 4px; cursor: pointer;
@@ -734,9 +780,6 @@ label.file, .dock label.ghost {
   border: 1px solid var(--line); background: transparent; color: var(--fg);
 }
 label.file:hover, .dock label.ghost:hover { background: var(--card2); }
-/* 禁言按钮列表 */
-.mm-sec { font-size: 11px; color: var(--fg2); }
-.mm-chips { display: flex; flex-wrap: wrap; gap: 4px; }
 .gp-results .r-text { white-space: pre-wrap; word-break: break-word; }
 .ginfo-grid { display: flex; flex-direction: column; gap: 2px; }
 .ginfo-sec { font-size: 12px; color: var(--fg2); margin: 12px 0 6px; border-top: 1px solid var(--line); padding-top: 10px; }

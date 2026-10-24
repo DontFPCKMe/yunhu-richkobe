@@ -3,8 +3,8 @@
  * 单条消息：头像 + 元信息 + 元素树
  * 交互：右键/长按/「⋯」呼出上下文菜单；多选态下显示勾选框并支持点击选中
  */
-import { inject, computed } from 'vue'
-import { fmtTime, fallbackAvatar } from '../core/util'
+import { inject, computed, ref } from 'vue'
+import { fmtTime, fmtFullTime, fallbackAvatar } from '../core/util'
 import { resUrl } from '../core/res'
 import { parse } from '../satori/element'
 import type { Element } from '../satori/element'
@@ -24,7 +24,9 @@ const elements = computed<Element[]>(() => {
   return parse(props.msg.content || {}, props.msg.type)
 })
 
-/** 引用块：优先在本地消息里找到被引用的那条，否则退回 quote_msg_text */
+/** 引用块：优先在本地消息里找到被引用的那条，否则退回 quote_msg_text。
+ *  ⚠️ 无论走哪条分支都必须带上 id —— 之前 quote_msg_text 分支丢了 id，
+ *     导致被引用消息不在本地窗口时（如较早的图片引用）点击无法跳转定位。 */
 const quote = computed(() => {
   const qid = props.msg.quoteId || props.msg.content?.quote_msg_id
   if (!qid) return null
@@ -33,9 +35,10 @@ const quote = computed(() => {
   const t = props.msg.content?.quote_msg_text
   if (t) {
     const i = String(t).indexOf(':')
+    // 保留 id：点击时走 jumpTo → messagesAround 拉上下文定位（即便本地没有这条）
     return i > 0
-      ? { sender: String(t).slice(0, i).trim(), preview: String(t).slice(i + 1).trim() }
-      : { sender: '', preview: String(t) }
+      ? { id: qid, sender: String(t).slice(0, i).trim(), preview: String(t).slice(i + 1).trim() }
+      : { id: qid, sender: '', preview: String(t) }
   }
   return { id: qid, sender: '', preview: '引用的消息不在本地记录中' }
 })
@@ -69,6 +72,11 @@ function openProfile() {
 }
 const selected = computed(() => chat.state.selected.includes(props.msg.id))
 const selecting = computed(() => chat.state.selecting)
+
+/** 时间显示：左键点击在「简短(时分)」与「完整日期+秒」间切换（用户要求） */
+const timeExpanded = ref(false)
+const timeText = computed(() => timeExpanded.value ? fmtFullTime(props.msg.ts) : fmtTime(props.msg.ts))
+function toggleTime() { timeExpanded.value = !timeExpanded.value }
 
 function onContextMenu(e: MouseEvent) {
   e.preventDefault()
@@ -119,7 +127,7 @@ function onA2uiAction(a: any) {
       </div>
       <div class="meta">
         <span class="who" title="查看 TA 的主页" @click.stop="openProfile">{{ msg.sender }}</span>
-        <span class="t">{{ fmtTime(msg.ts) }}</span>
+        <span class="t" :title="timeExpanded ? '点击显示简短时间' : '点击显示完整日期与秒'" @click.stop="toggleTime">{{ timeText }}</span>
         <span v-if="msg.edited" class="flag">已编辑</span>
       </div>
       <!-- 撤回：QQ 式居中灰色胶囊，不占气泡 -->
@@ -139,6 +147,8 @@ function onA2uiAction(a: any) {
 <style scoped>
 .msg-wrap { min-width: 0; }
 .meta { font-size: 11px; color: var(--fg2); margin-bottom: 3px; display: flex; gap: 6px; }
+.meta .t { cursor: pointer; user-select: none; }
+.meta .t:hover { color: var(--acc); }
 .row.right .meta { justify-content: flex-end; }
 .meta .flag { opacity: .7; }
 .row img.av { cursor: pointer; }

@@ -150,8 +150,15 @@ function classify(f: File): Pending['kind'] {
   return 'file'
 }
 
-/** 加入待发送区：图片/视频生成本地预览 URL（objectURL，移除/卸载时释放） */
+/** 加入待发送区：图片/视频生成本地预览 URL（objectURL，移除/卸载时释放）。
+ *  ⚠️ 40MB 上限在进暂存区时就拦下并说清原因（用户反馈：超限文件只报笼统「发送失败」，
+ *     不知道是超大小）——与 api.uploadFile 的 LIMITS 同源，双保险。 */
+const MAX_FILE_BYTES = 40 * 1024 * 1024
 function stage(f: File) {
+  if (f.size > MAX_FILE_BYTES) {
+    ctx.ui?.toast?.(`「${f.name}」${(f.size / 1024 / 1024).toFixed(1)}MB 超过 40MB 上传限制，未加入待发送`, 'error', 6000)
+    return
+  }
   const k = classify(f)
   const url = (k === 'image' || k === 'video') ? URL.createObjectURL(f) : ''
   pending.value.push({ id: ++pendingSeq, file: f, url, kind: k, caption: '', error: '', progress: 0, speed: 0 })
@@ -317,7 +324,11 @@ async function submit() {
     autoresize()
   } finally {
     uploading.value = false
-    if (attachFailed) ctx.ui?.toast(`${attachFailed} 个附件发送失败，已保留在待发送区，可重试`, 'error')
+    // 失败 toast 带上真实原因（用户反馈：只说「发送失败」不知道为啥，超大小等要明说）
+    if (attachFailed) {
+      const firstErr = pending.value.find((x) => x.error)?.error || ''
+      ctx.ui?.toast(`${attachFailed} 个附件发送失败${firstErr ? '：' + firstErr : ''}，已保留在待发送区，可重试`, 'error', 6000)
+    }
   }
 }
 
@@ -459,7 +470,7 @@ function fmtSize(n: number) {
           <div class="bar" :style="{ width: Math.round(p.progress * 100) + '%' }"></div>
           <span class="spd">{{ p.speed.toFixed(1) }} MB/s</span>
         </div>
-        <span v-if="p.error" class="pend-err" :title="p.error">发送失败 · 点发送重试</span>
+        <span v-if="p.error" class="pend-err" :title="p.error">发送失败：{{ p.error }} · 点发送重试</span>
         <button class="pend-x" title="移除" @click="unstage(p)">×</button>
         <input v-if="p.kind === 'image'" v-model="p.caption" class="pend-cap" placeholder="给这张图配一句话（可选）" />
       </div>

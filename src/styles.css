@@ -316,6 +316,8 @@ code.mono, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, m
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; font-size: 13.5px;
 }
 .convs .time { font-size: 11px; color: var(--fg2); opacity: .8; }
+/* 免打扰会话：名字旁灰色小铃铛（QQ 式），有未读也不弹红点 */
+.convs .mute-ico { color: var(--fg2); opacity: .75; flex: 0 0 auto; align-self: center; }
 .convs .prev {
   font-size: 12px; color: var(--fg2); opacity: .85;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px;

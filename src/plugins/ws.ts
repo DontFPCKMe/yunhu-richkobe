@@ -58,8 +58,18 @@ export const wsPlugin = {
     let socket = null
     let hbTimer = null
     let retryTimer = null
+    let stableTimer = null   // 连接稳定计时：存活够久才把 retry 归零
+    let slowTimer = null     // 达到重连上限后的静默慢速重试
     let retry = 0
     let manualClose = false
+    let cappedNoted = false   // 「已达上限」提示只标注一次，避免慢速重试循环里 error 无限 append
+
+    // 「连上即断」循环是「一直重连中」的真根因：onopen 无条件把 retry 归零，
+    // 服务端因 token 失效/被踢而秒断时，retry 永远累加不到上限 → status 永远停在 retry。
+    // 对策：连接需**稳定存活** STABLE_MS 才算真正连上、才归零 retry；秒断则 retry 继续累加，
+    // 到上限转 closed（消息走轮询兜底），之后每 SLOW_RETRY_MS 静默重试，成功才转 online。
+    const STABLE_MS = 10000
+    const SLOW_RETRY_MS = 30000
 
     function log(...a) { ctx.logger?.info('[ws]', ...a) }
 
@@ -89,7 +99,7 @@ export const wsPlugin = {
       my.onopen = () => {
         if (socket !== my) return
         state.status = 'online'
-        retry = 0
+        clearTimeout(slowTimer); slowTimer = null
         log('已连接，发送登录包')
         sendJson({
           seq: seq(), cmd: 'login',
@@ -97,6 +107,10 @@ export const wsPlugin = {
         })
         clearInterval(hbTimer)
         hbTimer = setInterval(() => sendJson({ seq: seq(), cmd: 'heartbeat', data: {} }), hbMs)
+        // 稳定计时：存活够久才认为「真的连上了」，把重连计数归零；
+        // 若在此期间被秒断，onclose 会清掉这个计时器，retry 得以继续累加
+        clearTimeout(stableTimer)
+        stableTimer = setTimeout(() => { if (socket === my) { retry = 0; cappedNoted = false; state.error = '' } }, STABLE_MS)
       }
 
       my.onmessage = ev => {
@@ -110,6 +124,7 @@ export const wsPlugin = {
         if (socket !== my) return          // 旧代 socket 的迟到回调，忽略
         state.status = 'closed'
         clearInterval(hbTimer)
+        clearTimeout(stableTimer)          // 秒断：取消「稳定归零」，retry 继续累加
         socket = null
         log('连接关闭')
         if (!manualClose) scheduleRetry()
@@ -119,18 +134,25 @@ export const wsPlugin = {
     }
 
     function scheduleRetry(err?: any) {
-      retry = Math.min(retry + 1, 6)
-      const delay = Math.min(1500 * retry, 15000)
+      retry = retry + 1
       if (err) state.error = err.message || String(err)
-      // 重连次数封顶后不再显示「重连中」：转 closed（轮询兜底照常工作），
-      // 否则 status 永远停在 retry，用户看到「一直重连中」
+      // 快速重连达到上限：转 closed（消息走轮询兜底，不再刷屏「重连中」），
+      // 但后台仍每 SLOW_RETRY_MS 静默重试一次——网络恢复/token 刷新后能自动回到 online，
+      // 而不是永久停在「已断开」需要用户手动点。
       if (retry >= 6) {
         state.status = 'closed'
-        state.error = (state.error || '') + '（重连已达上限，消息走轮询兜底；点状态点可手动重连）'
-        log('重连达上限，转轮询兜底')
+        // 只标注一次：慢速重试每 30s 失败都会再进这里，无条件 append 会让 error 无限增长
+        if (!cappedNoted) {
+          state.error = (state.error || '') + '（快速重连已达上限，消息走轮询兜底；后台仍在尝试，也可点状态点手动重连）'
+          cappedNoted = true
+        }
+        log('重连达上限，转轮询兜底 + 慢速重试')
+        clearTimeout(slowTimer)
+        slowTimer = setTimeout(connect, SLOW_RETRY_MS)
         return
       }
       state.status = 'retry'
+      const delay = Math.min(1500 * retry, 15000)
       log(`${delay}ms 后重连（第 ${retry} 次）`)
       clearTimeout(retryTimer)
       retryTimer = setTimeout(connect, delay)
@@ -138,8 +160,11 @@ export const wsPlugin = {
 
     function close() {
       manualClose = true
+      cappedNoted = false
       clearInterval(hbTimer)
       clearTimeout(retryTimer)
+      clearTimeout(slowTimer)
+      clearTimeout(stableTimer)
       if (socket) { try { socket.close() } catch { /* ignore */ } }
       socket = null
       state.status = 'idle'
@@ -198,7 +223,7 @@ export const wsPlugin = {
       state,
       connect,
       close,
-      reconnect: () => { close(); connect() },
+      reconnect: () => { close(); retry = 0; connect() },   // 手动重连：重置计数，重新快速重连
       get online() { return state.status === 'online' },
       send: sendJson,
     }

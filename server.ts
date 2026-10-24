@@ -11,7 +11,7 @@
 import http from 'node:http'
 import https from 'node:https'
 import { readFile, writeFile, unlink } from 'node:fs/promises'
-import { execFileSync } from 'node:child_process'
+import { execFileSync, execFile } from 'node:child_process'
 import { mkdirSync, readFileSync } from 'node:fs'
 import { existsSync } from 'node:fs'
 import { extname, join, normalize } from 'node:path'
@@ -149,17 +149,26 @@ function follow(target: string, req: http.IncomingMessage, res: http.ServerRespo
      *   浏览器是发 Range 请求（分片）拿媒体的，上游回 206 + Content-Range，
      *   如果代理只透传 content-type，把 content-range/accept-ranges/content-length 丢了，
      *   浏览器就认为响应残缺 → **视频根本播不了**（之前就是这个原因）。
+     * ⚠️⚠️ 透传头必须净化：上游 content-disposition 带中文文件名时是裸非 ASCII，
+     *   Node writeHead 直接抛 ERR_INVALID_CHAR 且无 catch → **整个 sidecar 进程崩溃**
+     *   （用户报「点开板块就停止」「闪退」的真根因）。非 ASCII 头值一律丢弃该头。
      */
     const h: Record<string, any> = {
-      'content-type': up.headers['content-type'] || 'application/octet-stream',
+      'content-type': safeHeader(up.headers['content-type']) || 'application/octet-stream',
       'cache-control': cacheControl,
       'access-control-allow-origin': '*',
       'access-control-expose-headers': 'content-range, content-length, accept-ranges',
     }
     for (const k of ['content-length', 'content-range', 'accept-ranges', 'etag', 'last-modified', 'content-disposition']) {
-      if (up.headers[k] !== undefined) h[k] = up.headers[k]
+      const v = safeHeader(up.headers[k])
+      if (v !== undefined) h[k] = v
     }
-    res.writeHead(up.statusCode || 502, h)
+    try {
+      res.writeHead(up.statusCode || 502, h)
+    } catch {
+      // 兜底：任何残留非法头都不许再炸进程——只发安全子集
+      res.writeHead(up.statusCode || 502, { 'content-type': 'application/octet-stream', 'cache-control': cacheControl })
+    }
     up.pipe(res)
   })
   r.on('error', (e: Error) => {
@@ -168,6 +177,15 @@ function follow(target: string, req: http.IncomingMessage, res: http.ServerRespo
   })
   if (req.method === 'GET' || req.method === 'HEAD') r.end()
   else req.pipe(r)
+}
+
+/** 上游响应头透传前的净化：Node 的 writeHead 拒绝非 ASCII 头值（ERR_INVALID_CHAR 会炸进程）。
+ *  中文文件名常见于 content-disposition；这类头对浏览器非必需，直接丢弃比炸服务安全。 */
+function safeHeader(v: string | string[] | undefined): string | undefined {
+  if (v === undefined) return undefined
+  const s = Array.isArray(v) ? v.join(', ') : String(v)
+  // eslint-disable-next-line no-control-regex
+  return /^[\x09\x20-\x7e]*$/.test(s) ? s : undefined
 }
 
 function resProxy(req: http.IncomingMessage, res: http.ServerResponse, pathname: string, search: string): void {
@@ -192,7 +210,7 @@ function upProxy(req: http.IncomingMessage, res: http.ServerResponse, pathname: 
     hostname: url.hostname, port: 443, method: req.method, path: url.pathname + url.search, headers,
   }, up => {
     res.writeHead(up.statusCode || 502, {
-      'content-type': up.headers['content-type'] || 'application/octet-stream',
+      'content-type': safeHeader(up.headers['content-type']) || 'application/octet-stream',
       'access-control-allow-origin': '*',
     })
     up.pipe(res)
@@ -352,6 +370,46 @@ async function handleFileDir(req: http.IncomingMessage, res: http.ServerResponse
 }
 
 /**
+ * GET /pick-dir —— 弹出系统原生「选择文件夹」对话框，返回用户选中的绝对路径。
+ * 供「数据目录 / 文件保存目录」的「浏览…」按钮用（也可直接粘贴路径，两者互补）。
+ * 跨平台：Windows 用 PowerShell + FolderBrowserDialog（需 -STA），
+ *         macOS 用 osascript，Linux 用 zenity/kdialog。取消或失败返回 { ok:true, dir:'' }。
+ * ⚠️ 对话框可能长时间开着，故给足超时；execFileSync 传参数数组，不经 shell 拼接，避免注入。
+ */
+async function handlePickDir(_req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
+  // 用**异步** execFile：execFileSync 会在系统对话框打开期间冻结整个 Node 事件循环，
+  // 导致 /api 代理、消息轮询、/res 图片、WS 全部卡死（对话框可能开着几分钟）。
+  const run = (cmd: string, args: string[]): Promise<{ ok: boolean; out: string; msg?: string }> =>
+    new Promise((resolve) => {
+      execFile(cmd, args, { encoding: 'utf8', timeout: 600000, windowsHide: true },
+        (err, stdout) => err
+          ? resolve({ ok: false, out: '', msg: (err as any).message })
+          : resolve({ ok: true, out: String(stdout || '') }))
+    })
+  let dir = ''
+  try {
+    if (process.platform === 'win32') {
+      const ps = "Add-Type -AssemblyName System.Windows.Forms;" +
+        "$f=New-Object System.Windows.Forms.FolderBrowserDialog;" +
+        "$f.Description='选择目录';" +
+        "if($f.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK){Write-Output $f.SelectedPath}"
+      const r = await run('powershell.exe', ['-NoProfile', '-STA', '-Command', ps])
+      dir = r.ok ? (r.out.trim().split(/\r?\n/).filter(Boolean).pop() || '') : ''
+    } else if (process.platform === 'darwin') {
+      const r = await run('osascript', ['-e', 'POSIX path of (choose folder with prompt "选择目录")'])
+      dir = r.ok ? r.out.trim().replace(/\/$/, '') : ''
+    } else {
+      const z = await run('zenity', ['--file-selection', '--directory', '--title=选择目录'])
+      if (z.ok) dir = z.out.trim()
+      else { const k = await run('kdialog', ['--getexistingdirectory']); dir = k.ok ? k.out.trim() : '' }
+    }
+    res.writeHead(200, JSON_HDR).end(JSON.stringify({ ok: true, dir }))
+  } catch (e: any) {
+    res.writeHead(200, JSON_HDR).end(JSON.stringify({ ok: true, dir: '', note: e?.message || '' }))
+  }
+}
+
+/**
  * GET /local-open?url= * POST /local-open {url, name} —— name= —— 「在文件夹中打开」/「保存文件」：
  * 把远程文件下载到**文件保存目录**（默认 文档/yhchat/file，可自定义），
  * 然后调系统资源管理器定位选中（Windows: explorer /select,xxx；其它平台打开目录）。
@@ -446,6 +504,7 @@ function serverApp(req: any, res: any) {
   if (pathname === '/update-check' && req.method === 'GET') { handleUpdateCheck(res).catch(e => { res.writeHead(502, JSON_HDR).end(JSON.stringify({ ok: false, msg: e.message })) }); return }
   if (pathname === '/local-open' && req.method === 'GET') { handleLocalOpen(req, res, search).catch(e => { res.writeHead(500, JSON_HDR).end(JSON.stringify({ ok: false, msg: e.message })) }); return }
   if (pathname === '/file-dir') { handleFileDir(req, res).catch(e => { res.writeHead(500, JSON_HDR).end(JSON.stringify({ ok: false, msg: e.message })) }); return }
+  if (pathname === '/pick-dir' && req.method === 'GET') { handlePickDir(req, res); return }
   if (pathname === '/local-read' && req.method === 'GET') { handleLocalRead(req, res, search).catch(e => { res.writeHead(500, JSON_HDR).end(JSON.stringify({ ok: false, msg: e.message })) }); return }
   // 标准 Satori 协议端点
   if (pathname.startsWith('/satori/')) {
@@ -540,5 +599,15 @@ server.on('upgrade', (req: any, socket: any) => {
     } catch { /* 忽略 */ }
   })
   ws.start().catch(() => {})
+})
+
+/* 进程级最后防线：任何未捕获异常/未处理拒绝只记日志，不杀进程。
+   单请求的错误（如上游怪响应头）不该让整个客户端闪退——
+   「点开板块/看文件就整个应用死掉」这类事故的兜底（根因修复见 safeHeader）。 */
+process.on('uncaughtException', (e: Error) => {
+  console.error('[yunhu] uncaughtException（已兜底，进程不退出）:', e?.message || e)
+})
+process.on('unhandledRejection', (e: any) => {
+  console.error('[yunhu] unhandledRejection（已兜底，进程不退出）:', e?.message || e)
 })
 

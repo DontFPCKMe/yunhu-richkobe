@@ -8,22 +8,25 @@ import { inject, ref, onMounted } from 'vue'
 import KLayout from '../components/KLayout.vue'
 import KCard from '../components/KCard.vue'
 import { resUrl } from '../../core/res'
-import { fmtTime } from '../../core/util'
+import { fmtTime, fallbackAvatar } from '../../core/util'
 import { renderMarkdown } from '../../core/render'
 
 const ctx = inject<any>('ctx')
 const cm = ctx.community
 const s = cm.state
 
-const tab = ref<'mine' | 'all' | 'hot' | 'follow'>('mine')
+const tab = ref<'mine' | 'all' | 'hot' | 'follow'>('hot')
 const newBa = ref({ name: '', avatar: '' })
 /** 文章正文按 markdown 渲染 */
 const md = (t: string) => renderMarkdown(t || '')
 const editing = ref<any>(null)
 
 const TABS: Array<[string, number]> = [['我的', 3], ['全部', 4], ['热门', 2], ['关注', 1]]
+/** 当前页签对应的列表类型（刷新按钮用，避免在「热门」页却刷新成「全部」） */
+const TAB_TYPE: Record<'mine' | 'all' | 'hot' | 'follow', number> = { mine: 3, all: 4, hot: 2, follow: 1 }
 
-onMounted(() => { cm.load(3); cm.loadFollows?.() })
+// 默认「热门」页（用户要求）：进页面即拉热门列表
+onMounted(() => { cm.load(2); cm.loadFollows?.() })
 
 const isFollowed = (id: number) => !!cm.isFollowed?.(id)
 async function toggleFollow(b: any) { await cm.toggleFollow?.(b) }
@@ -47,7 +50,7 @@ async function create() {
       <button v-for="t in TABS" :key="t[0]" class="ghost small"
               :class="{ on: (tab === 'mine' && t[0] === '我的') || (tab === 'all' && t[0] === '全部') || (tab === 'hot' && t[0] === '热门') || (tab === 'follow' && t[0] === '关注') }"
               @click="switchTab(t)">{{ t[0] }} {{ cm.countOf(t[1]) }}</button>
-      <button class="ghost small" @click="cm.load(tab === 'mine' ? 3 : 4)">刷新</button>
+      <button class="ghost small" @click="cm.load(TAB_TYPE[tab])">刷新</button>
     </template>
 
     <KCard title="创建板块">
@@ -68,8 +71,9 @@ async function create() {
     <KCard class="mt" :pad="false">
       <div class="list">
         <div class="item" v-for="b in s.list" :key="b.id">
-          <img :src="b.avatar ? resUrl(b.avatar) : ''" v-if="b.avatar" alt="" />
-          <div class="ic" v-else>{{ (b.name || '?').slice(0, 1) }}</div>
+          <!-- 头像统一走 resUrl 代理（防盗链），空/加载失败兜底首字母块（fallbackAvatar） -->
+          <img :src="b.avatar ? resUrl(b.avatar) : fallbackAvatar(b.name)" alt=""
+               @error="(e: any) => (e.target.src = fallbackAvatar(b.name))" />
           <div class="imain">
             <div class="iname">
               {{ b.name }}

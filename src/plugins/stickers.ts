@@ -47,6 +47,9 @@ export const stickersPlugin = {
       loading: false,
       panelOpen: false,
       activeTab: 'fav' as 'fav' | number,   // 面板当前页签（openPackOf 可外部定位）
+      /** 聊天里点表情后要在面板中高亮（圈线）的那一张：{ tab, id }。
+       *  tab='fav' 时 id 是 expression_id；tab=数字时 id 是包内贴纸 itemId */
+      locateSticker: null as null | { tab: 'fav' | number; id: number },
       keyword: '',
       recording: false,
       seconds: 0,
@@ -315,21 +318,39 @@ export const stickersPlugin = {
     }
 
     /**
-     * 聊天里左键点表情 → 打开面板并定位到它所属的合集页签。
-     * 合集不在我的收藏里时：停在收藏页签并给出「添加该合集」提示条（suggestPack）。
+     * 聊天里左键点表情 → 打开面板并**定位到那张表情**（圈线高亮）。
+     *  · 属于我已收藏的合集：切到该合集页签，高亮包内 itemId 对应的贴纸；
+     *  · 是个人收藏表情（无 packId）：切收藏页签，高亮 expression_id；
+     *  · 合集不在我的收藏里：停在收藏页签 + 提示条（suggestPack）可一键添加。
+     * @param arg 兼容对象 {packId,itemId,expressionId} 与旧的两参调用 (packId, expressionId)
      */
     const suggestPack = { id: 0, name: '' }
-    async function openPackOf(packId: number | string, expressionId: number | string) {
+    async function openPackOf(arg: any, legacyExpr?: any) {
+      const a = (arg && typeof arg === 'object') ? arg : { packId: Number(arg) || 0, expressionId: Number(legacyExpr) || 0 }
+      const pid = Number(a.packId) || 0
+      const itemId = Number(a.itemId) || 0
+      const exprId = Number(a.expressionId) || 0
       state.panelOpen = true
+      state.locateSticker = null
       if (!state.packs.length) await loadPacks()
-      const pid = Number(packId) || 0
-      const hit = pid ? state.packs.find((p: any) => p.id === pid) : null
+      // ⚠️ 接口回的包 id 可能是字符串，pid 是 number —— 必须双侧强转再比，
+      //    否则 find 恒空、永远走「未收藏」分支，圈线定位失效
+      const hit = pid ? state.packs.find((p: any) => Number(p.id) === pid) : null
       if (hit) {
         suggestPack.id = 0; suggestPack.name = ''
-        state.activeTab = hit.id
+        state.activeTab = Number(hit.id)
+        // 高亮该合集里的那一张（包内贴纸 id）
+        state.locateSticker = { tab: Number(hit.id), id: itemId }
         return
       }
-      // 不在收藏：收藏页签 + 提示条（expressionId 有值时也能定位到收藏项）
+      if (exprId) {
+        // 个人收藏表情：切收藏页签并高亮该收藏项
+        suggestPack.id = 0; suggestPack.name = ''
+        state.activeTab = 'fav'
+        state.locateSticker = { tab: 'fav', id: exprId }
+        return
+      }
+      // 合集不在我的收藏：收藏页签 + 提示条（可一键添加该合集）
       suggestPack.id = pid
       suggestPack.name = pid ? `合集 ${pid}` : ''
       state.activeTab = 'fav'

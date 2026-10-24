@@ -53,6 +53,19 @@ onMounted(async () => {
   loadFileDir()
 })
 
+/** 弹系统原生「选择文件夹」对话框，把选中路径回填到对应输入框（也可直接粘贴路径）。
+ *  取消/不支持时 dir 为空，静默返回不打扰。 */
+async function pickDir(target: 'data' | 'file') {
+  try {
+    const r = await fetch('/pick-dir')
+    const j = await r.json().catch(() => null)
+    if (j?.ok && j.dir) {
+      if (target === 'data') newDir.value = j.dir
+      else newFileDir.value = j.dir
+    }
+  } catch { ctx.ui?.toast?.('无法打开目录选择框，请手动粘贴路径', 'warn') }
+}
+
 async function saveDir() {
   const d = newDir.value.trim()
   if (!d) return
@@ -128,10 +141,11 @@ async function resetDir() {
       </p>
       <div class="ab-dir-row">
         <input v-model="newDir" class="ab-input" placeholder="自定义目录，如 D:\文档\yhchat" />
+        <button class="ab-btn ghost" :disabled="dirBusy" @click="pickDir('data')">浏览…</button>
         <button class="ab-btn" :disabled="dirBusy || !newDir.trim()" @click="saveDir">保存</button>
         <button v-if="dirState.custom" class="ab-btn ghost" :disabled="dirBusy" @click="resetDir">恢复默认</button>
       </div>
-      <p class="ab-hint">建议文件夹名用 yhchat；修改后旧目录里的数据会自动搬过去。</p>
+      <p class="ab-hint">可点「浏览…」选文件夹，也可直接粘贴路径。建议文件夹名用 yhchat；修改后旧目录里的数据会自动搬过去。</p>
 
       <div class="ab-sec" style="margin-top:14px">文件保存目录</div>
       <p class="ab-desc small">
@@ -140,6 +154,7 @@ async function resetDir() {
       </p>
       <div class="ab-dir-row">
         <input v-model="newFileDir" class="ab-input" placeholder="如 D:\文档\yhchat\file" />
+        <button class="ab-btn ghost" :disabled="fileDirBusy" @click="pickDir('file')">浏览…</button>
         <button class="ab-btn" :disabled="fileDirBusy || !newFileDir.trim()" @click="saveFileDir">保存</button>
         <button v-if="fileDirState.custom" class="ab-btn ghost" :disabled="fileDirBusy" @click="resetFileDir">恢复默认</button>
       </div>

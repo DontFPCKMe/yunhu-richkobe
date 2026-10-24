@@ -88,32 +88,39 @@ async function pickMenu(item: any) {
   catch (e: any) { ctx.ui?.toast('操作失败：' + e.message, 'error') }
 }
 
-/** 点引用跳到被引用的消息（含窗口外：messagesAround 拉上下文后高亮） */
+/** 点引用跳到被引用的消息（含窗口外：messagesAround 拉上下文后高亮）。
+ *  ⚠️ 用户反馈「二次跳转大概率失败」：大量消息重渲染后单个 nextTick DOM 常未就位，
+ *     改用轮询查找（最多 ~1s）+ 命中即滚动高亮，避免静默失败。 */
 async function jumpTo(mid: string) {
   const cur = chat.state.current
   if (!cur || !mid) return
-  const highlight = () => nextTick(() => {
+  chat.state.locateId = mid          // 持续色块指示（无论本地命中还是拉取）
+  chat.state.jumpedAway = true
+  const seek = (tries = 12) => {
     const el = document.querySelector(`[data-mid="${mid}"]`) as HTMLElement | null
     if (el) {
       el.scrollIntoView({ block: 'center', behavior: 'smooth' })
       el.classList.add('flash')
       setTimeout(() => el.classList.remove('flash'), 2000)
+      return
     }
-  })
+    if (tries > 0) setTimeout(() => seek(tries - 1), 80)   // DOM 还没渲染出来，稍后重试
+    else ctx.ui?.toast?.('没能定位到这条消息（可能已删除或过旧）', 'warn')
+  }
   // ① 本地已有
-  if (chat.state.messages.some((m: any) => m.id === mid)) { highlight(); return }
+  if (chat.state.messages.some((m: any) => m.id === mid)) { nextTick(() => seek()); return }
   // ② 拉被引用消息的上下文窗口（seq 未知传 -1=uint64max，官方语义）
   try {
     const around = await ctx.api.messagesAround(cur.id, cur.type, mid, 30, -1)
     if (around.length && around.some((m: any) => m.id === mid)) {
       chat.state.messages = around
-      chat.state.jumpedAway = true
-      chat.state.locateId = mid
-      highlight()
+      nextTick(() => seek())
       return
     }
   } catch { /* 落到 ③ */ }
-  // ③ 兜底提示
+  // ③ 兜底提示：跳转失败，定位态与「回到最新」按钮都要清掉（否则按钮空挂）
+  chat.state.locateId = null
+  chat.state.jumpedAway = false
   ctx.ui?.toast('被引用的消息拉取失败或已删除', 'warn')
 }
 

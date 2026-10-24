@@ -380,7 +380,8 @@ export const apiPlugin = {
       },
       /** 重置机器人 token：/v1/bot/reset-bot-token { botId }（我原来写成 /v1/bot/reset-token） */
       async resetBotToken(botId: string) {
-        const r = assertOk(await request('/v1/bot/reset-bot-token', { body: { botId } }))
+        const r = await request('/v1/bot/reset-bot-token', { body: { botId } })
+        assertOk(r)
         return r.json?.data?.token || ''
       },
 
@@ -472,7 +473,8 @@ export const apiPlugin = {
       },
       /** 创建分区（板块）：name 最多 10 字 */
       async baCreate(name: string, avatar = '') {
-        const r = assertOk(await request('/v1/community/ba/create', { body: { name, avatar } }))
+        const r = await request('/v1/community/ba/create', { body: { name, avatar } })
+        assertOk(r)
         return r.json?.data?.id ?? 0
       },
       /** 编辑分区 */
@@ -555,7 +557,8 @@ export const apiPlugin = {
       },
       /** 创建表情包 → 返回新包 ID */
       async stickerCreatePack(name: string) {
-        const r = assertOk(await request('/v1/sticker/create-pack', { body: { name } }))
+        const r = await request('/v1/sticker/create-pack', { body: { name } })
+        assertOk(r)
         return r.json?.data?.id ?? 0
       },
       /** 重命名表情包 */
@@ -665,9 +668,10 @@ export const apiPlugin = {
         return assertOk(await request('/v1/disk/create-folder', { body: { chatId, chatType, folderName, parentFolderId } }))
       },
 
-      /** 删除群文件：接口是 /v1/disk/remove（/v1/disk/delete 会 404） */
-      async diskDelete(id: number) {
-        return assertOk(await request('/v1/disk/remove', { body: { id } }))
+      /** 删除群文件：/v1/disk/remove。请求体与同族 rename 一致，必须带 objectType
+       *  （只发 {id} 会失败——和 diskRename 当初漏 objectType 是同一个坑） */
+      async diskDelete(id: number, objectType = 2) {
+        return assertOk(await request('/v1/disk/remove', { body: { id, objectType } }))
       },
 
       /** 群网盘用量：接口是 /v1/disk/file-size（之前写的 total-size 是 404，控制台能看到报错） */
@@ -1035,11 +1039,16 @@ export const apiPlugin = {
       async report(chatId: string, chatType: number, chatName: string, content: string) {
         return assertOk(await request('/v1/report/create', { body: { chatId, chatType, chatName, content } }))
       },
-      /** 创建分享（含群二维码图 imageKey + shareUrl）：JSON {chatId, chatType, chatName} */
+      /** 创建分享（含群二维码图 imageKey + key + ts）：JSON {chatId, chatType, chatName}。
+       *  ⚠️ 实测响应：shareUrl 只回裸域名 https://yhfx.jwznb.com/，完整链接要客户端用 key+ts 拼。
+       *  ⚠️ assertOk 的返回值是 json body 本身（不是 request 的包装对象），
+       *     取 data 必须用「先 request 再 assertOk(r)、再用 r.json」的写法——
+       *     `const r = assertOk(await request(...))` 后接 r.json 会拿到 undefined（同族 4 处已修）。 */
       async shareCreate(chatId: string, chatType: number, chatName: string) {
-        const r = assertOk(await request('/v1/share/create', { body: { chatId, chatType, chatName } }))
+        const r = await request('/v1/share/create', { body: { chatId, chatType, chatName } })
+        assertOk(r)
         const d = r.json?.data || {}
-        return { imageKey: d.imageKey || '', key: d.key || '', shareUrl: d.shareUrl || '' }
+        return { imageKey: d.imageKey || '', key: d.key || '', shareUrl: d.shareUrl || '', ts: Number(d.ts) || 0 }
       },
       /** 关注板块：{ baId, followSource=2 }（Yhchat 实测形态） */
       async followBoard(baId: number) {

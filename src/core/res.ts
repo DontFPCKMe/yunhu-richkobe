@@ -20,6 +20,8 @@ export function resUrl(u) {
   if (isNative()) {
     if (!u || typeof u !== 'string') return u
     if (u.startsWith('data:') || u.startsWith('blob:') || u.startsWith('/res/')) return u
+    // 自定义协议深链原样返回（同非 native 分支）
+    if (/^[a-z][a-z0-9+.-]*:/i.test(u) && !/^https?:/i.test(u)) return u
     // 相对 key 补图片桶域名
     if (!/^https?:\/\//i.test(u) && !u.startsWith('/')) {
       return `https://chat-img.jwznb.com/${u.replace(/^\/+/, '')}`
@@ -29,6 +31,9 @@ export function resUrl(u) {
   if (!u || typeof u !== 'string') return u
   if (u.startsWith('data:') || u.startsWith('blob:')) return u
   if (u.startsWith('/res/')) return u
+  // 自定义协议深链（yunhu://chat-add、mailto:、tel: 等）原样返回：
+  // 否则会被当成「相对 key」补上 /res 图片桶前缀，深链变 404 死链（群卡片点不动第二层根因）
+  if (/^[a-z][a-z0-9+.-]*:/i.test(u) && !/^https?:/i.test(u)) return u
 
   // 相对 key：云湖很多字段（content.image、expression_id 等）存的是**没有域名的 key**，
   // 例如 "1791136274952_5v959y.png"、"expression/abc.jpg"。必须补上图片桶域名再走代理，

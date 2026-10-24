@@ -12,6 +12,10 @@ const SANITIZE_OPTS = {
   ADD_ATTR: ['target', 'rel', 'data-a2ui-action', 'data-a2ui-id'],
   FORBID_TAGS: ['script', 'style', 'iframe', 'object', 'embed', 'form'],
   FORBID_ATTR: ['onerror', 'onload', 'onclick'],
+  // ⚠️ 默认白名单不认自定义协议：群卡片的 <a href="yunhu://chat-add?..."> 会被整条剥掉 href，
+  //    渲染出来就是点不动的死链（用户报「点击依旧点不动」的真根因，实测 a.getAttribute('href')=null）。
+  //    在默认正则基础上追加 yunhu: 分支；[^a-z] 分支保留（相对路径/data: 头像仍放行）。
+  ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|tel|callto|sms|cid|xmpp|yunhu):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
 }
 
 export function renderMarkdown(md: string): string {
