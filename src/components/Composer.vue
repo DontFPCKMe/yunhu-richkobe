@@ -151,14 +151,9 @@ function classify(f: File): Pending['kind'] {
 }
 
 /** 加入待发送区：图片/视频生成本地预览 URL（objectURL，移除/卸载时释放）。
- *  ⚠️ 40MB 上限在进暂存区时就拦下并说清原因（用户反馈：超限文件只报笼统「发送失败」，
- *     不知道是超大小）——与 api.uploadFile 的 LIMITS 同源，双保险。 */
-const MAX_FILE_BYTES = 40 * 1024 * 1024
+ *  大小限制不在此预拦（用户要求：先让上传跑，失败时才提示 40MB 超限）——
+ *  门在 api.uploadFile 的 LIMITS，失败原因会显示在暂存卡片与 toast 上。 */
 function stage(f: File) {
-  if (f.size > MAX_FILE_BYTES) {
-    ctx.ui?.toast?.(`「${f.name}」${(f.size / 1024 / 1024).toFixed(1)}MB 超过 40MB 上传限制，未加入待发送`, 'error', 6000)
-    return
-  }
   const k = classify(f)
   const url = (k === 'image' || k === 'video') ? URL.createObjectURL(f) : ''
   pending.value.push({ id: ++pendingSeq, file: f, url, kind: k, caption: '', error: '', progress: 0, speed: 0 })

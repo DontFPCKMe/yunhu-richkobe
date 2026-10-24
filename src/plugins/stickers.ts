@@ -58,6 +58,9 @@ export const stickersPlugin = {
       videoSeconds: 0,
       packs: [] as any[],
       packsLoading: false,
+      /** 浏览未收藏的合集（点聊天里未收藏表情触发）：{id,name,items,locateId}，
+       *  面板独立区域渲染全合集 + 框住点的那张 + 「添加合集」按钮 */
+      browsePack: null as null | { id: number; name: string; items: any[]; locateId: number },
     })
 
     /* ---------------- 表情收藏 ---------------- */
@@ -347,33 +350,48 @@ export const stickersPlugin = {
       const exprId = Number(a.expressionId) || 0
       state.panelOpen = true
       state.locateSticker = null
+      state.browsePack = null
       if (!state.packs.length) await loadPacks()
-      // ⚠️ 接口回的包 id 可能是字符串，pid 是 number —— 必须双侧强转再比，
-      //    否则 find 恒空、永远走「未收藏」分支，圈线定位失效
+      // ⚠️ 包 id 可能是字符串，pid 是 number —— 双侧强转再比，否则 find 恒空
       const hit = pid ? state.packs.find((p: any) => Number(p.id) === pid) : null
       if (hit) {
         suggestPack.id = 0; suggestPack.name = ''
         state.activeTab = Number(hit.id)
-        // 高亮该合集里的那一张（包内贴纸 id）
         state.locateSticker = { tab: Number(hit.id), id: itemId }
         return
       }
+      if (pid) {
+        // 未收藏的合集：拉全合集列表独立展示 + 框住点的那张 + 「添加合集」按钮
+        // （/v1/sticker/detail 不要求已收藏，实测他人合集全量返回；url 需归一化）
+        try {
+          const d = await api.stickerPackDetail(pid)
+          const pack = d?.stickerPack
+          const items = (pack?.stickerItems || []).map((i: any) => ({
+            id: i.id, name: i.name, stickerPackId: i.stickerPackId ?? pid,
+            url: String(i.url || '').replace(/^https?:\/\/[^/]+\//, ''),
+            urlOriginal: i.url,
+          }))
+          state.browsePack = { id: pid, name: pack?.name || `合集 ${pid}`, items, locateId: itemId }
+          return
+        } catch (e: any) {
+          ui.toast('该合集不可用：' + e.message, 'warn')
+        }
+      }
       if (exprId) {
-        // 个人收藏表情：切收藏页签并高亮该收藏项
         suggestPack.id = 0; suggestPack.name = ''
         state.activeTab = 'fav'
         state.locateSticker = { tab: 'fav', id: exprId }
         return
       }
-      // 合集不在我的收藏：收藏页签 + 提示条（可一键添加该合集）
       suggestPack.id = pid
       suggestPack.name = pid ? `合集 ${pid}` : ''
       state.activeTab = 'fav'
     }
+    function closeBrowse() { state.browsePack = null }
 
     const service = {
       state, load, open, close, send, uploadAndAdd, remove, topping, addFromUrl,
-      addFileToTarget, addUrlToPack, suggestPack, openPackOf,
+      addFileToTarget, addUrlToPack, suggestPack, openPackOf, closeBrowse,
       loadPacks, createPack, renamePack, deletePack, removePack,
       recordStart, recordStop, sendAudioFile,
       sendVideo, sendVideoFile, recordVideoStart, recordVideoStop,

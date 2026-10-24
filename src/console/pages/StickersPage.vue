@@ -4,7 +4,7 @@
  *   左：我收藏的表情包（/v1/sticker/list）—— 可以创建、重命名、删除、导入 zip、看包内表情
  *   右：个人表情收藏（/v1/expression/list）—— 可以置顶、删除、上传新增
  */
-import { inject, ref, onMounted, computed } from 'vue'
+import { inject, ref, onMounted, onUnmounted, computed } from 'vue'
 import KLayout from '../components/KLayout.vue'
 import KCard from '../components/KCard.vue'
 import { resUrl } from '../../core/res'
@@ -18,7 +18,27 @@ const editing = ref<any>(null)
 
 const favCount = computed(() => (s.list || []).length)
 
-onMounted(() => { st.load(); ctx.stickers.loadPacks?.() })
+onMounted(() => {
+  st.load(); ctx.stickers.loadPacks?.()
+  document.addEventListener('paste', onPastePack)
+})
+onUnmounted(() => document.removeEventListener('paste', onPastePack))
+
+/** Ctrl+V 粘贴图片 → 上传到当前展开的合集（未展开合集时提示先展开） */
+async function onPastePack(e: ClipboardEvent) {
+  const items = e.clipboardData?.items
+  if (!items) return
+  const files: File[] = []
+  for (const it of Array.from(items)) {
+    if (it.kind !== 'file') continue
+    const f = it.getAsFile()
+    if (f && f.type.startsWith('image/')) files.push(f)
+  }
+  if (!files.length) return
+  e.preventDefault()
+  if (!openPack.value) { ctx.ui?.toast?.('先点开一个表情包合集，再粘贴图片', 'warn'); return }
+  for (const f of files) await st.addFileToTarget?.(f, openPack.value)
+}
 
 function src(u: string) {
   const v = String(u || '')
@@ -56,6 +76,13 @@ const batchStart = ref(1)
 const batchRegexFrom = ref('')
 const batchRegexTo = ref('')
 const batchBusy = ref(false)
+/** 反选：当前展开合集内，选中的取消、未选中的选上 */
+function invertBatchSel() {
+  const items = (s.packs || []).find((x: any) => x.id === openPack.value)?.items || []
+  const next = new Set<number>()
+  for (const i of items) if (!batchSel.value.has(i.id)) next.add(i.id)
+  batchSel.value = next
+}
 const batchPreview = computed(() => {
   const pack = (s.packs || []).find((p: any) => p.id === openPack.value)
   if (!pack) return [] as Array<{ id: number; from: string; to: string }>
@@ -172,6 +199,10 @@ async function confirmZipImport() {
               <button class="ghost small" :class="{ on: batchMode }" @click="batchMode = !batchMode; batchSel = new Set()">
                 {{ batchMode ? '退出多选' : '多选' }}
               </button>
+              <template v-if="batchMode">
+                <button class="ghost small" @click="batchSel = new Set(((s.packs || []).find((x: any) => x.id === openPack)?.items || []).map((i: any) => i.id))">全选</button>
+                <button class="ghost small" @click="invertBatchSel()">反选</button>
+              </template>
               <button v-if="batchMode && batchSel.size" class="ghost small" @click="batchDlg = true">
                 批量重命名（{{ batchSel.size }}）
               </button>

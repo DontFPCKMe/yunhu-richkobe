@@ -47,12 +47,13 @@ const list = computed(() => props.elements || [])
  */
 function onHtmlClick(e: MouseEvent) {
   const t = e.target as HTMLElement | null
-  // 群卡片深链：yunhu://chat-add?id=<群号>&type=group → 打开该群并看群资料（官方语义「点击查看群聊信息」）
-  const link = t?.closest?.('a[href^="yunhu://"]') as HTMLAnchorElement | null
+  // 群卡片深链：yunhu://chat-add?id=<群号>&type=group → 弹确认框（加入群聊/发消息/关闭）。
+  // 双保险：href 万一被渲染管线剥掉，凭 data-yh-id 兜底识别
+  const link = t?.closest?.('a[href^="yunhu://"], a[data-yh-id]') as HTMLAnchorElement | null
   if (link) {
     e.preventDefault()
     e.stopPropagation()
-    openYunhuLink(link.getAttribute('href') || '')
+    openYunhuLink(link.getAttribute('href') || '', link.getAttribute('data-yh-id') || '', link.getAttribute('data-yh-type') || '')
     return
   }
   const btn = t?.closest?.('[data-a2ui-action]') as HTMLElement | null
@@ -70,12 +71,17 @@ function onHtmlClick(e: MouseEvent) {
  *  已加入 → 按钮「发消息」直接进会话；未加入 → 「加入群聊」走官方
  *  /v1/friend/apply（chatType=2，官方注释「添加好友/加入群聊/机器人」同端点）。 */
 const cardAsk = ref<{ id: string; type: number; name: string; joined: boolean } | null>(null)
-async function openYunhuLink(href: string) {
+async function openYunhuLink(href: string, dataId = '', dataType = '') {
   try {
-    const u = new URL(href)
-    if (u.protocol !== 'yunhu:') return
-    const id = u.searchParams.get('id') || ''
-    const type = Number(u.searchParams.get('type')) || 2
+    let id = dataId
+    let type = Number(dataType) || 2
+    if (href) {
+      const u = new URL(href)
+      if (u.protocol === 'yunhu:') {
+        id = u.searchParams.get('id') || id
+        type = Number(u.searchParams.get('type')) || type
+      }
+    }
     if (!id) return
     if (ctx.chat?.state?.current?.id === id) return   // 已在该群：无需弹窗
     await ctx.social?.loadBook?.()
@@ -312,11 +318,13 @@ watch(() => props.elements, fix, { deep: true })
       <div v-else-if="el.type === 'html'" class="rich" v-html="htmlHtml(el)"></div>
 
       <!-- 媒体 -->
-      <!-- 图片：带上宽高能提前占位，避免加载时跳动；点击可看原图 -->
-      <img v-else-if="el.type === 'img'" class="media" :src="resUrl(el.attrs.src)" loading="lazy"
+      <!-- 图片：带上宽高能提前占位，避免加载时跳动；点击可看原图。
+           ⚠️ 不用 loading="lazy"：滚动容器内 lazy 在 WebView2 不触发（视口外图片永不加载、
+              气泡塌成小点、位置视觉异常），消息流图片量级可接受全量加载（推翻旧「消息流保留 lazy」决定） -->
+      <img v-else-if="el.type === 'img'" class="media" :src="resUrl(el.attrs.src)" decoding="async"
            :style="ratioOf(el)" alt="[图片]" @click="openRaw(el.attrs.src)"
            @error="(e: any) => (e.target.style.display = 'none')" />
-      <img v-else-if="el.type === 'sticker'" class="sticker" :src="resUrl(el.attrs.src)" loading="lazy" alt="[表情]"
+      <img v-else-if="el.type === 'sticker'" class="sticker" :src="resUrl(el.attrs.src)" decoding="async" alt="[表情]"
            title="点击查看所属合集" style="cursor:pointer" @click.stop="openStickerPack(el)" />
       <div v-else-if="el.type === 'video'" class="video-wrap">
         <video class="media" :src="mediaUrl(el.attrs.src, 'video')" controls preload="metadata" @click="openVideo(el.attrs.src)"></video>

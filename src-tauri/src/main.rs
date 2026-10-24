@@ -30,6 +30,24 @@ fn sidecar_slot() -> &'static Mutex<Option<Child>> {
     SIDECAR.get_or_init(|| Mutex::new(None))
 }
 
+/// 资源目录全局副本：restart_sidecar 命令（错误页「重试」按钮）要用
+static RES_DIR: std::sync::OnceLock<PathBuf> = std::sync::OnceLock::new();
+
+/// 前端 invoke('restart_sidecar')：杀旧 sidecar 重新拉起，返回是否已持有新句柄
+#[tauri::command]
+fn restart_sidecar() -> bool {
+    kill_sidecar();
+    let res = RES_DIR.get().cloned().unwrap_or_else(|| PathBuf::from("."));
+    // 端口可能还被旧进程占着：先等它释放（最多 3s）
+    for _ in 0..15 {
+        if TcpStream::connect(("127.0.0.1", PORT)).is_err() {
+            break;
+        }
+        std::thread::sleep(Duration::from_millis(200));
+    }
+    spawn_sidecar(&res)
+}
+
 /// 杀掉 sidecar 子进程（take 出句柄后 kill+wait）。
 /// 幂等：句柄已被 take 走则本次为空操作，供托盘「退出」与窗口 Destroyed 两处复用。
 fn kill_sidecar() {
@@ -37,6 +55,32 @@ fn kill_sidecar() {
         if let Some(mut child) = guard.take() {
             let _ = child.kill();
             let _ = child.wait();
+        }
+    }
+}
+
+/// 尝试拉起 sidecar（若端口已通或已有句柄则跳过）。返回是否持有句柄。
+fn spawn_sidecar(res: &std::path::Path) -> bool {
+    let node = res.join("node.exe");
+    let bundle = res.join("server-bundle.mjs");
+    if !node.exists() || !bundle.exists() {
+        return false;
+    }
+    match Command::new(&node)
+        .arg(&bundle)
+        .env("YH_ROOT", res)
+        .env("PORT", PORT.to_string())
+        .spawn()
+    {
+        Ok(child) => {
+            if let Ok(mut guard) = sidecar_slot().lock() {
+                *guard = Some(child);
+            }
+            true
+        }
+        Err(e) => {
+            eprintln!("[tauri] sidecar 启动失败: {e}");
+            false
         }
     }
 }
@@ -86,7 +130,7 @@ fn error_html(msg: &str) -> String {
   <div class="card">
     <h1>无法连接到后端服务</h1>
     <p>{msg}</p>
-    <button onclick="location.href='http://127.0.0.1:{port}'">重试连接</button>
+    <button onclick="(window.__TAURI__&&window.__TAURI__.core?window.__TAURI__.core.invoke('restart_sidecar').then(function(ok){{setTimeout(function(){{location.href='http://127.0.0.1:{port}'}},ok?1500:300)}}).catch(function(){{location.href='http://127.0.0.1:{port}'}})):location.href='http://127.0.0.1:{port}'">重试连接</button>
   </div>
 </body>
 </html>"#,
@@ -149,6 +193,7 @@ fn spawn_sidecar_monitor(app: AppHandle) {
 
 fn main() {
     let result = tauri::Builder::default()
+        .invoke_handler(tauri::generate_handler![restart_sidecar])
         .setup(|app| {
             // 先 clone handle 再进闭包/线程，避免借用冲突
             let handle = app.handle().clone();
@@ -159,27 +204,18 @@ fn main() {
                 .path()
                 .resource_dir()
                 .unwrap_or_else(|_| std::env::current_dir().unwrap_or_else(|_| PathBuf::from(".")));
+            let _ = RES_DIR.set(res.clone());
             let node = res.join("node.exe");
             let bundle = res.join("server-bundle.mjs");
             let resources_ok = node.exists() && bundle.exists();
 
             // 拉起 sidecar（端口已被占用时复用现有实例，避免双开冲突）
+            let mut spawned = false;
             if !wait_port(PORT, Duration::from_millis(300)) {
                 if resources_ok {
-                    match Command::new(&node)
-                        .arg(&bundle)
-                        .env("YH_ROOT", &res)
-                        .env("PORT", PORT.to_string())
-                        .spawn()
-                    {
-                        Ok(child) => {
-                            if let Ok(mut guard) = sidecar_slot().lock() {
-                                *guard = Some(child);
-                            }
-                            // 仅在成功拉起子进程后才启动中途退出监控
-                            spawn_sidecar_monitor(handle.clone());
-                        }
-                        Err(e) => eprintln!("[tauri] sidecar 启动失败: {e}"),
+                    spawned = spawn_sidecar(&res);
+                    if spawned {
+                        spawn_sidecar_monitor(handle.clone());
                     }
                 } else {
                     eprintln!(
@@ -190,12 +226,20 @@ fn main() {
                     );
                 }
             }
+            let _ = spawned;
 
             // 等服务就绪（最多 20s）后在主线程建窗口。
             // 未就绪时加载 about:blank 再注入错误页，避免连接失败白屏。
+            // 等待策略：45s（高负载机器首启 node 可能很慢）→ 仍不就绪且文件齐全则
+            // 重试拉起一次 sidecar 再等 20s → 仍失败才显示错误页（带真实原因）。
             let win_handle = handle.clone();
             std::thread::spawn(move || {
-                let ready = wait_port(PORT, Duration::from_secs(20));
+                let mut ready = wait_port(PORT, Duration::from_secs(45));
+                if !ready && resources_ok {
+                    eprintln!("[tauri] sidecar 45s 未就绪，重试拉起一次");
+                    spawn_sidecar(&res);
+                    ready = wait_port(PORT, Duration::from_secs(20));
+                }
                 let inner = win_handle.clone();
                 let _ = win_handle.run_on_main_thread(move || {
                     // 就绪→加载 sidecar；未就绪→about:blank（都是必然可解析的字面量）。
@@ -230,8 +274,8 @@ fn main() {
                             if !ready {
                                 let msg = if resources_ok {
                                     format!(
-                                        "后端服务未能在 20 秒内启动（端口 {PORT}）。\
-                                         可能是首次启动较慢或被安全软件拦截，请点击重试。"
+                                        "后端服务未能在 65 秒内启动（端口 {PORT}，已自动重试一次）。\
+                                         可能是首次启动较慢、端口被占用或被安全软件拦截，请点击重试。"
                                     )
                                 } else {
                                     format!(

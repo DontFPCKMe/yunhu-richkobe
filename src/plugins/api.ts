@@ -64,7 +64,9 @@ export const apiPlugin = {
     let routes = null
 
     interface RequestOptions { method?: string; body?: any; timeout?: number }
-    async function request(path: string, { method = 'POST', body, timeout = 20000 }: RequestOptions = {}) {
+    // 默认超时 60s（原 20s 在高负载机器+慢上游时批量上传表情会误 abort，
+    // 用户实测连发多张收藏报「signal is aborted without reason」）
+    async function request(path: string, { method = 'POST', body, timeout = 60000 }: RequestOptions = {}) {
       const headers: Record<string, string> = {}
       if (token) headers.token = token
       // 前端再保险一层：接口请求禁用缓存
@@ -301,9 +303,10 @@ export const apiPlugin = {
         const path = kind === 'agree' ? '/v1/friend/agree-apply' : kind === 'ignore' ? '/v1/friend/ignore-apply' : '/v1/friend/delete-request'
         return assertOk(await request(path, { body: { id } }))
       },
-      /** 免打扰开关：POST /v1/friend/no-notify { chatId, chatType, noNotify } */
-      async noNotify(chatId: string, chatType = 1, noNotify = true) {
-        return assertOk(await request('/v1/friend/no-notify', { body: { chatId, chatType, noNotify } }))
+      /** 免打扰开关（官方 NoNotifyRequest 实测：只有 chatId + noNotify(0|1) 两字段，
+       *  好友/群/机器人共用；多传 chatType 或传布尔会导致云端同步不可靠） */
+      async noNotify(chatId: string, noNotify: boolean | number = true) {
+        return assertOk(await request('/v1/friend/no-notify', { body: { chatId, noNotify: noNotify ? 1 : 0 } }))
       },
 
       /** 删除好友/退群/删机器人：官方字段 { chatId, chatType }（同族 applyFriend 实测教训：
@@ -516,7 +519,15 @@ export const apiPlugin = {
        *    我原来写的 /v1/expression/add 是「添加已有表情包」({id})，完全不是一回事。
        */
       async expressionCreate(url: string) {
-        return assertOk(await request('/v1/expression/create', { body: { url } }))
+        // 批量上传时偶发 abort/超时：网络类错误重试一次，业务错误（assertOk 抛）不重试
+        try {
+          return assertOk(await request('/v1/expression/create', { body: { url } }))
+        } catch (e: any) {
+          if (/abort|timeout|network|fetch/i.test(e?.message || '')) {
+            return assertOk(await request('/v1/expression/create', { body: { url } }))
+          }
+          throw e
+        }
       },
       /** 添加已有表情包到自己的收藏：{ id: 表情包 ID } */
       async expressionAddPack(id: number) {

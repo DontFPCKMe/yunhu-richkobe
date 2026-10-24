@@ -87,7 +87,7 @@ async function toggleMute() {
   const next = !muted.value
   chat.toggleMute(cur.value.id)
   // 云端同步（失败不阻塞本地）
-  try { await ctx.api?.noNotify?.(cur.value.id, cur.value.type || 1, next) } catch { /* 本地已生效 */ }
+  try { await ctx.api?.noNotify?.(cur.value.id, next) } catch { /* 本地已生效 */ }
 }
 
 /* 群看板（/v1/bot/board 内容）：默认 3 行，超长给展开提示 */
@@ -157,12 +157,18 @@ async function copyShareLink() {
 }
 
 /** 分享群卡片：官方云湖的「群卡片」本质是 HTML 消息（content_type 8），
- *  无专门端点——把群头像/群名/群号/简介拼成卡片 HTML 发给选中的会话。 */
+ *  无专门端点——把群头像/群名/群号/简介拼成卡片 HTML 发给选中的会话。
+ *  页面形态按用户要求=转发消息同款大页面（全会话列表含本会话+页签+多选+确认），
+ *  不再用小弹窗。 */
 const cardOpen = ref(false)
 const cardBusy = ref(false)
 const cardSel = ref<Set<string>>(new Set())
+const cardTab = ref<'all' | 'friends' | 'groups'>('all')
+const cardKw = ref('')
 function openCardPick() {
   cardSel.value = new Set()
+  cardKw.value = ''
+  cardTab.value = 'all'
   cardOpen.value = true
   ctx.social?.loadBook?.()
 }
@@ -172,6 +178,20 @@ function toggleCard(id: string) {
   else s.add(id)
   cardSel.value = s
 }
+/** 大页面列表：全会话（含本群——用户要求本会话也能分享本群卡片）+ 页签/关键词过滤 */
+const cardList = computed(() => {
+  let list = (ctx.chat?.state?.conversations || []).map((c: any) => ({ id: c.id, type: c.type, name: c.name, avatar: c.avatar }))
+  // 好友补充（会话列表里没有的好友也能私发卡片）
+  const seen = new Set(list.map((x: any) => x.id))
+  for (const u of (ctx.social?.state?.book?.users || [])) {
+    if (!seen.has(u.id)) list.push({ id: u.id, type: 1, name: u.name, avatar: u.avatar })
+  }
+  if (cardTab.value === 'friends') list = list.filter((x: any) => x.type === 1 || x.type === 3)
+  if (cardTab.value === 'groups') list = list.filter((x: any) => x.type === 2)
+  const k = cardKw.value.trim()
+  if (k) list = list.filter((x: any) => String(x.name || '').includes(k) || String(x.id).includes(k))
+  return list
+})
 function cardHtml(): string {
   const c = cur.value
   if (!c) return ''
@@ -182,7 +202,8 @@ function cardHtml(): string {
     : ''
   // 官方群卡片样板（用户 2026-10-24 提供真实 HTML 逐字对照）：
   //   yunhu://chat-add 深链 a > table > 44px 圆角方头像 td + 群名(15px/600) + 「点击查看会话信息」(12px/0.65)
-  return '<a href="yunhu://chat-add?id=' + encodeURIComponent(c.id) + '&type=group" style="display:block;text-decoration:none;color:inherit;-webkit-tap-highlight-color:transparent;border:none;outline:none;">'
+  //   data-yh-id/type 是深链双保险：万一渲染管线剥掉 href，点击委托仍能凭 data 属性弹确认框
+  return '<a href="yunhu://chat-add?id=' + encodeURIComponent(c.id) + '&type=group" data-yh-id="' + esc(c.id) + '" data-yh-type="group" style="display:block;text-decoration:none;color:inherit;-webkit-tap-highlight-color:transparent;border:none;outline:none;">'
     + '<table cellpadding="0" cellspacing="0" border="0" style="max-width:280px;border-collapse:collapse;border:none;"><tr>'
     + (av
       ? '<td style="width:44px;padding:0;vertical-align:middle;border:none;"><div style="width:44px;height:44px;border-radius:10px;overflow:hidden;border:none;outline:none;">'
@@ -202,9 +223,9 @@ async function sendCard() {
   let ok = 0
   try {
     for (const id of ids) {
-      // 目标类型：好友=1（用户），群=2；从通讯录两份列表里反查
-      const isGroup = (ctx.social?.state?.book?.groups || []).some((g: any) => g.id === id)
-      await ctx.api.send(id, isGroup ? 2 : 1, 8, { text: html })
+      // 目标类型从大页面列表项取（含本会话；type 2=群 1=用户 3=机器人）
+      const t = cardList.value.find((x: any) => x.id === id)?.type || 1
+      await ctx.api.send(id, t, 8, { text: html })
       ok++
     }
     ctx.ui?.toast?.(`群卡片已发送给 ${ok} 个会话`, 'success')
@@ -514,29 +535,34 @@ onMounted(() => { if (isOpen.value && isGroup.value) g.loadMembers() })
           </div>
         </div>
       </div>
-      <!-- 分享群卡片：选目标会话（好友/群），把群信息以 HTML 卡片消息发出 -->
-      <div v-if="cardOpen" class="qr-mask" @click.self="cardOpen = false">
-        <div class="qr-box wide">
-          <div class="qr-head">
-            <b>分享「{{ cur?.name }}」群卡片（已选 {{ cardSel.size }}）</b>
-            <button class="gp-x" title="关闭" @click="cardOpen = false">×</button>
+      <!-- 分享群卡片：转发消息同款大页面（全会话含本群 + 页签 + 搜索 + 多选 + 确认） -->
+      <div v-if="cardOpen" class="fd-mask" @click.self="cardOpen = false">
+        <div class="fd">
+          <div class="fd-head">
+            <b>分享「{{ cur?.name }}」群卡片</b>
+            <span class="grow"></span>
+            <input v-model="cardKw" placeholder="搜索会话…" class="fd-kw" />
+            <button class="ghost small" @click="cardOpen = false">关闭</button>
           </div>
-          <div class="inv-list">
-            <label v-for="u in friends" :key="u.id" class="inv-row">
-              <input type="checkbox" :checked="cardSel.has(u.id)" @change="toggleCard(u.id)" />
-              <img :src="u.avatar ? resUrl(u.avatar) : fallbackAvatar(u.name)" alt="" />
-              <span>{{ u.name }}</span>
-            </label>
-            <label v-for="g2 in groups.filter(x => x.id !== cur?.id)" :key="g2.id" class="inv-row">
-              <input type="checkbox" :checked="cardSel.has(g2.id)" @change="toggleCard(g2.id)" />
-              <img :src="g2.avatar ? resUrl(g2.avatar) : fallbackAvatar(g2.name)" alt="" />
-              <span>{{ g2.name }}（群）</span>
-            </label>
-            <p v-if="!friends.length && !groups.length" class="dim small">通讯录为空，无法分享卡片</p>
+          <div class="fd-tabs">
+            <button v-for="t in (['all', 'friends', 'groups'] as const)" :key="t"
+                    class="fd-tab" :class="{ on: cardTab === t }" @click="cardTab = t">
+              {{ t === 'all' ? '全部' : t === 'friends' ? '好友/机器人' : '群聊' }}
+            </button>
           </div>
-          <div class="gp-row">
-            <button class="ghost small" @click="cardOpen = false">取消</button>
-            <button class="ghost small" :disabled="!cardSel.size || cardBusy" @click="sendCard">发送群卡片</button>
+          <ul class="fd-list">
+            <li v-for="c2 in cardList" :key="c2.id" :class="{ on: cardSel.has(c2.id) }" @click="toggleCard(c2.id)">
+              <img :src="c2.avatar ? resUrl(c2.avatar) : fallbackAvatar(c2.name)" alt="" />
+              <span class="nm">{{ c2.name }}</span>
+              <span class="ty">{{ c2.id === cur?.id ? '本群' : (c2.type === 2 ? '群聊' : c2.type === 3 ? '机器人' : '好友') }}</span>
+              <span class="ck">{{ cardSel.has(c2.id) ? '✓' : '' }}</span>
+            </li>
+            <li v-if="!cardList.length" class="empty">没有匹配的会话</li>
+          </ul>
+          <div class="fd-foot">
+            <span class="dim small">已选 {{ cardSel.size }} 个目标</span>
+            <span class="grow"></span>
+            <button :disabled="!cardSel.size || cardBusy" @click="sendCard">发送群卡片</button>
           </div>
         </div>
       </div>
@@ -653,6 +679,39 @@ onMounted(() => { if (isOpen.value && isGroup.value) g.loadMembers() })
 }
 .inv-tabs .sp-tab.on { color: var(--acc); border-bottom-color: var(--acc); font-weight: 600; }
 .mt { margin-top: 10px; }
+/* 分享群卡片大页面（与转发消息 ForwardDialog 同款视觉） */
+.fd-mask {
+  position: fixed; inset: 0; background: rgba(0, 0, 0, .45);
+  display: flex; align-items: center; justify-content: center; z-index: 120;
+}
+.fd {
+  width: 420px; max-width: 92vw; max-height: 80vh; display: flex; flex-direction: column;
+  background: var(--card); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.fd-head { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.fd-head .grow { flex: 1; }
+.fd-kw { max-width: 140px; }
+.fd-tabs { display: flex; gap: 4px; padding: 8px 16px; }
+.fd-tab {
+  padding: 4px 12px 5px; border: none; background: none; color: var(--fg2);
+  font-size: 12.5px; cursor: pointer; border-bottom: 2px solid transparent;
+}
+.fd-tab:hover { color: var(--fg); }
+.fd-tab.on { color: var(--acc); border-bottom-color: var(--acc); font-weight: 600; }
+.fd-list { list-style: none; margin: 0; padding: 0 8px; overflow: auto; flex: 1; }
+.fd-list li { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; cursor: pointer; }
+.fd-list li:hover { background: var(--card2); }
+.fd-list li.on { background: var(--acc-soft); }
+.fd-list img { width: 34px; height: 34px; border-radius: 9px; object-fit: cover; background: var(--card2); }
+.fd-list .nm { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fd-list .ty { font-size: 11px; color: var(--fg2); }
+.fd-list .ck { width: 18px; text-align: center; color: var(--acc); font-weight: 700; }
+.fd-list .empty { justify-content: center; color: var(--fg2); cursor: default; }
+.fd-foot { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-top: 1px solid var(--line); }
+.fd-foot .grow { flex: 1; }
+.fd-foot button { padding: 7px 16px; border-radius: 9px; border: none; background: var(--acc); color: #fff; font-size: 13px; cursor: pointer; }
+.fd-foot button:disabled { opacity: .5; cursor: not-allowed; }
 .gp-msglimit { display: flex; flex-direction: column; gap: 8px; }
 .gp-chips { display: flex; flex-wrap: wrap; gap: 6px; }
 /* 成员右键菜单 */

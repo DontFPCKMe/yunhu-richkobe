@@ -259,6 +259,26 @@ function qrDrop(targetId: string) {
         <button class="ghost tiny" @click="renaming = null">取消</button>
       </div>
 
+      <!-- 浏览未收藏的合集：全量列出 + 框住点的那张 + 添加合集按钮 -->
+      <div v-if="s.browsePack" class="sp-browse">
+        <div class="sp-browse-head">
+          <b>{{ s.browsePack.name }}</b>
+          <span class="dim small">{{ s.browsePack.items.length }} 张 · 未收藏</span>
+          <span class="grow"></span>
+          <button class="ghost tiny" @click="addPackById(s.browsePack.id)">添加合集</button>
+          <button class="ghost tiny" @click="st.closeBrowse()">收起</button>
+        </div>
+        <div class="grid">
+          <button v-for="e in s.browsePack.items" :key="e.id" class="cell"
+                  :class="{ located: Number(e.id) === Number(s.browsePack.locateId) }"
+                  :title="e.name || ''" @click="st.send(e)">
+            <img :src="src(e)" alt="" @error="(ev: any) => { ev.target.style.visibility = 'hidden' }" />
+            <span class="cell-name" :title="e.name">{{ e.name || '' }}</span>
+          </button>
+        </div>
+        <p v-if="!s.browsePack.items.length" class="dim center">这个合集是空的或已被删除</p>
+      </div>
+
       <div class="sp-body" ref="bodyEl">
         <div class="grid">
           <template v-if="tab === 'fav'">
@@ -337,6 +357,10 @@ function qrDrop(targetId: string) {
 .sp-tab em { font-style: normal; font-size: 10.5px; color: var(--fg2); margin-left: 3px; }
 .sp-tabs .grow { flex: 1; }
 .sp-addrow { display: flex; gap: 6px; padding: 6px 12px; }
+/* 未收藏合集浏览区（面板顶部独立块） */
+.sp-browse { border-bottom: 1px solid var(--line); padding: 8px 12px 12px; max-height: 40vh; overflow: auto; background: var(--card2); }
+.sp-browse-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.sp-browse-head .grow { flex: 1; }
 .sp-addrow input {
   flex: 1; background: var(--card2); border: 1px solid var(--line); border-radius: 8px;
   color: var(--fg); padding: 5px 9px; font-size: 12.5px; outline: none;
