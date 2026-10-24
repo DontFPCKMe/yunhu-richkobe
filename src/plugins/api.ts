@@ -306,9 +306,10 @@ export const apiPlugin = {
         return assertOk(await request('/v1/friend/no-notify', { body: { chatId, chatType, noNotify } }))
       },
 
-      /** 删除好友 */
-      async deleteFriend(targetId: string, chatType = 1) {
-        return assertOk(await request('/v1/friend/delete-friend', { body: { targetId, chatType } }))
+      /** 删除好友/退群/删机器人：官方字段 { chatId, chatType }（同族 applyFriend 实测教训：
+       *  targetId 是猜的字段名，服务端回 1100「请求参数错误」；chatType 2=退群 1=删好友 3=删机器人） */
+      async deleteFriend(chatId: string, chatType = 1) {
+        return assertOk(await request('/v1/friend/delete-friend', { body: { chatId, chatType } }))
       },
 
       /** 创建群聊：CreateGroupRequest{ name=2, introduction=3, avatar_url=4 } */

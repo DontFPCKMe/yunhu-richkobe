@@ -180,16 +180,17 @@ function cardHtml(): string {
   const av = info.value?.avatar
     ? (/^https?:/.test(info.value.avatar) ? info.value.avatar : `https://chat-img.jwznb.com/${String(info.value.avatar).replace(/^\/+/, '')}`)
     : ''
-  // 官方群卡片结构（yunhu://chat-add 深链 + table 布局 + 圆头像 + 群名 + 提示行），
-  // 按用户要求整体压缩：padding 12→8、头像 36→32、字号 16/13→14/12，去掉多余行
-  return '<a href="yunhu://chat-add?id=' + encodeURIComponent(c.id) + '&type=group" style="display:block;text-decoration:none;color:inherit;">'
-    + '<table cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:240px;">'
-    + '<tr><td style="padding:8px;">'
-    + '<table cellpadding="0" cellspacing="0" border="0"><tr>'
-    + (av ? '<td style="padding-right:8px;"><img src="' + esc(av) + '" width="32" height="32" style="border-radius:50%;"></td>' : '')
-    + '<td><div style="font-size:14px;font-weight:bold;margin-bottom:3px;color:#333;">' + esc(c.name) + '</div>'
-    + '<div style="font-size:12px;color:#666;">点击查看群聊信息</div></td>'
-    + '</tr></table>'
+  // 官方群卡片样板（用户 2026-10-24 提供真实 HTML 逐字对照）：
+  //   yunhu://chat-add 深链 a > table > 44px 圆角方头像 td + 群名(15px/600) + 「点击查看会话信息」(12px/0.65)
+  return '<a href="yunhu://chat-add?id=' + encodeURIComponent(c.id) + '&type=group" style="display:block;text-decoration:none;color:inherit;-webkit-tap-highlight-color:transparent;border:none;outline:none;">'
+    + '<table cellpadding="0" cellspacing="0" border="0" style="max-width:280px;border-collapse:collapse;border:none;"><tr>'
+    + (av
+      ? '<td style="width:44px;padding:0;vertical-align:middle;border:none;"><div style="width:44px;height:44px;border-radius:10px;overflow:hidden;border:none;outline:none;">'
+        + '<img src="' + esc(av) + '" width="44" height="44" style="display:block;width:44px;height:44px;min-width:44px;min-height:44px;max-width:44px;max-height:44px;border-radius:10px;object-fit:cover;border:0;outline:none;padding:0;margin:0;" alt=""></div></td>'
+      : '')
+    + '<td style="padding:0 0 0 10px;vertical-align:middle;border:none;">'
+    + '<div style="font-size:15px;font-weight:600;line-height:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(c.name) + '</div>'
+    + '<div style="font-size:12px;line-height:16px;margin-top:2px;opacity:0.65;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">点击查看会话信息</div>'
     + '</td></tr></table></a>'
 }
 async function sendCard() {
@@ -271,22 +272,20 @@ async function sendInvite() {
   if (!c || !ids.length || invBusy.value) return
   const isGroups = invTab.value === 'groups'
   const label = isGroups ? '群聊' : '好友'
-  if (!(await ctx.ui?.confirm?.('发送邀请', `向 ${ids.length} 个${label}发送「${c.name}」的入群邀请（群号 ${c.id}）？`))) return
+  if (!(await ctx.ui?.confirm?.('发送群卡片', `向 ${ids.length} 个${label}发送「${c.name}」的群卡片（对方点开可加群）？`))) return
   invBusy.value = true
   try {
-    if (!isGroups) {
-      await ctx.api.inviteToGroup(c.id, ids)
-    } else {
-      // 发到群聊：发**群卡片**（官方形态 = content_type 8 HTML 消息，yunhu://chat-add 深链 + table 布局），
-      // 对方点开卡片可一键加群；不再发纯文本群号
-      const html = cardHtml()
-      for (const gid of ids) {
-        await ctx.api.send(gid, 2, 8, { text: html })
-      }
+    // ⚠️ 官方移动端无「邀请普通用户进群」功能（Murexide 只有邀机器人入口），
+    //    上游 web 的 pb /v1/group/invite 实测报参数错误=死路。
+    //    邀请的统一形态 = 发群卡片（content_type 8 HTML，用户指定的官方形态）：
+    //    好友=私聊发卡片(type 1)，群聊=群里发卡片(type 2)，对方点卡片一键加群。
+    const html = cardHtml()
+    for (const gid of ids) {
+      await ctx.api.send(gid, isGroups ? 2 : 1, 8, { text: html })
     }
-    ctx.ui?.toast?.('邀请已发送', 'success')
+    ctx.ui?.toast?.('群卡片已发送', 'success')
     invOpen.value = false
-  } catch (e: any) { ctx.ui?.toast?.('邀请失败：' + e.message, 'error') }
+  } catch (e: any) { ctx.ui?.toast?.('发送失败：' + e.message, 'error') }
   finally { invBusy.value = false }
 }
 

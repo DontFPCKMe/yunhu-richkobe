@@ -20,6 +20,7 @@ import type { Context } from '../core/context'
 import StickerPanel from '../components/StickerPanel.vue'
 import StickersPage from '../console/pages/StickersPage.vue'
 import { h } from '../satori/element'
+import { resUrl } from '../core/res'
 
 export const name = 'stickers'
 
@@ -76,20 +77,34 @@ export const stickersPlugin = {
     /** 点一张表情 → 作为表情消息发出 */
     async function send(e: any) {
       try {
-        // 字段形态实测结论（两轮用户真机反馈修正）：
-        //   · 字段 9（sticker_url/image）：手机端**直接当图片地址读**，必须发完整 URL（发相对 key 手机加载不了）
-        //   · 字段 3（image_url）：显式发完整 URL，防止服务端拿字段 9 二次拼接污染字段 3
-        //   · 收藏 id 走 expression_id(15)；包内贴纸走 sticker_item_id(25)+sticker_pack_id(26)
+        // 字段形态以**官方手机端真实发出的消息** dump 对照为准（2026-10-24 取证）：
+        //   · f3 image_url = 完整 URL
+        //   · f9 image/sticker_url = **相对 key**（手机端按它拼域名；发全 URL 会被服务端二次拼接污染 f3）
+        //   · f15 expression_id = 收藏 id（包内贴纸为 0）；f25/f26 = item/pack id
+        //   · f33/f34 = 实际宽高（手机端样本全带；取不到时 0）
+        // ⚠️ 历史教训：10-20 经验「字段9发完整URL」是错的（只看了桌面回读），680f917 据此改坏，
+        //    导致手机端三轮「识别不了」。
         const u = e.urlOriginal || e.url || ''
         if (!u) { ui.toast('这张表情没有可用地址', 'warn'); return }
-        const full = /^https?:\/\//i.test(u) ? u : `https://chat-img.jwznb.com/${String(u).replace(/^\/+/, '')}`
+        const rel = String(u).replace(/^https?:\/\/[^/]+\//, '')
+        const full = /^https?:\/\//i.test(u) ? u : `https://chat-img.jwznb.com/${rel}`
         const inPack = !!e.stickerPackId
-        await chat.sendMedia([h.sticker(
-          full,
-          inPack ? Number(e.id) || 0 : 0,
-          inPack ? Number(e.stickerPackId) || 0 : 0,
-          inPack ? 0 : Number(e.id) || 0,
-        )])
+        // 取实际宽高（加载代理图）；超时/失败退 0，不阻塞发送
+        let w = Number(e.width) || 0
+        let hgt = Number(e.height) || 0
+        if (!w || !hgt) {
+          try {
+            const dim = await new Promise<{ w: number; h: number }>((resolve) => {
+              const img = new Image()
+              const t = setTimeout(() => resolve({ w: 0, h: 0 }), 800)
+              img.onload = () => { clearTimeout(t); resolve({ w: img.naturalWidth, h: img.naturalHeight }) }
+              img.onerror = () => { clearTimeout(t); resolve({ w: 0, h: 0 }) }
+              img.src = resUrl(full)
+            })
+            w = dim.w; hgt = dim.h
+          } catch { /* 保持 0 */ }
+        }
+        await chat.sendMedia([h.sticker(rel, inPack ? Number(e.id) || 0 : 0, inPack ? Number(e.stickerPackId) || 0 : 0, inPack ? 0 : Number(e.id) || 0, w, hgt, full)])
         close()
       } catch (err: any) { ui.toast('发送失败：' + err.message, 'error') }
     }
