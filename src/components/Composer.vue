@@ -272,6 +272,21 @@ function progressOf(p: Pending) {
  * 发送：逐个上传待发送附件（uploadAndUrl 拿完整 URL + 进度/速度），再发文本。
  * 失败保留在暂存区标红可重试；超大小限制在 api 层直接拒绝并提示。
  */
+/** 读音频文件真实时长（秒，向上取整，最小 1）；解码失败返回 0。
+ *  手机端进度条依赖 content f22（audio_time），传 0 会被 protobuf 省略 → 手机拖不了进度。 */
+function audioDurationOf(f: File): Promise<number> {
+  return new Promise((resolve) => {
+    const url = URL.createObjectURL(f)
+    const a = document.createElement('audio')
+    const done = (v: number) => { URL.revokeObjectURL(url); resolve(v) }
+    const t = setTimeout(() => done(0), 3000)
+    a.preload = 'metadata'
+    a.onloadedmetadata = () => { clearTimeout(t); done(Math.max(1, Math.ceil(a.duration || 0))) }
+    a.onerror = () => { clearTimeout(t); done(0) }
+    a.src = url
+  })
+}
+
 async function submit() {
   if (uploading.value || chat.state.sending) return
   const v = text.value.trim()
@@ -284,30 +299,40 @@ async function submit() {
       p.error = ''
       p.progress = 0
       p.speed = 0
-      try {
-        const onProg = progressOf(p)
-        if (p.kind === 'image') {
-          const { url } = await ctx.api.uploadAndUrl(p.file, 'image', onProg)
-          await chat.sendMedia([h.image(url)])
-          if (p.caption.trim()) await chat.send(p.caption.trim(), 1)
-        } else if (p.kind === 'video') {
-          // 视频/音频发**裸 key**（与 stickers.sendVideo 同协议）：发完整 URL 云端存不下、播放 404
-          const { key } = await ctx.api.uploadFile(p.file, 'video', onProg)
-          await chat.sendMedia([h.video(key, 0)])
-        } else if (p.kind === 'audio') {
-          const { key } = await ctx.api.uploadFile(p.file, 'audio', onProg)
-          await chat.sendMedia([h.audio(key, 0)])
-        } else {
-          const { url } = await ctx.api.uploadAndUrl(p.file, 'file', onProg)
-          await chat.sendMedia([h.file(url, p.file.name, p.file.size)])
+      // 网络类失败（abort/超时/七牛区域跳转等）同一次发送内自动重试一次——
+      // 用户报「文件要发两遍才上传得上去」：首败标红等手动重试体验太差
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          const onProg = progressOf(p)
+          if (p.kind === 'image') {
+            const { url } = await ctx.api.uploadAndUrl(p.file, 'image', onProg)
+            await chat.sendMedia([h.image(url)])
+            if (p.caption.trim()) await chat.send(p.caption.trim(), 1)
+          } else if (p.kind === 'video') {
+            // 视频/音频发**裸 key**（服务端补域名）：发完整 URL 会被二次拼接损坏
+            const { key } = await ctx.api.uploadFile(p.file, 'video', onProg)
+            await chat.sendMedia([h.video(key, 0)])
+          } else if (p.kind === 'audio') {
+            const { key } = await ctx.api.uploadFile(p.file, 'audio', onProg)
+            // 手机端进度条依赖 f22 时长：读真实时长，0 会被 protobuf 省略字段
+            const secs = await audioDurationOf(p.file)
+            await chat.sendMedia([h.audio(key, secs)])
+          } else {
+            const { url } = await ctx.api.uploadAndUrl(p.file, 'file', onProg)
+            await chat.sendMedia([h.file(url, p.file.name, p.file.size)])
+          }
+          unstage(p)
+          break
+        } catch (err: any) {
+          const retryable = /abort|timeout|network|fetch|failed|region|incorrect|错误/i.test(err?.message || '')
+          if (attempt === 0 && retryable) { p.progress = 0; p.speed = 0; continue }
+          // 失败不丢附件：标红留在暂存区，下次点发送自动重试
+          p.error = err?.message || '上传失败'
+          p.progress = 0
+          p.speed = 0
+          attachFailed++
+          break
         }
-        unstage(p)
-      } catch (err: any) {
-        // 失败不丢附件：标红留在暂存区，下次点发送自动重试
-        p.error = err?.message || '上传失败'
-        p.progress = 0
-        p.speed = 0
-        attachFailed++
       }
     }
     if (v) {

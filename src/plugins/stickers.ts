@@ -236,8 +236,25 @@ export const stickersPlugin = {
     async function sendAudioFile(ev: any) {
       const f = ev?.target?.files?.[0]
       if (!f) return
-      await sendAudio(f, 0)
+      // ⚠️ 手机端进度条依赖 f22 音频时长：传 0 会被 protobuf 省略字段 → 手机无法拖进度。
+      //    选文件发送时先读真实时长（metadata），读不到退 1s 保底。
+      const secs = await audioDuration(f)
+      await sendAudio(f, secs)
       ev.target.value = ''
+    }
+
+    /** 读音频文件真实时长（秒，向上取整）；解码失败返回 0 */
+    function audioDuration(f: File): Promise<number> {
+      return new Promise((resolve) => {
+        const url = URL.createObjectURL(f)
+        const a = document.createElement('audio')
+        const done = (v: number) => { URL.revokeObjectURL(url); resolve(v) }
+        const t = setTimeout(() => done(0), 3000)
+        a.preload = 'metadata'
+        a.onloadedmetadata = () => { clearTimeout(t); done(Math.max(1, Math.ceil(a.duration || 0))) }
+        a.onerror = () => { clearTimeout(t); done(0) }
+        a.src = url
+      })
     }
 
     /* ---------------- 视频 ---------------- */

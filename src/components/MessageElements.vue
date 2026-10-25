@@ -181,15 +181,33 @@ function onWheel(e: WheelEvent) {
   if (!viewer.value || viewer.value.kind !== 'image') return
   zoom.value = Math.min(8, Math.max(0.2, zoom.value * (e.deltaY < 0 ? 1.15 : 1 / 1.15)))
 }
-/** 拖拽平移（放大后看局部） */
+/** 拖拽平移（放大后看局部）。
+ *  ⚠️ 拖完松手的 click 会命中 mask/img 的关闭逻辑——用户报「按住图片滑动松鼠标把灯箱关了」。
+ *    记录本次是否真拖过（位移>3px），拖过则吞掉紧随的那一次 click。 */
+let justDragged = false
 function startPan(e: MouseEvent) {
   if (zoom.value <= 1) return
   const sx = e.clientX, sy = e.clientY
   const ox = pan.value.x, oy = pan.value.y
-  const move = (ev: MouseEvent) => { pan.value = { x: ox + ev.clientX - sx, y: oy + ev.clientY - sy } }
-  const up = () => { window.removeEventListener('mousemove', move); window.removeEventListener('mouseup', up) }
+  let moved = false
+  const move = (ev: MouseEvent) => {
+    const dx = ev.clientX - sx, dy = ev.clientY - sy
+    if (!moved && Math.hypot(dx, dy) > 3) { moved = true; justDragged = true }
+    pan.value = { x: ox + dx, y: oy + dy }
+  }
+  const up = () => {
+    window.removeEventListener('mousemove', move)
+    window.removeEventListener('mouseup', up)
+    // 稍后清标记：click 在 mouseup 之后同步派发，下一个宏任务再复位才吞得到
+    setTimeout(() => { justDragged = false }, 0)
+  }
   window.addEventListener('mousemove', move)
   window.addEventListener('mouseup', up)
+}
+/** 灯箱关闭点击的统一守卫：刚拖过图则吞掉这次 click */
+function closeViewerGuarded() {
+  if (justDragged) return
+  closeViewer()
 }
 /** 视频应用内全屏（requestFullscreen，不跳外部播放器） */
 function fullVideo() {
@@ -399,10 +417,10 @@ watch(() => props.elements, fix, { deep: true })
 
   <!-- 图片/视频灯箱：点空白收起；图片滚轮缩放+拖拽平移；视频可应用内全屏 -->
   <Teleport to="body">
-    <div v-if="viewer" class="viewer-mask" :class="{ 'video-full': videoFull }" @click.self="closeViewer" @wheel.prevent="onWheel">
+    <div v-if="viewer" class="viewer-mask" :class="{ 'video-full': videoFull }" @click.self="closeViewerGuarded" @wheel.prevent="onWheel">
       <img v-if="viewer.kind === 'image'" :src="viewer.url" alt=""
            :style="{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})` }"
-           class="viewer-img" @click.self="closeViewer"
+           class="viewer-img" @click.self="closeViewerGuarded"
            @mousedown.prevent="startPan" @dblclick="zoom = zoom > 1 ? 1 : 2" />
       <video v-else ref="viewerVideo" :src="viewer.url" controls autoplay @click.self="closeViewer"></video>
       <div class="viewer-bar">

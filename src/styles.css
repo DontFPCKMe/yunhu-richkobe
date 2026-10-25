@@ -384,6 +384,9 @@ code.mono, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, m
   align-self: flex-start; width: fit-content; max-width: 100%;
 }
 .row.right .bubble { background: var(--acc-soft); color: var(--fg); border-radius: 12px; align-self: flex-end; }
+/* 双保险：己方气泡/媒体显式右贴（任何未知布局条件下都不许居中漂） */
+.row.right .msg-wrap { margin-left: auto; }
+.row.right .bubble img.media, .row.right .bubble img.sticker { margin-left: auto; margin-right: 0; display: block; }
 .row.right .bubble a { color: #dbe8ff; }
 .meta { font-size: 11px; color: var(--fg2); margin-bottom: 4px; display: flex; gap: 6px; }
 .row.right .meta { justify-content: flex-end; }
