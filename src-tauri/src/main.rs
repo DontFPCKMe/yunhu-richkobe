@@ -14,6 +14,13 @@ use std::path::PathBuf;
 use std::process::{Child, Command, Stdio};
 use std::sync::Mutex;
 use std::time::{Duration, Instant};
+#[cfg(windows)]
+use std::os::windows::process::CommandExt as _;
+
+/// CREATE_NO_WINDOW：node.exe 是控制台程序，从 GUI 壳拉起会带一个黑窗口；
+/// 隐藏它（日志已落盘 %TEMP%/yunhulaoda-sidecar.log，不靠控制台看输出）
+#[cfg(windows)]
+const CREATE_NO_WINDOW: u32 = 0x08000000;
 use tauri::{
     image::Image,
     menu::{Menu, MenuItem},
@@ -91,6 +98,7 @@ fn spawn_sidecar(res: &std::path::Path) -> bool {
             .env("PORT", PORT.to_string())
             .stdout(f)
             .stderr(f2)
+            .creation_flags(CREATE_NO_WINDOW)
             .spawn()
         {
             Ok(child) => {
@@ -110,6 +118,7 @@ fn spawn_sidecar(res: &std::path::Path) -> bool {
             .env("PORT", PORT.to_string())
             .stdout(Stdio::null())
             .stderr(Stdio::null())
+            .creation_flags(CREATE_NO_WINDOW)
             .spawn()
         {
             Ok(child) => {
@@ -195,50 +204,55 @@ fn show_error_page(app: &AppHandle, msg: &str) {
     let _ = win.set_title("云湖牢大版（后端未启动）");
 }
 
-/// 后台监控 sidecar：每 2s 一次。
-///  · 有子进程：try_wait 检测中途退出，退出则提示用户；
-///  · 无子进程（启动时复用了外部实例、外部实例后来死了）：端口不通就**自动补拉起**自己的 sidecar，
-///    不再让用户对着死端口白等（「后端未启动」误报的第二层防护）。
+/// 后台监控 sidecar：每 2s 一次，**死了就自动补拉起**（用户误关黑窗口/进程崩溃都自愈），
+///  只有连续补拉失败才显示错误页。三种死法都覆盖：
+///   · 有子进程且已退出（try_wait 返回 Some）→ 补拉；
+///   · 无子进程（启动时复用了外部实例、外部实例后来死了）且端口不通 → 补拉。
 fn spawn_sidecar_monitor(app: AppHandle, res: PathBuf) {
-    std::thread::spawn(move || loop {
-        std::thread::sleep(Duration::from_secs(2));
-        let exited = match sidecar_slot().lock() {
-            Ok(mut guard) => {
-                let st = guard.as_mut().map(|c| c.try_wait()); // 借用在此结束
-                match st {
-                    Some(Ok(Some(_status))) => {
-                        *guard = None; // 进程已退出，清空句柄
-                        true
-                    }
-                    Some(Ok(None)) => false, // 仍在运行
-                    Some(Err(_)) => {
-                        *guard = None;
-                        true
-                    }
-                    // 无子进程：复用外部实例的场景——端口还通就继续观察，不通则补拉起
-                    None => {
-                        if wait_port(PORT, Duration::from_millis(400)) {
-                            false
-                        } else {
-                            eprintln!("[tauri] 监控发现端口 {PORT} 无服务且无子进程，自动补拉起 sidecar");
-                            if spawn_sidecar(&res) {
-                                false // 已拉起，继续观察
-                            } else {
-                                true // 拉不起来（缺文件等），提示一次后停止
-                            }
+    std::thread::spawn(move || {
+        let mut respawn_fail = 0u32;
+        loop {
+            std::thread::sleep(Duration::from_secs(2));
+            let need_respawn = match sidecar_slot().lock() {
+                Ok(mut guard) => {
+                    let st = guard.as_mut().map(|c| c.try_wait()); // 借用在此结束
+                    match st {
+                        Some(Ok(Some(_status))) => {
+                            *guard = None; // 子进程已退出（含用户误关黑窗口）
+                            true
                         }
+                        Some(Ok(None)) => false, // 仍在运行
+                        Some(Err(_)) => {
+                            *guard = None;
+                            true
+                        }
+                        // 无子进程：复用外部实例的场景——端口还通就继续观察，不通则补拉起
+                        None => !wait_port(PORT, Duration::from_millis(400)),
                     }
                 }
+                Err(_) => return, // 锁中毒：panic=abort 下几乎不会发生，保守停止
+            };
+            if !need_respawn {
+                respawn_fail = 0;
+                continue;
             }
-            // 锁中毒：panic=abort 下几乎不会发生，保守停止
-            Err(_) => return,
-        };
-        if exited {
-            let app2 = app.clone();
-            let _ = app.run_on_main_thread(move || {
-                show_error_page(&app2, "后端服务已意外退出，请点击下方按钮重试，或重启应用。")
-            });
-            return; // 只提示一次
+            eprintln!("[tauri] 监控发现后端不在，自动补拉起 sidecar");
+            if spawn_sidecar(&res) {
+                respawn_fail = 0;
+                // 等新实例就绪（最多 20s），就绪则继续观察
+                if !wait_port(PORT, Duration::from_secs(20)) {
+                    respawn_fail += 1;
+                }
+            } else {
+                respawn_fail += 1;
+            }
+            if respawn_fail >= 3 {
+                let app2 = app.clone();
+                let _ = app.run_on_main_thread(move || {
+                    show_error_page(&app2, "后端服务多次拉起失败（详见 %TEMP%\\yunhulaoda-sidecar.log），请点击重试或重启应用。")
+                });
+                return;
+            }
         }
     });
 }
