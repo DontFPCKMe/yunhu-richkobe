@@ -69,34 +69,30 @@ fn spawn_sidecar(res: &std::path::Path) -> bool {
         return false;
     }
     let log = std::env::temp_dir().join("yunhulaoda-sidecar.log");
-    let logf = std::fs::OpenOptions::new()
-        .create(true)
-        .append(true)
-        .open(&log);
-    match logf {
-        Ok(f) => {
-            let f2 = f.try_clone().ok();
-            match Command::new(&node)
-                .arg(&bundle)
-                .env("YH_ROOT", res)
-                .env("PORT", PORT.to_string())
-                .stdout(f)
-                .stderr(f2.unwrap_or_else(|| Stdio::null()))
-                .spawn()
-            {
-                Ok(child) => {
-                    if let Ok(mut guard) = sidecar_slot().lock() {
-                        *guard = Some(child);
-                    }
-                    true
+    // stdout/stderr 各开一个追加句柄（File 不能 move 两次）
+    let out = std::fs::OpenOptions::new().create(true).append(true).open(&log);
+    let err = std::fs::OpenOptions::new().create(true).append(true).open(&log);
+    match (out, err) {
+        (Ok(f), Ok(f2)) => match Command::new(&node)
+            .arg(&bundle)
+            .env("YH_ROOT", res)
+            .env("PORT", PORT.to_string())
+            .stdout(f)
+            .stderr(f2)
+            .spawn()
+        {
+            Ok(child) => {
+                if let Ok(mut guard) = sidecar_slot().lock() {
+                    *guard = Some(child);
                 }
-                Err(e) => {
-                    eprintln!("[tauri] sidecar 启动失败: {e}");
-                    false
-                }
+                true
             }
-        }
-        Err(_) => match Command::new(&node)
+            Err(e) => {
+                eprintln!("[tauri] sidecar 启动失败: {e}");
+                false
+            }
+        },
+        _ => match Command::new(&node)
             .arg(&bundle)
             .env("YH_ROOT", res)
             .env("PORT", PORT.to_string())
