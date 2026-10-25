@@ -137,6 +137,11 @@ export function toText(elements: Element[] = []): string {
   }).join('')
 }
 
+/** url 类 content 字段（image_url/file_url/video_url/sticker 的 image_url）服务端会**自动补域名**：
+ *  发完整 URL 会被二次拼接成 域名/https://域名/key 的坏地址（2026-10-25 复现实验证实：
+ *  file 发全 URL → 回读双拼；发裸 key → 回读单层完整）。统一剥成裸 key 再发。 */
+const bareKey = (u: string) => String(u || '').replace(/^https?:\/\/[^/]+\//, '')
+
 /** 元素树 -> 云湖 { contentType, content } */
 export function render(elements: Element[] = []): { contentType: number; content: Attrs } {
   const els = elements.filter(Boolean)
@@ -145,14 +150,14 @@ export function render(elements: Element[] = []): { contentType: number; content
   // 单元素直通（保留平台原生消息类型）
   if (only) {
     switch (only.type) {
-      case 'img': return { contentType: ContentType.image, content: { image_url: only.attrs.src } }
+      case 'img': return { contentType: ContentType.image, content: { image_url: bareKey(only.attrs.src) } }
       case 'sticker': return {
         contentType: ContentType.sticker,
         // 官方手机端真实消息对照（2026-10-24 dump）：f9 image=相对 key、f3 image_url=完整 URL、
         // f15=收藏 id、f25/26=item/pack id、f33/34=宽高。桌面显示用 attrs.src（相对 key 走 /res 代理）。
         content: { image: only.attrs.src, image_url: only.attrs.imageUrl || '', sticker_item_id: only.attrs.itemId, sticker_pack_id: only.attrs.packId, expression_id: only.attrs.expressionId ? String(only.attrs.expressionId) : '', width: only.attrs.width || 0, height: only.attrs.height || 0 },
       }
-      case 'file': return { contentType: ContentType.file, content: { file_url: only.attrs.src, file_name: only.attrs.name, file_size: only.attrs.size } }
+      case 'file': return { contentType: ContentType.file, content: { file_url: bareKey(only.attrs.src), file_name: only.attrs.name, file_size: only.attrs.size } }
       case 'audio': return { contentType: ContentType.audio, content: { audio_url: only.attrs.src, audio_time: only.attrs.time } }
       case 'markdown': return { contentType: ContentType.markdown, content: { text: only.attrs.content } }
       case 'html': return { contentType: ContentType.html, content: { text: only.attrs.content } }

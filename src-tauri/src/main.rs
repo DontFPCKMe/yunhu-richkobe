@@ -62,6 +62,7 @@ fn kill_sidecar() {
 /// 尝试拉起 sidecar（若端口已通或已有句柄则跳过）。返回是否持有句柄。
 /// ⚠️ windows_subsystem="windows" 下子进程 stdout/stderr 无处可去，
 ///    全部重定向到 %TEMP%/yunhulaoda-sidecar.log（追加），崩溃时能看死因。
+///    首行额外写一条壳侧启动记录（node/bundle/YH_ROOT 实际路径），路径类崩溃可直接对账。
 fn spawn_sidecar(res: &std::path::Path) -> bool {
     let node = res.join("node.exe");
     let bundle = res.join("server-bundle.mjs");
@@ -69,6 +70,17 @@ fn spawn_sidecar(res: &std::path::Path) -> bool {
         return false;
     }
     let log = std::env::temp_dir().join("yunhulaoda-sidecar.log");
+    if let Ok(mut f) = std::fs::OpenOptions::new().create(true).append(true).open(&log) {
+        use std::io::Write;
+        let _ = writeln!(
+            f,
+            "[shell] spawn sidecar: node={} bundle={} exists={}{}",
+            node.display(),
+            bundle.display(),
+            node.exists() && bundle.exists(),
+            ""
+        );
+    }
     // stdout/stderr 各开一个追加句柄（File 不能 move 两次）
     let out = std::fs::OpenOptions::new().create(true).append(true).open(&log);
     let err = std::fs::OpenOptions::new().create(true).append(true).open(&log);
@@ -238,12 +250,26 @@ fn main() {
             // 先 clone handle 再进闭包/线程，避免借用冲突
             let handle = app.handle().clone();
 
-            // 资源目录（安装后 = 安装目录/resources）。
-            // resource_dir 失败退回当前目录，当前目录也失败退回 "."，全程不 panic。
-            let res: PathBuf = handle
-                .path()
-                .resource_dir()
-                .unwrap_or_else(|_| std::env::current_dir().unwrap_or_else(|_| PathBuf::from(".")));
+            // 资源目录锚点（用户机实测 EISDIR 'D:' 崩溃后加固）：
+            //   首选 **current_exe() 所在目录**（安装目录，node.exe/bundle 经 ls 证实就在里面，
+            //   不依赖 Tauri resource_dir 的解析行为）；resource_dir 仅作回退；再回退当前目录。
+            let res: PathBuf = std::env::current_exe()
+                .ok()
+                .and_then(|p| p.parent().map(|d| d.to_path_buf()))
+                .filter(|d| d.join("node.exe").exists() && d.join("server-bundle.mjs").exists())
+                .or_else(|| {
+                    handle
+                        .path()
+                        .resource_dir()
+                        .ok()
+                        .filter(|d| d.join("node.exe").exists() && d.join("server-bundle.mjs").exists())
+                })
+                .unwrap_or_else(|| {
+                    handle
+                        .path()
+                        .resource_dir()
+                        .unwrap_or_else(|_| std::env::current_dir().unwrap_or_else(|_| PathBuf::from(".")))
+                });
             let _ = RES_DIR.set(res.clone());
             let node = res.join("node.exe");
             let bundle = res.join("server-bundle.mjs");
