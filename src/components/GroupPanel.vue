@@ -390,10 +390,15 @@ onMounted(() => { if (isOpen.value && isGroup.value) g.loadMembers() })
           <button class="gp-link" @click="g.setDockTab('members')">查看{{ info?.headcount || '' }}名成员 ›</button>
         </div>
         <div class="gp-grid">
-          <button v-for="m in members" :key="m.id" class="gp-cell" :title="m.name"
+          <button v-for="m in members" :key="m.id" class="gp-cell" :title="m.name + (m.level >= 100 ? '（群主）' : m.level >= 2 ? '（管理员）' : '')"
                   @click="mmProfile2(m)" @contextmenu.prevent="openMemberMenu(m, $event)">
-            <img :src="m.avatar ? resUrl(m.avatar) : fallbackAvatar(m.name)" alt=""
-                 @error="(e: any) => (e.target.src = fallbackAvatar(m.name))" />
+            <span class="gp-cell-wrap">
+              <img :src="m.avatar ? resUrl(m.avatar) : fallbackAvatar(m.name)" alt=""
+                   @error="(e: any) => (e.target.src = fallbackAvatar(m.name))" />
+              <!-- 身份角标：群主/管理员（成员数据 level 字段，dump 证实 f3=100/2） -->
+              <em v-if="m.level >= 100" class="gp-role owner">群主</em>
+              <em v-else-if="m.level >= 2" class="gp-role admin">管理</em>
+            </span>
             <span>{{ (m.name || '').slice(0, 4) }}</span>
           </button>
           <button class="gp-cell add" title="邀请好友入群" @click="openInvite">
@@ -602,6 +607,15 @@ onMounted(() => { if (isOpen.value && isGroup.value) g.loadMembers() })
 }
 .gp-cell:hover { background: var(--card2); color: var(--fg); }
 .gp-cell img { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; background: var(--card2); }
+/* 成员宫格身份角标（群主金/管理紫，叠头像右下） */
+.gp-cell-wrap { position: relative; display: inline-block; }
+.gp-role {
+  position: absolute; right: -6px; bottom: -3px; font-style: normal;
+  font-size: 9px; line-height: 1; padding: 1.5px 3px; border-radius: 4px;
+  border: 1px solid var(--card); white-space: nowrap;
+}
+.gp-role.owner { background: #d4a017; color: #fff; }
+.gp-role.admin { background: var(--acc); color: #fff; }
 .gp-cell.add { border: 1px dashed var(--line); }
 .gp-notice {
   font-size: 12.5px; color: var(--fg2); background: var(--card2); border-radius: 8px;

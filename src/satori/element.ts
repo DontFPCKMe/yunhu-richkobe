@@ -159,6 +159,9 @@ export function render(elements: Element[] = []): { contentType: number; content
       }
       case 'file': return { contentType: ContentType.file, content: { file_url: bareKey(only.attrs.src), file_name: only.attrs.name, file_size: only.attrs.size } }
       case 'audio': return { contentType: ContentType.audio, content: { audio_url: only.attrs.src, audio_time: only.attrs.time } }
+      // ⚠️ video 分支曾缺失：视频元素落 default 被当文本发（content=裸 key 文件名），
+      //    接收方只见文件名文本气泡（用户截图实锤）。video_url 发裸 key（服务端补域名，同族规则）。
+      case 'video': return { contentType: ContentType.video, content: { video_url: bareKey(only.attrs.src), video_time: only.attrs.time } }
       case 'markdown': return { contentType: ContentType.markdown, content: { text: only.attrs.content } }
       case 'html': return { contentType: ContentType.html, content: { text: only.attrs.content } }
       case 'a2ui': return { contentType: ContentType.a2ui, content: { text: typeof only.attrs.data === 'string' ? only.attrs.data : JSON.stringify(only.attrs.data) } }

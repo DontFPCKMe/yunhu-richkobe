@@ -386,17 +386,25 @@ export const groupAdminPlugin = {
     /**
      * 构建「用户 -> 标签」映射：逐个标签查它绑定了哪些人。
      * 用来在消息头像上方显示该用户的群标签。
+     * ⚠️ 性能：标签可能上百个、每标签一次请求——按群缓存 5 分钟 + 并发提到 12，
+     *    否则每次进群/开 dock 都全量扫，用户感知「加载标签延迟」（2026-10-25 用户报）。
      */
-    async function loadTagMap() {
+    const tagMapCache: Record<string, { at: number; map: Record<string, any[]> }> = {}
+    const TAGMAP_TTL = 5 * 60 * 1000
+    async function loadTagMap(force = false) {
       const gid = requireGroup(); if (!gid) return
+      const cached = tagMapCache[gid]
+      if (!force && cached && Date.now() - cached.at < TAGMAP_TTL) {
+        state.tagMap = cached.map
+        return
+      }
       if (state.tagMapLoading) return
       state.tagMapLoading = true
       try {
         if (!state.tags.length) await loadTags()
         const map: Record<string, any[]> = {}
-        // 之前只取前 80 个标签，导致很多人的标签显示不出来；这里改成全量（并发 6）
         const list = state.tags
-        const CONC = 6
+        const CONC = 12
         for (let i = 0; i < list.length; i += CONC) {
           const batch = list.slice(i, i + CONC)
           const res = await Promise.all(batch.map(t =>
@@ -409,6 +417,7 @@ export const groupAdminPlugin = {
           }
         }
         state.tagMap = map
+        tagMapCache[gid] = { at: Date.now(), map }
       } catch { /* 忽略 */ }
       finally { state.tagMapLoading = false }
     }

@@ -26,12 +26,16 @@ const elements = computed<Element[]>(() => {
 
 /** 引用块：优先在本地消息里找到被引用的那条，否则退回 quote_msg_text。
  *  ⚠️ 无论走哪条分支都必须带上 id —— 之前 quote_msg_text 分支丢了 id，
- *     导致被引用消息不在本地窗口时（如较早的图片引用）点击无法跳转定位。 */
+ *     导致被引用消息不在本地窗口时（如较早的图片引用）点击无法跳转定位。
+ *  ⚠️ 延迟优化（用户报「看别人引用有延迟」）：本地没有且无回退文本时，
+ *     异步拉被引消息单条补 preview，不再长期显示「不在本地记录中」。 */
+const remoteQuote = ref<any>(null)
 const quote = computed(() => {
   const qid = props.msg.quoteId || props.msg.content?.quote_msg_id
   if (!qid) return null
   const hit = (chat.state.messages || []).find((m: any) => m.id === qid)
   if (hit) return { id: qid, sender: hit.sender, preview: chat.previewOf(hit) }
+  if (remoteQuote.value?.id === qid) return { id: qid, sender: remoteQuote.value.sender, preview: remoteQuote.value.preview }
   const t = props.msg.content?.quote_msg_text
   if (t) {
     const i = String(t).indexOf(':')
@@ -42,6 +46,21 @@ const quote = computed(() => {
   }
   return { id: qid, sender: '', preview: '引用的消息不在本地记录中' }
 })
+// 本地缺失且无回退文本 → 后台补拉单条（messagesAround count=1 锚定该消息）
+if (props.msg.quoteId || props.msg.content?.quote_msg_id) {
+  const qid = props.msg.quoteId || props.msg.content?.quote_msg_id
+  const inLocal = (chat.state.messages || []).some((m: any) => m.id === qid)
+  const hasFallback = !!props.msg.content?.quote_msg_text
+  if (!inLocal && !hasFallback) {
+    const cur = chat.state.current
+    ctx.api?.messagesAround?.(cur?.id, cur?.type, qid, 1, -1)
+      .then((arr: any[]) => {
+        const hit = (arr || []).find((m: any) => m.id === qid)
+        if (hit) remoteQuote.value = { id: qid, sender: hit.sender, preview: chat.previewOf(hit) }
+      })
+      .catch(() => { /* 拉不到保持回退文案 */ })
+  }
+}
 
 const isTip = computed(() => props.msg.type === 9 && !props.msg.recalled)
 /** 搜索定位目标：持续色块指示（引用式高亮框），直到回最新/切会话 */
