@@ -11,6 +11,7 @@
     "preview": "vite preview",
     "serve": "node server.ts",
     "typecheck": "vue-tsc --noEmit",
+    "test:chat": "node scripts/test-chat-regressions.mjs",
     "test:kernel": "tsx test-kernel.mjs",
     "test:api": "tsx test.mjs",
     "test:ws": "tsx test-ws.mjs",

@@ -40,6 +40,36 @@ fn sidecar_slot() -> &'static Mutex<Option<Child>> {
 /// 资源目录全局副本：restart_sidecar 命令（错误页「重试」按钮）要用
 static RES_DIR: std::sync::OnceLock<PathBuf> = std::sync::OnceLock::new();
 
+/// 仅允许网页链接，直接传参数给系统打开程序，不经过 shell 解释 URL。
+#[tauri::command]
+fn open_external_url(url: String) -> Result<(), String> {
+    let parsed = Url::parse(&url).map_err(|_| "链接无效".to_string())?;
+    if !matches!(parsed.scheme(), "http" | "https") || parsed.host_str().is_none() {
+        return Err("仅支持 HTTP/HTTPS 链接".into());
+    }
+    #[cfg(windows)]
+    let mut command = {
+        let mut cmd = Command::new("rundll32.exe");
+        cmd.arg("url.dll,FileProtocolHandler").arg(parsed.as_str());
+        cmd.creation_flags(CREATE_NO_WINDOW);
+        cmd
+    };
+    #[cfg(target_os = "macos")]
+    let mut command = {
+        let mut cmd = Command::new("open");
+        cmd.arg(parsed.as_str());
+        cmd
+    };
+    #[cfg(all(unix, not(target_os = "macos")))]
+    let mut command = {
+        let mut cmd = Command::new("xdg-open");
+        cmd.arg(parsed.as_str());
+        cmd
+    };
+    command.spawn().map_err(|e| format!("无法打开浏览器：{e}"))?;
+    Ok(())
+}
+
 /// 前端 invoke('restart_sidecar')：杀旧 sidecar 重新拉起，返回是否已持有新句柄
 #[tauri::command]
 fn restart_sidecar() -> bool {
@@ -259,7 +289,7 @@ fn spawn_sidecar_monitor(app: AppHandle, res: PathBuf) {
 
 fn main() {
     let result = tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![restart_sidecar])
+        .invoke_handler(tauri::generate_handler![restart_sidecar, open_external_url])
         .setup(|app| {
             // 先 clone handle 再进闭包/线程，避免借用冲突
             let handle = app.handle().clone();
