@@ -2,7 +2,7 @@
 import http from "node:http";
 import https4 from "node:https";
 import { readFile, writeFile, unlink } from "node:fs/promises";
-import { execFileSync } from "node:child_process";
+import { execFileSync, execFile } from "node:child_process";
 import { mkdirSync, readFileSync as readFileSync2 } from "node:fs";
 import { existsSync as existsSync2 } from "node:fs";
 import { extname, join as join2, normalize } from "node:path";
@@ -1254,15 +1254,20 @@ function follow(target, req, res, referer, depth = 0, cacheControl = "no-store")
       return follow(new URL(up.headers.location, url).toString(), req, res, referer, depth + 1, cacheControl);
     }
     const h = {
-      "content-type": up.headers["content-type"] || "application/octet-stream",
+      "content-type": safeHeader(up.headers["content-type"]) || "application/octet-stream",
       "cache-control": cacheControl,
       "access-control-allow-origin": "*",
       "access-control-expose-headers": "content-range, content-length, accept-ranges"
     };
     for (const k of ["content-length", "content-range", "accept-ranges", "etag", "last-modified", "content-disposition"]) {
-      if (up.headers[k] !== void 0) h[k] = up.headers[k];
+      const v = safeHeader(up.headers[k]);
+      if (v !== void 0) h[k] = v;
     }
-    res.writeHead(up.statusCode || 502, h);
+    try {
+      res.writeHead(up.statusCode || 502, h);
+    } catch {
+      res.writeHead(up.statusCode || 502, { "content-type": "application/octet-stream", "cache-control": cacheControl });
+    }
     up.pipe(res);
   });
   r.on("error", (e) => {
@@ -1271,6 +1276,11 @@ function follow(target, req, res, referer, depth = 0, cacheControl = "no-store")
   });
   if (req.method === "GET" || req.method === "HEAD") r.end();
   else req.pipe(r);
+}
+function safeHeader(v) {
+  if (v === void 0) return void 0;
+  const s = Array.isArray(v) ? v.join(", ") : String(v);
+  return /^[\x09\x20-\x7e]*$/.test(s) ? s : void 0;
 }
 function resProxy(req, res, pathname, search) {
   const m = pathname.match(/^\/res\/([^/]+)(\/.*)?$/);
@@ -1308,7 +1318,7 @@ function upProxy(req, res, pathname, search) {
     headers
   }, (up) => {
     res.writeHead(up.statusCode || 502, {
-      "content-type": up.headers["content-type"] || "application/octet-stream",
+      "content-type": safeHeader(up.headers["content-type"]) || "application/octet-stream",
       "access-control-allow-origin": "*"
     });
     up.pipe(res);
@@ -1454,6 +1464,149 @@ async function handleUpdateCheck(res) {
     res.writeHead(502, JSON_HDR).end(JSON.stringify({ ok: false, msg: "bad github payload" }));
   }
 }
+var FILE_DIR_FILE = join2(homedir(), ".yhchat-filedir");
+function defaultFileDir() {
+  return join2(DATA_DIR, "file");
+}
+function resolveFileDir() {
+  if (process.env.YH_FILE_DIR) return process.env.YH_FILE_DIR;
+  try {
+    const custom = readFileSync2(FILE_DIR_FILE, "utf8").trim();
+    if (custom) return custom;
+  } catch {
+  }
+  return defaultFileDir();
+}
+var FILE_DIR = resolveFileDir();
+try {
+  mkdirSync(FILE_DIR, { recursive: true });
+} catch {
+}
+async function handleFileDir(req, res) {
+  if (req.method === "GET") {
+    res.writeHead(200, JSON_HDR);
+    res.end(JSON.stringify({ dir: FILE_DIR, custom: existsSync2(FILE_DIR_FILE), default: defaultFileDir() }));
+    return;
+  }
+  if (req.method === "PUT" || req.method === "POST") {
+    try {
+      const body = JSON.parse(await readBody2(req));
+      const dir = String(body.dir || "").trim();
+      if (!dir || dir.length > 260) {
+        res.writeHead(400, JSON_HDR).end(JSON.stringify({ ok: false, msg: "\u76EE\u5F55\u8DEF\u5F84\u4E0D\u5408\u6CD5" }));
+        return;
+      }
+      mkdirSync(dir, { recursive: true });
+      await writeFile(FILE_DIR_FILE, dir, "utf8");
+      FILE_DIR = dir;
+      res.writeHead(200, JSON_HDR);
+      res.end(JSON.stringify({ ok: true, dir }));
+    } catch (e) {
+      res.writeHead(500, JSON_HDR);
+      res.end(JSON.stringify({ ok: false, msg: e.message }));
+    }
+    return;
+  }
+  res.writeHead(405).end("method not allowed");
+}
+async function handlePickDir(_req, res) {
+  const run = (cmd, args) => new Promise((resolve) => {
+    execFile(
+      cmd,
+      args,
+      { encoding: "utf8", timeout: 6e5, windowsHide: true },
+      (err, stdout) => err ? resolve({ ok: false, out: "", msg: err.message }) : resolve({ ok: true, out: String(stdout || "") })
+    );
+  });
+  let dir = "";
+  try {
+    if (process.platform === "win32") {
+      const ps = "Add-Type -AssemblyName System.Windows.Forms;$f=New-Object System.Windows.Forms.FolderBrowserDialog;$f.Description='\u9009\u62E9\u76EE\u5F55';if($f.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK){Write-Output $f.SelectedPath}";
+      const r = await run("powershell.exe", ["-NoProfile", "-STA", "-Command", ps]);
+      dir = r.ok ? r.out.trim().split(/\r?\n/).filter(Boolean).pop() || "" : "";
+    } else if (process.platform === "darwin") {
+      const r = await run("osascript", ["-e", 'POSIX path of (choose folder with prompt "\u9009\u62E9\u76EE\u5F55")']);
+      dir = r.ok ? r.out.trim().replace(/\/$/, "") : "";
+    } else {
+      const z = await run("zenity", ["--file-selection", "--directory", "--title=\u9009\u62E9\u76EE\u5F55"]);
+      if (z.ok) dir = z.out.trim();
+      else {
+        const k = await run("kdialog", ["--getexistingdirectory"]);
+        dir = k.ok ? k.out.trim() : "";
+      }
+    }
+    res.writeHead(200, JSON_HDR).end(JSON.stringify({ ok: true, dir }));
+  } catch (e) {
+    res.writeHead(200, JSON_HDR).end(JSON.stringify({ ok: true, dir: "", note: e?.message || "" }));
+  }
+}
+async function handleLocalOpen(req, res, search) {
+  if (req.method !== "GET") {
+    res.writeHead(405, JSON_HDR).end(JSON.stringify({ ok: false, msg: "use GET with ?url=&name=" }));
+    return;
+  }
+  const q0 = new URLSearchParams(search || "");
+  try {
+    const url = String(q0.get("url") || "");
+    const name = String(q0.get("name") || "").replace(/[\\/:*?"<>|]/g, "_").slice(0, 120) || "file";
+    const u = new URL(url, "http://localhost");
+    const allowed = u.pathname.startsWith("/res/") || RES_HOST_RE.test(u.hostname) || u.hostname === "localhost" || u.hostname === "127.0.0.1";
+    if (!allowed) {
+      res.writeHead(403, JSON_HDR).end(JSON.stringify({ ok: false, msg: "url not allowed" }));
+      return;
+    }
+    mkdirSync(FILE_DIR, { recursive: true });
+    const dest = join2(FILE_DIR, name);
+    const target = u.hostname === "localhost" || u.hostname === "127.0.0.1" ? `http://127.0.0.1:${PORT}${u.pathname}${u.search}` : url;
+    const data = await new Promise((resolve, reject) => {
+      const mod = target.startsWith("https") ? https4 : http;
+      mod.get(target, { headers: u.pathname.startsWith("/res/") ? { referer: RES_REFERER } : {} }, (up) => {
+        if ((up.statusCode || 0) >= 400) {
+          up.resume();
+          reject(new Error("HTTP " + up.statusCode));
+          return;
+        }
+        const chunks = [];
+        up.on("data", (c) => chunks.push(c));
+        up.on("end", () => resolve(Buffer.concat(chunks)));
+        up.on("error", reject);
+      }).on("error", reject);
+    });
+    await writeFile(dest, data);
+    if (process.platform === "win32") {
+      execFileSync("explorer.exe", ["/select," + dest], { stdio: "ignore" });
+    } else {
+      execFileSync(process.platform === "darwin" ? "open" : "xdg-open", [FILE_DIR], { stdio: "ignore" });
+    }
+    res.writeHead(200, JSON_HDR).end(JSON.stringify({ ok: true, path: dest }));
+  } catch (e) {
+    res.writeHead(500, JSON_HDR).end(JSON.stringify({ ok: false, msg: e.message }));
+  }
+}
+async function handleLocalRead(req, res, search) {
+  const tok = String(req.headers.token || "").trim();
+  if (!tok) {
+    res.writeHead(401, JSON_HDR).end(JSON.stringify({ ok: false, msg: "token required" }));
+    return;
+  }
+  const q = new URLSearchParams(search || "");
+  const p = String(q.get("path") || "");
+  if (!p || !existsSync2(p)) {
+    res.writeHead(404, JSON_HDR).end(JSON.stringify({ ok: false, msg: "file not found" }));
+    return;
+  }
+  try {
+    const data = await readFile(p);
+    res.writeHead(200, {
+      "content-type": "application/octet-stream",
+      "x-file-name": encodeURIComponent(extname(p) ? p.slice(0, -extname(p).length).split(/[\\/]/).pop() + extname(p) : p.split(/[\\/]/).pop()),
+      "access-control-allow-origin": "*"
+    });
+    res.end(data);
+  } catch (e) {
+    res.writeHead(500, JSON_HDR).end(JSON.stringify({ ok: false, msg: e.message }));
+  }
+}
 async function staticFile(res, pathname) {
   let rel = pathname === "/" ? "/index.html" : pathname;
   rel = normalize(rel).replace(/^(\.\.[/\\])+/, "");
@@ -1496,6 +1649,28 @@ function serverApp(req, res) {
   if (pathname === "/update-check" && req.method === "GET") {
     handleUpdateCheck(res).catch((e) => {
       res.writeHead(502, JSON_HDR).end(JSON.stringify({ ok: false, msg: e.message }));
+    });
+    return;
+  }
+  if (pathname === "/local-open" && req.method === "GET") {
+    handleLocalOpen(req, res, search).catch((e) => {
+      res.writeHead(500, JSON_HDR).end(JSON.stringify({ ok: false, msg: e.message }));
+    });
+    return;
+  }
+  if (pathname === "/file-dir") {
+    handleFileDir(req, res).catch((e) => {
+      res.writeHead(500, JSON_HDR).end(JSON.stringify({ ok: false, msg: e.message }));
+    });
+    return;
+  }
+  if (pathname === "/pick-dir" && req.method === "GET") {
+    handlePickDir(req, res);
+    return;
+  }
+  if (pathname === "/local-read" && req.method === "GET") {
+    handleLocalRead(req, res, search).catch((e) => {
+      res.writeHead(500, JSON_HDR).end(JSON.stringify({ ok: false, msg: e.message }));
     });
     return;
   }
@@ -1576,10 +1751,14 @@ try {
     ], { stdio: "ignore" });
     console.log("[yunhu] \u5DF2\u81EA\u7B7E HTTPS \u8BC1\u4E66\uFF08\u81EA\u7B7E\u7684\uFF0C\u6D4F\u89C8\u5668\u4F1A\u63D0\u793A\u4E0D\u5B89\u5168\uFF0C\u624B\u52A8\u4FE1\u4EFB\u5373\u53EF\uFF09");
   }
-  https4.createServer({
+  const httpsSrv = https4.createServer({
     key: readFileSync2(keyFile),
     cert: readFileSync2(certFile)
-  }, serverApp).listen(HTTPS_PORT, HOST, () => {
+  }, serverApp);
+  httpsSrv.on("error", (e) => {
+    console.log(`[yunhu] https ${HTTPS_PORT} \u8D77\u4E0D\u6765\uFF08${e.code || e.message}\uFF09\uFF0C\u4EC5 http \u53EF\u7528`);
+  });
+  httpsSrv.listen(HTTPS_PORT, HOST, () => {
     console.log(`[yunhu] https://${HOST}:${HTTPS_PORT}  (\u624B\u673A\u5F55\u97F3/\u5F55\u50CF\u8981\u7528\u8FD9\u4E2A\uFF0C\u56E0\u4E3A\u662F\u5B89\u5168\u4E0A\u4E0B\u6587)`);
   });
 } catch (e) {
@@ -1617,4 +1796,10 @@ Sec-WebSocket-Accept: ${acceptKey(String(key))}\r
   });
   ws.start().catch(() => {
   });
+});
+process.on("uncaughtException", (e) => {
+  console.error("[yunhu] uncaughtException\uFF08\u5DF2\u515C\u5E95\uFF0C\u8FDB\u7A0B\u4E0D\u9000\u51FA\uFF09:", e?.message || e);
+});
+process.on("unhandledRejection", (e) => {
+  console.error("[yunhu] unhandledRejection\uFF08\u5DF2\u515C\u5E95\uFF0C\u8FDB\u7A0B\u4E0D\u9000\u51FA\uFF09:", e?.message || e);
 });

@@ -11,7 +11,7 @@
 
 use std::net::TcpStream;
 use std::path::PathBuf;
-use std::process::{Child, Command};
+use std::process::{Child, Command, Stdio};
 use std::sync::Mutex;
 use std::time::{Duration, Instant};
 use tauri::{
@@ -60,28 +60,61 @@ fn kill_sidecar() {
 }
 
 /// 尝试拉起 sidecar（若端口已通或已有句柄则跳过）。返回是否持有句柄。
+/// ⚠️ windows_subsystem="windows" 下子进程 stdout/stderr 无处可去，
+///    全部重定向到 %TEMP%/yunhulaoda-sidecar.log（追加），崩溃时能看死因。
 fn spawn_sidecar(res: &std::path::Path) -> bool {
     let node = res.join("node.exe");
     let bundle = res.join("server-bundle.mjs");
     if !node.exists() || !bundle.exists() {
         return false;
     }
-    match Command::new(&node)
-        .arg(&bundle)
-        .env("YH_ROOT", res)
-        .env("PORT", PORT.to_string())
-        .spawn()
-    {
-        Ok(child) => {
-            if let Ok(mut guard) = sidecar_slot().lock() {
-                *guard = Some(child);
+    let log = std::env::temp_dir().join("yunhulaoda-sidecar.log");
+    let logf = std::fs::OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(&log);
+    match logf {
+        Ok(f) => {
+            let f2 = f.try_clone().ok();
+            match Command::new(&node)
+                .arg(&bundle)
+                .env("YH_ROOT", res)
+                .env("PORT", PORT.to_string())
+                .stdout(f)
+                .stderr(f2.unwrap_or_else(|| Stdio::null()))
+                .spawn()
+            {
+                Ok(child) => {
+                    if let Ok(mut guard) = sidecar_slot().lock() {
+                        *guard = Some(child);
+                    }
+                    true
+                }
+                Err(e) => {
+                    eprintln!("[tauri] sidecar 启动失败: {e}");
+                    false
+                }
             }
-            true
         }
-        Err(e) => {
-            eprintln!("[tauri] sidecar 启动失败: {e}");
-            false
-        }
+        Err(_) => match Command::new(&node)
+            .arg(&bundle)
+            .env("YH_ROOT", res)
+            .env("PORT", PORT.to_string())
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .spawn()
+        {
+            Ok(child) => {
+                if let Ok(mut guard) = sidecar_slot().lock() {
+                    *guard = Some(child);
+                }
+                true
+            }
+            Err(e) => {
+                eprintln!("[tauri] sidecar 启动失败: {e}");
+                false
+            }
+        },
     }
 }
 
@@ -154,11 +187,11 @@ fn show_error_page(app: &AppHandle, msg: &str) {
     let _ = win.set_title("云湖牢大版（后端未启动）");
 }
 
-/// 后台监控 sidecar：每 2s try_wait 一次，中途退出就提示用户。
-/// 句柄被取走（窗口关闭时 Destroyed 分支 kill 掉了子进程）或锁异常时自动停止。
-/// ⚠️ 借用纪律：先在锁内算出结果并结束借用，再在锁外改容器——
-///    `guard.as_mut()` 的借用与 `*guard = None` 交叠会触发 E0502/E0499。
-fn spawn_sidecar_monitor(app: AppHandle) {
+/// 后台监控 sidecar：每 2s 一次。
+///  · 有子进程：try_wait 检测中途退出，退出则提示用户；
+///  · 无子进程（启动时复用了外部实例、外部实例后来死了）：端口不通就**自动补拉起**自己的 sidecar，
+///    不再让用户对着死端口白等（「后端未启动」误报的第二层防护）。
+fn spawn_sidecar_monitor(app: AppHandle, res: PathBuf) {
     std::thread::spawn(move || loop {
         std::thread::sleep(Duration::from_secs(2));
         let exited = match sidecar_slot().lock() {
@@ -174,8 +207,19 @@ fn spawn_sidecar_monitor(app: AppHandle) {
                         *guard = None;
                         true
                     }
-                    // 句柄已被取走（正常关闭流程或已处理过），停止监控
-                    None => return,
+                    // 无子进程：复用外部实例的场景——端口还通就继续观察，不通则补拉起
+                    None => {
+                        if wait_port(PORT, Duration::from_millis(400)) {
+                            false
+                        } else {
+                            eprintln!("[tauri] 监控发现端口 {PORT} 无服务且无子进程，自动补拉起 sidecar");
+                            if spawn_sidecar(&res) {
+                                false // 已拉起，继续观察
+                            } else {
+                                true // 拉不起来（缺文件等），提示一次后停止
+                            }
+                        }
+                    }
                 }
             }
             // 锁中毒：panic=abort 下几乎不会发生，保守停止
@@ -210,13 +254,9 @@ fn main() {
             let resources_ok = node.exists() && bundle.exists();
 
             // 拉起 sidecar（端口已被占用时复用现有实例，避免双开冲突）
-            let mut spawned = false;
             if !wait_port(PORT, Duration::from_millis(300)) {
                 if resources_ok {
-                    spawned = spawn_sidecar(&res);
-                    if spawned {
-                        spawn_sidecar_monitor(handle.clone());
-                    }
+                    spawn_sidecar(&res);
                 } else {
                     eprintln!(
                         "[tauri] 缺少运行文件：node={} bundle={}（存在={}）",
@@ -226,7 +266,9 @@ fn main() {
                     );
                 }
             }
-            let _ = spawned;
+            // 监控无条件启动：既管「自己拉的子进程中途退出」，也管「复用了外部实例、
+            // 外部实例后来死了」——后者端口不通时自动补拉起自己的 sidecar
+            spawn_sidecar_monitor(handle.clone(), res.clone());
 
             // 等服务就绪（最多 20s）后在主线程建窗口。
             // 未就绪时加载 about:blank 再注入错误页，避免连接失败白屏。
